@@ -2,6 +2,7 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
 import com.example.clinicmvcspring.models.PrescriptionModel;
 import com.example.clinicmvcspring.services.PrescriptionService;
 
@@ -43,13 +44,24 @@ public class PrescriptionController {
                 response.put("idRequested", id);
                 return response;
             }
-            return pres;
+
+            List<PrescriptionMedicationDTO> meds = prescriptionService.getMedicationsForPrescription(id);
+
+            response.put("id", pres.getId());
+            response.put("prescriptionNotes", pres.getPrescriptionNotes());
+            response.put("appointmentId", pres.getAppointmentId());
+            response.put("createdAt", pres.getCreatedAt());
+            response.put("medications", meds);
+
+            return response;
         } catch (Exception e) {
             response.put("message", "ERROR searching for prescription");
             response.put("reason", e.getMessage());
             return response;
         }
     }
+
+    
 
     @PostMapping
     public Map<String, Object> addNewPrescription(@RequestBody PrescriptionModel newPres) {
@@ -163,4 +175,5 @@ public class PrescriptionController {
             return response;
         }
     }
+
 }

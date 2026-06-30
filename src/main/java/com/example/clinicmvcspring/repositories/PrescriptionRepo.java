@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
 import com.example.clinicmvcspring.models.PrescriptionModel;
 
 @Repository
@@ -79,6 +80,19 @@ public class PrescriptionRepo {
 
         int rowsAffected = namedJdbcTemplate.update(sql, params);
         return rowsAffected > 0;
+    }
+
+    public List<PrescriptionMedicationDTO> getMedicationsForPrescription(int prescriptionId) {
+        String sql = "SELECT pm.medication_id, m.medication_name, pm.dosage, pm.frequency " +
+                "FROM prescription_medications pm " +
+                "JOIN medications m ON pm.medication_id = m.id " +
+                "WHERE pm.prescription_id = ?";
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new PrescriptionMedicationDTO(
+                rs.getInt("medication_id"),
+                rs.getString("medication_name"),
+                rs.getString("dosage"),
+                rs.getString("frequency")), prescriptionId);
     }
 
 }

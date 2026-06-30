@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
 
@@ -38,6 +39,10 @@ public class PrescriptionService {
 
     public boolean updatePrescriptionById(int id, PrescriptionModel pres) {
         return repo.updatePrescription(id, pres);
+    }
+
+    public List<PrescriptionMedicationDTO> getMedicationsForPrescription(int prescriptionId) {
+        return repo.getMedicationsForPrescription(prescriptionId);
     }
 
 }

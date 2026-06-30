@@ -2,6 +2,10 @@ package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({ "id", "dateAndTime", "patientId", "doctorId", "status", "createdAt" })
+
 public class AppointmentModel {
 
     private int id;
