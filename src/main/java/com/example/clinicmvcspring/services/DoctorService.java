@@ -12,7 +12,7 @@ public class DoctorService {
 
     private DoctorRepo repo;
 
-  public DoctorService(DoctorRepo repo) {
+    public DoctorService(DoctorRepo repo) {
         this.repo = repo;
     }
 
@@ -40,4 +40,7 @@ public class DoctorService {
         return repo.updateDoctorInDB(doc);
     }
 
+    public boolean updateDoctorById(int id,DoctorModel doc) {
+        return repo.updateDoctor(id,doc);
+    }
 }

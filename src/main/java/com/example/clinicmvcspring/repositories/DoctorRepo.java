@@ -100,4 +100,20 @@ public class DoctorRepo {
         return rowsAffected > 0;
     }
 
+        public boolean updateDoctor(int id,DoctorModel doc) {
+        String sql = "UPDATE doctors SET first_name = :firstName, last_name = :lastName, " +
+                "email = :email, salary = :salary, specialty = :specialty WHERE id = :id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("firstName", doc.getFirstName())
+                .addValue("lastName", doc.getLastName())
+                .addValue("email", doc.getEmail())
+                .addValue("salary", doc.getSalary())
+                .addValue("specialty", doc.getSpecialty())
+                .addValue("id", id);
+
+        int rowsAffected = namedJdbcTemplate.update(sql, params);
+        return rowsAffected > 0;
+    }
+
 }
