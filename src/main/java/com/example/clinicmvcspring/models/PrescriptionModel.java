@@ -23,6 +23,9 @@ public class PrescriptionModel {
         this.createdAt = createdAt;
     }
 
+    public PrescriptionModel() {
+    }
+
     public int getId() {
         return id;
     }

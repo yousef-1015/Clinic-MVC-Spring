@@ -36,4 +36,8 @@ public class PrescriptionService {
         return repo.deletePrescriptionFromDB(id);
     }
 
+    public boolean updatePrescriptionById(int id, PrescriptionModel pres) {
+        return repo.updatePrescription(id, pres);
+    }
+
 }
