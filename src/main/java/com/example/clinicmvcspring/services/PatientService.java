@@ -35,4 +35,8 @@ public class PatientService {
         return repo.deletePatientFromDB(id);
     }
 
+    public boolean updatePatientById(int id, PatientModel pat) {
+        return repo.updatePatient(id, pat);
+    }
+
 }

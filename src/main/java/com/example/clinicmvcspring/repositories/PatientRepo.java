@@ -1,6 +1,5 @@
 package com.example.clinicmvcspring.repositories;
 
-
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -70,6 +69,20 @@ public class PatientRepo {
     public boolean deletePatientFromDB(int id) {
         String sql = "DELETE FROM patients WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
+        return rowsAffected > 0;
+    }
+
+    public boolean updatePatient(int id, PatientModel pat) {
+        String sql = "UPDATE patients SET first_name = :firstName, last_name = :lastName, " +
+                "email = :email WHERE id = :id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("firstName", pat.getFirstName())
+                .addValue("lastName", pat.getLastName())
+                .addValue("email", pat.getEmail())
+                .addValue("id", id);
+
+        int rowsAffected = namedJdbcTemplate.update(sql, params);
         return rowsAffected > 0;
     }
 
