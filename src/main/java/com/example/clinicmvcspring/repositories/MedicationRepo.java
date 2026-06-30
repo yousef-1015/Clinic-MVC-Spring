@@ -76,4 +76,15 @@ public class MedicationRepo {
 
     }
 
+    public boolean updateMedication(int id, MedicationModel med) {
+        String sql = "UPDATE medications SET medication_name = :medicationName WHERE id = :id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("medicationName", med.getMedicationName())
+                .addValue("id", id);
+
+        int rowsAffected = namedJdbcTemplate.update(sql, params);
+        return rowsAffected > 0;
+    }
+
 }
