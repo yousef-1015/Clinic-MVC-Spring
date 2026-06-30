@@ -2,6 +2,9 @@ package com.example.clinicmvcspring.models;
 
 import java.sql.Date;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({ "id", "firstName", "lastName", "email", "specialty", "hireDate" })
 public class DoctorModel {
 
     // attributes
@@ -32,6 +35,9 @@ public class DoctorModel {
         this.salary = salary;
         this.hireDate = hireDate;
         this.specialty = specialty;
+    }
+
+    public DoctorModel() {
     }
 
     public int getId() {
