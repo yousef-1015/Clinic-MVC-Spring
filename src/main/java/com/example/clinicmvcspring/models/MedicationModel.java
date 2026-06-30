@@ -20,6 +20,9 @@ public class MedicationModel {
         this.createdAt = createdAt;
     }
 
+    public MedicationModel() {
+    }
+
     public int getId() {
         return id;
     }

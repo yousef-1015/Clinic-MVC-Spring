@@ -26,6 +26,9 @@ public class PatientModel {
         this.createdAt = createdAt;
     }
 
+    public PatientModel() {
+    }
+
     public int getId() {
         return id;
     }

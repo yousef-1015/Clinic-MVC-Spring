@@ -1,14 +1,10 @@
 package com.example.clinicmvcspring.repositories;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -41,6 +37,7 @@ public class DoctorRepo {
                 .addValue("specialty", doc.getSpecialty());
 
         int rowsAffected = namedJdbcTemplate.update(sql, params);
+        // execute query, map the args, return num of rows changes
 
         return rowsAffected > 0;
     }
@@ -60,7 +57,6 @@ public class DoctorRepo {
 
     public boolean deleteDoctorFromDB(DoctorModel docToDelete) {
         String sql = "DELETE FROM doctors WHERE id = ?";
-        // Run update query. It returns how many rows were deleted (usually 1)
         int rowsAffected = jdbcTemplate.update(sql, docToDelete.getId());
         return rowsAffected > 0;
     }
@@ -83,7 +79,7 @@ public class DoctorRepo {
                     rs.getDouble("salary"),
                     rs.getDate("hire_date"),
                     rs.getString("specialty")), id);
-        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }
