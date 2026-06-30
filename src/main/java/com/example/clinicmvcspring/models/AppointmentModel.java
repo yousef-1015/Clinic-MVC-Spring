@@ -1,4 +1,5 @@
 package com.example.clinicmvcspring.models;
+
 import java.sql.Timestamp;
 
 public class AppointmentModel {
@@ -20,13 +21,16 @@ public class AppointmentModel {
 
     // for getting
     public AppointmentModel(int id, Timestamp dateAndTime, int patientId, int doctorId, String status,
-                            Timestamp createdAt) {
+            Timestamp createdAt) {
         this.id = id;
         this.dateAndTime = dateAndTime;
         this.patientId = patientId;
         this.doctorId = doctorId;
         this.status = status;
         this.createdAt = createdAt;
+    }
+
+    public AppointmentModel() {
     }
 
     public int getId() {

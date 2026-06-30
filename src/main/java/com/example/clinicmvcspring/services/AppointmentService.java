@@ -37,4 +37,8 @@ public class AppointmentService {
         return repo.deleteAppointmentFromDB(id);
     }
 
+    public boolean updateAppointmentById(int id, AppointmentModel app) {
+        return repo.updateAppointment(id, app);
+    }
+
 }

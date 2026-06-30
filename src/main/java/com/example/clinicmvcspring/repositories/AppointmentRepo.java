@@ -72,4 +72,19 @@ public class AppointmentRepo {
         return rowsAffected > 0;
     }
 
+    public boolean updateAppointment(int id, AppointmentModel app) {
+        String sql = "UPDATE appointments SET date_and_time = :dateAndTime, patient_id = :patientId, " +
+                "doctor_id = :doctorId, status = :status WHERE id = :id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("dateAndTime", app.getDateAndTime())
+                .addValue("patientId", app.getPatientId())
+                .addValue("doctorId", app.getDoctorId())
+                .addValue("status", app.getStatus())
+                .addValue("id", id);
+
+        int rowsAffected = namedJdbcTemplate.update(sql, params);
+        return rowsAffected > 0;
+    }
+
 }
