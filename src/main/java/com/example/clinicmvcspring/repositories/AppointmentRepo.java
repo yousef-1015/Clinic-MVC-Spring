@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.clinicmvcspring.models.Appointment;
+import com.example.clinicmvcspring.models.AppointmentStatus;
 
 @Repository
 public class AppointmentRepo {
@@ -31,7 +32,7 @@ public class AppointmentRepo {
             res.getTimestamp("date_and_time"),
             res.getInt("patient_id"),
             res.getInt("doctor_id"),
-            res.getString("status"),
+            AppointmentStatus.valueOf(res.getString("status")),
             res.getTimestamp("created_at"));
 
     public boolean insert(Appointment app) {
@@ -51,7 +52,18 @@ public class AppointmentRepo {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public Appointment getByID(int id) {
+    public List<Appointment> findAllPagination(int page, int size) {
+        String sql = "SELECT * FROM appointments LIMIT ? OFFSET ?";
+        int offset = page * size;
+        return jdbcTemplate.query(sql, rowMapper, size, offset);
+    }
+
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM appointments";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
+    public Appointment findByID(int id) {
         String sql = "SELECT * FROM appointments WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, id);

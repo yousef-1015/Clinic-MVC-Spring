@@ -4,19 +4,25 @@ import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.validation.constraints.NotNull;
+
 @JsonPropertyOrder({ "id", "dateAndTime", "patientId", "doctorId", "status", "createdAt" })
 
 public class Appointment {
 
     private int id;
+
+    @NotNull(message = "Date and Time is Required")
     private Timestamp dateAndTime;
     private int patientId;
     private int doctorId;
-    private String status; // enum
+
+    @NotNull(message = "Status is Required")
+    private AppointmentStatus status; // enum
     private Timestamp createdAt;
 
     // for adding
-    public Appointment(Timestamp dateAndTime, int patientId, int doctorId, String status) {
+    public Appointment(Timestamp dateAndTime, int patientId, int doctorId, AppointmentStatus  status) {
         this.dateAndTime = dateAndTime;
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -24,8 +30,8 @@ public class Appointment {
     }
 
     // for getting
-    public Appointment(int id, Timestamp dateAndTime, int patientId, int doctorId, String status,
-                       Timestamp createdAt) {
+    public Appointment(int id, Timestamp dateAndTime, int patientId, int doctorId, AppointmentStatus  status,
+            Timestamp createdAt) {
         this.id = id;
         this.dateAndTime = dateAndTime;
         this.patientId = patientId;
@@ -69,11 +75,11 @@ public class Appointment {
         this.doctorId = doctorId;
     }
 
-    public String getStatus() {
+    public AppointmentStatus  getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus  status) {
         this.status = status;
     }
 

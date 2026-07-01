@@ -26,7 +26,7 @@ public class AppointmentService {
     }
 
     public Appointment getAppointmentByID(int id) {
-        return repo.getByID(id);
+        return repo.findByID(id);
     }
 
     public boolean deleteAppointment(Appointment app) {
@@ -39,6 +39,14 @@ public class AppointmentService {
 
     public boolean updateAppointmentById(int id, Appointment app) {
         return repo.update(id, app);
+    }
+
+    public List<Appointment> getAllAppointments(int page, int size) {
+        return repo.findAllPagination(page, size);
+    }
+
+    public int countAppointments() {
+        return repo.count();
     }
 
 }
