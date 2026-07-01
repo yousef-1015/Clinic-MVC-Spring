@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.example.clinicmvcspring.models.PatientModel;
+import com.example.clinicmvcspring.models.Patient;
 
 @Repository
 public class PatientRepo {
@@ -25,8 +25,8 @@ public class PatientRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    private final RowMapper<PatientModel> rowMapper = (res, rowNum) -> {
-        PatientModel pat = new PatientModel();
+    private final RowMapper<Patient> rowMapper = (res, rowNum) -> {
+        Patient pat = new Patient();
         pat.setId(res.getInt("id"));
         pat.setFirstName(res.getString("first_name"));
         pat.setLastName(res.getString("last_name"));
@@ -35,7 +35,7 @@ public class PatientRepo {
         return pat;
     };
 
-    public boolean insertNewPatient(PatientModel newPatient) {
+    public boolean insert(Patient newPatient) {
         String sql = "INSERT INTO patients (first_name, last_name, email) " +
                 "VALUES (:firstName, :lastName, :email)";
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -46,12 +46,12 @@ public class PatientRepo {
         return rowsAffected > 0;
     }
 
-    public List<PatientModel> getAllPatients() {
+    public List<Patient> getAll() {
         String sql = "SELECT * FROM patients";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public PatientModel getPatientByID(int id) {
+    public Patient getByID(int id) {
         String sql = "SELECT * FROM patients WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, id);
@@ -60,19 +60,19 @@ public class PatientRepo {
         }
     }
 
-    public boolean deletePatientFromDB(PatientModel pat) {
+    public boolean delete(Patient pat) {
         String sql = "DELETE FROM patients WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, pat.getId());
         return rowsAffected > 0;
     }
 
-    public boolean deletePatientFromDB(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM patients WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
 
-    public boolean updatePatient(int id, PatientModel pat) {
+    public boolean update(int id, Patient pat) {
         String sql = "UPDATE patients SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email WHERE id = :id";
 

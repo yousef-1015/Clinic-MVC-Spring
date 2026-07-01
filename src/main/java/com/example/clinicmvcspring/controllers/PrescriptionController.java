@@ -3,7 +3,7 @@ package com.example.clinicmvcspring.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
-import com.example.clinicmvcspring.models.PrescriptionModel;
+import com.example.clinicmvcspring.models.Prescription;
 import com.example.clinicmvcspring.services.PrescriptionService;
 
 import java.util.LinkedHashMap;
@@ -29,7 +29,7 @@ public class PrescriptionController {
     }
 
     @GetMapping
-    public List<PrescriptionModel> getPrescriptions() {
+    public List<Prescription> getPrescriptions() {
         return prescriptionService.getAllPrescriptions();
     }
 
@@ -38,7 +38,7 @@ public class PrescriptionController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            PrescriptionModel pres = prescriptionService.getPrescriptionByID(id);
+            Prescription pres = prescriptionService.getPrescriptionByID(id);
             if (pres == null) {
                 response.put("message", "ERROR: Prescription not found");
                 response.put("idRequested", id);
@@ -64,7 +64,7 @@ public class PrescriptionController {
     
 
     @PostMapping
-    public Map<String, Object> addNewPrescription(@RequestBody PrescriptionModel newPres) {
+    public Map<String, Object> addNewPrescription(@RequestBody Prescription newPres) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
@@ -85,7 +85,7 @@ public class PrescriptionController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            PrescriptionModel pres = prescriptionService.getPrescriptionByID(id);
+            Prescription pres = prescriptionService.getPrescriptionByID(id);
 
             if (pres == null) {
                 response.put("message", "ERROR: Prescription not found");
@@ -114,11 +114,11 @@ public class PrescriptionController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updatePrescription(@PathVariable int id, @RequestBody PrescriptionModel pres) {
+    public Map<String, Object> updatePrescription(@PathVariable int id, @RequestBody Prescription pres) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            PrescriptionModel existingPres = prescriptionService.getPrescriptionByID(id);
+            Prescription existingPres = prescriptionService.getPrescriptionByID(id);
 
             if (existingPres == null) {
                 response.put("message", "ERROR: Prescription not found");
@@ -147,7 +147,7 @@ public class PrescriptionController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            PrescriptionModel existingPres = prescriptionService.getPrescriptionByID(id);
+            Prescription existingPres = prescriptionService.getPrescriptionByID(id);
 
             if (existingPres == null) {
                 response.put("message", "ERROR: Prescription not found");

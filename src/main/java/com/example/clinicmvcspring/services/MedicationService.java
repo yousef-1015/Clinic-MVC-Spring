@@ -16,28 +16,28 @@ public class MedicationService {
         this.repo = repo;
     }
 
-    public boolean addMedication(MedicationModel med) {
-        return repo.insertNewMedication(med);
+    public boolean addMedication(Medication med) {
+        return repo.insert(med);
     }
 
-    public List<MedicationModel> getAllMedications() {
-        return repo.findAllMedications();
+    public List<Medication> getAllMedications() {
+        return repo.findAll();
     }
 
-    public MedicationModel getMedicationByID(int id) {
-        return repo.getMedicationByID(id);
+    public Medication getMedicationByID(int id) {
+        return repo.getByID(id);
     }
 
-    public boolean deleteMedication(MedicationModel med) {
-        return repo.deleteMedicationFromDB(med);
+    public boolean deleteMedication(Medication med) {
+        return repo.delete(med);
     }
 
     public boolean deleteMedicationByID(int id) {
-        return repo.deleteMedicationFromDB(id);
+        return repo.delete(id);
     }
 
-    public boolean updateMedicationById(int id, MedicationModel med) {
-        return repo.updateMedication(id, med);
+    public boolean updateMedicationById(int id, Medication med) {
+        return repo.update(id, med);
     }
 
 }

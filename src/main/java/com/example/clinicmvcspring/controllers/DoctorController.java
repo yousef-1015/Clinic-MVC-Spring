@@ -3,7 +3,7 @@ package com.example.clinicmvcspring.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-import com.example.clinicmvcspring.models.DoctorModel;
+import com.example.clinicmvcspring.models.Doctor;
 import com.example.clinicmvcspring.services.DoctorService;
 
 import jakarta.validation.Valid;
@@ -52,7 +52,7 @@ public class DoctorController {
             return ResponseEntity.status(400).body(error);
         }
 
-        List<DoctorModel> allDocs = doctorService.getAllDoctors(page, size);
+        List<Doctor> allDocs = doctorService.getAllDoctors(page, size);
         int total = doctorService.countDoctors();
         int totalPages = (int) Math.ceil((double) total / size);
         Map<String, Object> response = new LinkedHashMap<>();
@@ -70,7 +70,7 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        DoctorModel doc = doctorService.getDoctorByID(id);
+        Doctor doc = doctorService.getDoctorByID(id);
         if (doc == null) {// Empty from repo exception
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No doctor found with id: " + id, 404));
@@ -79,7 +79,7 @@ public class DoctorController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addNewDoctor(@Valid @RequestBody DoctorModel newDoc) {
+    public ResponseEntity<?> addNewDoctor(@Valid @RequestBody Doctor newDoc) {
         doctorService.addDoctor(newDoc);
         return ResponseEntity.status(201).body(newDoc); // 201
 
@@ -91,7 +91,7 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        DoctorModel doc = doctorService.getDoctorByID(id);
+        Doctor doc = doctorService.getDoctorByID(id);
         if (doc == null) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Doctor found with id: " + id, 404));
@@ -102,12 +102,12 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDoctor(@PathVariable int id, @Valid @RequestBody DoctorModel doc) {
+    public ResponseEntity<?> updateDoctor(@PathVariable int id, @Valid @RequestBody Doctor doc) {
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        DoctorModel existingDoc = doctorService.getDoctorByID(id);
+        Doctor existingDoc = doctorService.getDoctorByID(id);
         if (existingDoc == null) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Doctor found with id: " + id, 404));
@@ -124,7 +124,7 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        DoctorModel existingDoc = doctorService.getDoctorByID(id);
+        Doctor existingDoc = doctorService.getDoctorByID(id);
         if (existingDoc == null) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Doctor found with id: " + id, 404));

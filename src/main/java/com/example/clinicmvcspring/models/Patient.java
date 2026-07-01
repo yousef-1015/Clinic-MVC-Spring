@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "id", "firstName", "lastName", "email" })
 
-public class PatientModel {
+public class Patient {
 
     private int id;
     private String firstName;
@@ -15,14 +15,14 @@ public class PatientModel {
     private Timestamp createdAt;
 
     // for creating
-    public PatientModel(String firstName, String lastName, String email) {
+    public Patient(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
     }
 
     // for getting
-    public PatientModel(int id, String firstName, String lastName, String email, Timestamp createdAt) {
+    public Patient(int id, String firstName, String lastName, String email, Timestamp createdAt) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -30,7 +30,7 @@ public class PatientModel {
         this.createdAt = createdAt;
     }
 
-    public PatientModel() {
+    public Patient() {
     }
 
     public int getId() {

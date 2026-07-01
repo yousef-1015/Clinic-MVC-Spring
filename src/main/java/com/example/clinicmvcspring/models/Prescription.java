@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "id", "prescriptionNotes", "appointmentId", "createdAt" })
-public class PrescriptionModel {
+public class Prescription {
 
     private int id;
     private String prescriptionNotes;
@@ -12,20 +12,20 @@ public class PrescriptionModel {
     private Timestamp createdAt;
 
     // for adding
-    public PrescriptionModel(String prescriptionNotes, int appointmentId) {
+    public Prescription(String prescriptionNotes, int appointmentId) {
         this.prescriptionNotes = prescriptionNotes;
         this.appointmentId = appointmentId;
     }
 
     // for getting
-    public PrescriptionModel(int id, String prescriptionNotes, int appointmentId, Timestamp createdAt) {
+    public Prescription(int id, String prescriptionNotes, int appointmentId, Timestamp createdAt) {
         this.id = id;
         this.prescriptionNotes = prescriptionNotes;
         this.appointmentId = appointmentId;
         this.createdAt = createdAt;
     }
 
-    public PrescriptionModel() {
+    public Prescription() {
     }
 
     public int getId() {

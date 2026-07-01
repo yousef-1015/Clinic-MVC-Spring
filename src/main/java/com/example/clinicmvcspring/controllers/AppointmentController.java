@@ -2,7 +2,7 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.clinicmvcspring.models.AppointmentModel;
+import com.example.clinicmvcspring.models.Appointment;
 import com.example.clinicmvcspring.services.AppointmentService;
 
 import java.sql.Timestamp;
@@ -29,7 +29,7 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public List<AppointmentModel> getAppointments() {
+    public List<Appointment> getAppointments() {
         return appointmentService.getAllAppointments();
     }
 
@@ -38,7 +38,7 @@ public class AppointmentController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            AppointmentModel app = appointmentService.getAppointmentByID(id);
+            Appointment app = appointmentService.getAppointmentByID(id);
             if (app == null) {
                 response.put("message", "ERROR: Appointment not found");
                 response.put("idRequested", id);
@@ -53,7 +53,7 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Map<String, Object> addNewAppointment(@RequestBody AppointmentModel newApp) {
+    public Map<String, Object> addNewAppointment(@RequestBody Appointment newApp) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
@@ -75,7 +75,7 @@ public class AppointmentController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            AppointmentModel app = appointmentService.getAppointmentByID(id);
+            Appointment app = appointmentService.getAppointmentByID(id);
 
             if (app == null) {
                 response.put("message", "ERROR: Appointment not found");
@@ -104,11 +104,11 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateAppointment(@PathVariable int id, @RequestBody AppointmentModel app) {
+    public Map<String, Object> updateAppointment(@PathVariable int id, @RequestBody Appointment app) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            AppointmentModel existingApp = appointmentService.getAppointmentByID(id);
+            Appointment existingApp = appointmentService.getAppointmentByID(id);
 
             if (existingApp == null) {
                 response.put("message", "ERROR: Appointment not found");
@@ -139,7 +139,7 @@ public class AppointmentController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            AppointmentModel existingApp = appointmentService.getAppointmentByID(id);
+            Appointment existingApp = appointmentService.getAppointmentByID(id);
 
             if (existingApp == null) {
                 response.put("message", "ERROR: Appointment not found");

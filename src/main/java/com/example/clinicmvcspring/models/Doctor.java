@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.*;
 
 @JsonPropertyOrder({ "id", "firstName", "lastName", "email", "specialty", "hireDate" })
-public class DoctorModel {
+public class Doctor {
 
     // attributes
     private int id;
@@ -36,7 +36,7 @@ public class DoctorModel {
     private String specialty;
 
     // for creating
-    public DoctorModel(String firstName, String lastName, String email, double salary, String specialty) {
+    public Doctor(String firstName, String lastName, String email, double salary, String specialty) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -45,8 +45,8 @@ public class DoctorModel {
     }
 
     // for getting
-    public DoctorModel(int id, String firstName, String lastName, String email, double salary, Date hireDate,
-            String specialty) {
+    public Doctor(int id, String firstName, String lastName, String email, double salary, Date hireDate,
+                  String specialty) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -56,7 +56,7 @@ public class DoctorModel {
         this.specialty = specialty;
     }
 
-    public DoctorModel() {
+    public Doctor() {
     }
 
     public int getId() {

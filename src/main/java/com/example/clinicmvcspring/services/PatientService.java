@@ -15,28 +15,28 @@ public class PatientService {
         this.repo = repo;
     }
 
-    public boolean addPatient(PatientModel newPatient) {
-        return repo.insertNewPatient(newPatient);// the job lies on the repo to access the DB
+    public boolean addPatient(Patient newPatient) {
+        return repo.insert(newPatient);// the job lies on the repo to access the DB
     }
 
-    public List<PatientModel> getAllPatients() {
-        return repo.getAllPatients();// the job lies on the repo to access the DB
+    public List<Patient> getAllPatients() {
+        return repo.getAll();// the job lies on the repo to access the DB
     }
 
-    public boolean deletePatient(PatientModel pat) {
-        return repo.deletePatientFromDB(pat);
+    public boolean deletePatient(Patient pat) {
+        return repo.delete(pat);
     }
 
-    public PatientModel getPatientByID(int id) {
-        return repo.getPatientByID(id);
+    public Patient getPatientByID(int id) {
+        return repo.getByID(id);
     }
 
     public boolean deletePatientByID(int id) {
-        return repo.deletePatientFromDB(id);
+        return repo.delete(id);
     }
 
-    public boolean updatePatientById(int id, PatientModel pat) {
-        return repo.updatePatient(id, pat);
+    public boolean updatePatientById(int id, Patient pat) {
+        return repo.update(id, pat);
     }
 
 }

@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
-import com.example.clinicmvcspring.models.PrescriptionModel;
+import com.example.clinicmvcspring.models.Prescription;
 
 @Repository
 public class PrescriptionRepo {
@@ -27,13 +27,13 @@ public class PrescriptionRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    private final RowMapper<PrescriptionModel> rowMapper = (res, rowNum) -> new PrescriptionModel(
+    private final RowMapper<Prescription> rowMapper = (res, rowNum) -> new Prescription(
             res.getInt("id"),
             res.getString("prescription_notes"),
             res.getInt("appointment_id"),
             res.getTimestamp("created_at"));
 
-    public boolean insertNewPrescription(PrescriptionModel pres) {
+    public boolean insert(Prescription pres) {
         String sql = "INSERT INTO prescriptions (prescription_notes, appointment_id) " +
                 "VALUES (:prescriptionNotes, :appointmentId)";
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -43,12 +43,12 @@ public class PrescriptionRepo {
         return rowsAffected > 0;
     }
 
-    public List<PrescriptionModel> findAllPrescriptions() {
+    public List<Prescription> findAll() {
         String sql = "SELECT * FROM prescriptions";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public PrescriptionModel getPrescriptionByID(int id) {
+    public Prescription getByID(int id) {
         String sql = "SELECT * FROM prescriptions WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, id);
@@ -57,19 +57,19 @@ public class PrescriptionRepo {
         }
     }
 
-    public boolean deletePrescriptionFromDB(PrescriptionModel pres) {
+    public boolean delete(Prescription pres) {
         String sql = "DELETE FROM prescriptions WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, pres.getId());
         return rowsAffected > 0;
     }
 
-    public boolean deletePrescriptionFromDB(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM prescriptions WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
 
-    public boolean updatePrescription(int id, PrescriptionModel pres) {
+    public boolean update(int id, Prescription pres) {
         String sql = "UPDATE prescriptions SET prescription_notes = :prescriptionNotes, " +
                 "appointment_id = :appointmentId WHERE id = :id";
 

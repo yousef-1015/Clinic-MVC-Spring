@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.example.clinicmvcspring.models.DoctorModel;
+import com.example.clinicmvcspring.models.Doctor;
 
 @Repository
 public class DoctorRepo {
@@ -26,7 +26,7 @@ public class DoctorRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    private final RowMapper<DoctorModel> rowMapper = (rs, rowNum) -> new DoctorModel(rs.getInt("id"),
+    private final RowMapper<Doctor> rowMapper = (rs, rowNum) -> new Doctor(rs.getInt("id"),
             rs.getString("first_name"),
             rs.getString("last_name"),
             rs.getString("email"),
@@ -34,7 +34,7 @@ public class DoctorRepo {
             rs.getDate("hire_date"),
             rs.getString("specialty"));
 
-    public boolean insertANewDoctor(DoctorModel doc) {
+    public boolean insert(Doctor doc) {
         String sql = "INSERT INTO doctors (first_name, last_name, email, salary, specialty) " +
                 "VALUES (:firstName, :lastName, :email, :salary, :specialty)";
 
@@ -51,37 +51,37 @@ public class DoctorRepo {
         return rowsAffected > 0;
     }
 
-    public List<DoctorModel> findAllDoctors() {
+    public List<Doctor> findAll() {
         String sql = "SELECT * FROM doctors";
 
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public List<DoctorModel> findAllDoctors(int page, int size) {
+    public List<Doctor> findAllPagination(int page, int size) {
         String sql = "SELECT * FROM doctors LIMIT ? OFFSET ?";
         int offset = page * size;
         return jdbcTemplate.query(sql, rowMapper, size, offset);
 
     }
 
-    public int countDoctors() {
+    public int count() {
         String sql = "SELECT COUNT(*) FROM doctors";
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
-    public boolean deleteDoctorFromDB(DoctorModel docToDelete) {
+    public boolean deleteObj(Doctor docToDelete) {
         String sql = "DELETE FROM doctors WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, docToDelete.getId());
         return rowsAffected > 0;
     }
 
-    public boolean deleteDoctorFromDB(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM doctors WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
 
-    public DoctorModel getDoctorByID(int id) {
+    public Doctor findByID(int id) {
         String sql = "SELECT * FROM doctors WHERE id = ?";
 
         try {
@@ -92,7 +92,7 @@ public class DoctorRepo {
         }
     }
 
-    public boolean updateDoctorInDB(DoctorModel doc) {
+    public boolean updateObj(Doctor doc) {
         String sql = "UPDATE doctors SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email, salary = :salary, specialty = :specialty WHERE id = :id";
 
@@ -108,7 +108,7 @@ public class DoctorRepo {
         return rowsAffected > 0;
     }
 
-    public boolean updateDoctor(int id, DoctorModel doc) {
+    public boolean update(int id, Doctor doc) {
         String sql = "UPDATE doctors SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email, salary = :salary, specialty = :specialty WHERE id = :id";
 

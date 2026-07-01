@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.example.clinicmvcspring.models.MedicationModel;
+import com.example.clinicmvcspring.models.Medication;
 
 @Repository
 public class MedicationRepo {
@@ -25,8 +25,8 @@ public class MedicationRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    RowMapper<MedicationModel> rowMapper = (res, rowNum) -> {
-        MedicationModel med = new MedicationModel();
+    RowMapper<Medication> rowMapper = (res, rowNum) -> {
+        Medication med = new Medication();
         med.setId(res.getInt("id"));
         med.setMedicationName(res.getString("medication_name"));
         med.setCreatedAt(res.getTimestamp("created_at"));
@@ -34,7 +34,7 @@ public class MedicationRepo {
 
     };
 
-    public boolean insertNewMedication(MedicationModel med) {
+    public boolean insert(Medication med) {
         String sql = "INSERT INTO medications (medication_name) VALUES (:medicationName)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -45,13 +45,13 @@ public class MedicationRepo {
 
     }
 
-    public List<MedicationModel> findAllMedications() {
+    public List<Medication> findAll() {
         String sql = "SELECT * FROM medications";
 
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public MedicationModel getMedicationByID(int id) {
+    public Medication getByID(int id) {
         String sql = "SELECT * FROM medications WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, id);
@@ -61,14 +61,14 @@ public class MedicationRepo {
         }
     }
 
-    public boolean deleteMedicationFromDB(MedicationModel med) {
+    public boolean delete(Medication med) {
         String sql = "DELETE FROM medications WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, med.getId());
 
         return rowsAffected > 0;
     }
 
-    public boolean deleteMedicationFromDB(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM medications WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
 
@@ -76,7 +76,7 @@ public class MedicationRepo {
 
     }
 
-    public boolean updateMedication(int id, MedicationModel med) {
+    public boolean update(int id, Medication med) {
         String sql = "UPDATE medications SET medication_name = :medicationName WHERE id = :id";
 
         MapSqlParameterSource params = new MapSqlParameterSource()

@@ -3,7 +3,7 @@ package com.example.clinicmvcspring.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.clinicmvcspring.models.PatientModel;
+import com.example.clinicmvcspring.models.Patient;
 import com.example.clinicmvcspring.services.PatientService;
 
 import java.util.LinkedHashMap;
@@ -29,7 +29,7 @@ public class PatientController {
     }
 
     @GetMapping("")
-    public List<PatientModel> getAllPatients() {
+    public List<Patient> getAllPatients() {
         return patientService.getAllPatients();
 
     }
@@ -38,7 +38,7 @@ public class PatientController {
     public Object getPatientByID(@PathVariable int id) {
         Map<String, Object> response = new LinkedHashMap<>();
         try {
-            PatientModel pat = patientService.getPatientByID(id);
+            Patient pat = patientService.getPatientByID(id);
             if (pat == null) {
                 response.put("message", "ERROR: Patient not found");
                 response.put("idRequested", id);
@@ -53,7 +53,7 @@ public class PatientController {
     }
 
     @PostMapping
-    public Map<String, Object> addNewPatient(@RequestBody PatientModel newPatient) {
+    public Map<String, Object> addNewPatient(@RequestBody Patient newPatient) {
         Map<String, Object> response = new LinkedHashMap<>();
         try {
             patientService.addPatient(newPatient);
@@ -72,7 +72,7 @@ public class PatientController {
     public Map<String, Object> deletePatient(@PathVariable int id) {
         Map<String, Object> response = new LinkedHashMap<>();
         try {
-            PatientModel pat = patientService.getPatientByID(id);
+            Patient pat = patientService.getPatientByID(id);
             if (pat == null) {
                 response.put("message", "ERROR: Patient not found");
                 response.put("idRequested", id);
@@ -100,10 +100,10 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updatePatient(@PathVariable int id, @RequestBody PatientModel pat) {
+    public Map<String, Object> updatePatient(@PathVariable int id, @RequestBody Patient pat) {
         Map<String, Object> response = new LinkedHashMap<>();
         try {
-            PatientModel existingPat = patientService.getPatientByID(id);
+            Patient existingPat = patientService.getPatientByID(id);
             if (existingPat == null) {
                 response.put("message", "ERROR: Patient not found");
                 response.put("idRequested", id);
@@ -127,7 +127,7 @@ public class PatientController {
     public Map<String, Object> partialPatientUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
         Map<String, Object> response = new LinkedHashMap<>();
         try {
-            PatientModel existingPat = patientService.getPatientByID(id);
+            Patient existingPat = patientService.getPatientByID(id);
             if (existingPat == null) {
                 response.put("message", "ERROR: Patient not found");
                 response.put("idRequested", id);

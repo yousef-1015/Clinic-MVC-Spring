@@ -16,39 +16,39 @@ public class DoctorService {
         this.repo = repo;
     }
 
-    public boolean addDoctor(DoctorModel newDoctor) {
-        return repo.insertANewDoctor(newDoctor);// the job lies on the repo to access the DB
+    public boolean addDoctor(Doctor newDoctor) {
+        return repo.insert(newDoctor);// the job lies on the repo to access the DB
     }
 
-    public List<DoctorModel> getAllDoctors() {
-        return repo.findAllDoctors();// the job lies on the repo to access the DB
+    public List<Doctor> getAllDoctors() {
+        return repo.findAll();// the job lies on the repo to access the DB
     }
 
-    public boolean deleteDoctor(DoctorModel docToDelete) {
-        return repo.deleteDoctorFromDB(docToDelete);
+    public boolean deleteDoctor(Doctor docToDelete) {
+        return repo.deleteObj(docToDelete);
     }
 
-    public DoctorModel getDoctorByID(int id) {
-        return repo.getDoctorByID(id);
+    public Doctor getDoctorByID(int id) {
+        return repo.findByID(id);
     }
 
     public boolean deleteDoctorByID(int id) {
-        return repo.deleteDoctorFromDB(id);
+        return repo.delete(id);
     }
 
-    public boolean updateDoctor(DoctorModel doc) {
-        return repo.updateDoctorInDB(doc);
+    public boolean updateDoctor(Doctor doc) {
+        return repo.updateObj(doc);
     }
 
-    public boolean updateDoctorById(int id, DoctorModel doc) {
-        return repo.updateDoctor(id, doc);
+    public boolean updateDoctorById(int id, Doctor doc) {
+        return repo.update(id, doc);
     }
 
-    public List<DoctorModel> getAllDoctors(int page, int size) {
-        return repo.findAllDoctors(page, size);
+    public List<Doctor> getAllDoctors(int page, int size) {
+        return repo.findAllPagination(page, size);
     }
 
     public int countDoctors() {
-        return repo.countDoctors();
+        return repo.count();
     }
 }

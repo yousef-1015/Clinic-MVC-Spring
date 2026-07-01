@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.example.clinicmvcspring.models.AppointmentModel;
+import com.example.clinicmvcspring.models.Appointment;
 
 @Repository
 public class AppointmentRepo {
@@ -26,7 +26,7 @@ public class AppointmentRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    private final RowMapper<AppointmentModel> rowMapper = (res, rowNum) -> new AppointmentModel(
+    private final RowMapper<Appointment> rowMapper = (res, rowNum) -> new Appointment(
             res.getInt("id"),
             res.getTimestamp("date_and_time"),
             res.getInt("patient_id"),
@@ -34,7 +34,7 @@ public class AppointmentRepo {
             res.getString("status"),
             res.getTimestamp("created_at"));
 
-    public boolean insertNewAppointment(AppointmentModel app) {
+    public boolean insert(Appointment app) {
         String sql = "INSERT INTO appointments (date_and_time, patient_id, doctor_id, status) " +
                 "VALUES (:dateAndTime, :patientId, :doctorId, :status)";
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -46,12 +46,12 @@ public class AppointmentRepo {
         return rowsAffected > 0;
     }
 
-    public List<AppointmentModel> findAllAppointments() {
+    public List<Appointment> findAll() {
         String sql = "SELECT * FROM appointments";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public AppointmentModel getAppointmentByID(int id) {
+    public Appointment getByID(int id) {
         String sql = "SELECT * FROM appointments WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, id);
@@ -60,19 +60,19 @@ public class AppointmentRepo {
         }
     }
 
-    public boolean deleteAppointmentFromDB(AppointmentModel app) {
+    public boolean delete(Appointment app) {
         String sql = "DELETE FROM appointments WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, app.getId());
         return rowsAffected > 0;
     }
 
-    public boolean deleteAppointmentFromDB(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM appointments WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, id);
         return rowsAffected > 0;
     }
 
-    public boolean updateAppointment(int id, AppointmentModel app) {
+    public boolean update(int id, Appointment app) {
         String sql = "UPDATE appointments SET date_and_time = :dateAndTime, patient_id = :patientId, " +
                 "doctor_id = :doctorId, status = :status WHERE id = :id";
 

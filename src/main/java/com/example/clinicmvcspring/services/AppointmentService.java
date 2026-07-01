@@ -17,28 +17,28 @@ public class AppointmentService {
         this.repo = repo;
     }
 
-    public boolean addAppointment(AppointmentModel app) {
-        return repo.insertNewAppointment(app);
+    public boolean addAppointment(Appointment app) {
+        return repo.insert(app);
     }
 
-    public List<AppointmentModel> getAllAppointments() {
-        return repo.findAllAppointments();
+    public List<Appointment> getAllAppointments() {
+        return repo.findAll();
     }
 
-    public AppointmentModel getAppointmentByID(int id) {
-        return repo.getAppointmentByID(id);
+    public Appointment getAppointmentByID(int id) {
+        return repo.getByID(id);
     }
 
-    public boolean deleteAppointment(AppointmentModel app) {
-        return repo.deleteAppointmentFromDB(app);
+    public boolean deleteAppointment(Appointment app) {
+        return repo.delete(app);
     }
 
     public boolean deleteAppointmentByID(int id) {
-        return repo.deleteAppointmentFromDB(id);
+        return repo.delete(id);
     }
 
-    public boolean updateAppointmentById(int id, AppointmentModel app) {
-        return repo.updateAppointment(id, app);
+    public boolean updateAppointmentById(int id, Appointment app) {
+        return repo.update(id, app);
     }
 
 }

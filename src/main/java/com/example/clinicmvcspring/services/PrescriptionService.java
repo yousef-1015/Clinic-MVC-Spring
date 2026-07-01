@@ -17,28 +17,28 @@ public class PrescriptionService {
         this.repo = repo;
     }
 
-    public boolean addPrescription(PrescriptionModel pres) {
-        return repo.insertNewPrescription(pres);
+    public boolean addPrescription(Prescription pres) {
+        return repo.insert(pres);
     }
 
-    public List<PrescriptionModel> getAllPrescriptions() {
-        return repo.findAllPrescriptions();
+    public List<Prescription> getAllPrescriptions() {
+        return repo.findAll();
     }
 
-    public PrescriptionModel getPrescriptionByID(int id) {
-        return repo.getPrescriptionByID(id);
+    public Prescription getPrescriptionByID(int id) {
+        return repo.getByID(id);
     }
 
-    public boolean deletePrescription(PrescriptionModel pres) {
-        return repo.deletePrescriptionFromDB(pres);
+    public boolean deletePrescription(Prescription pres) {
+        return repo.delete(pres);
     }
 
     public boolean deletePrescriptionByID(int id) {
-        return repo.deletePrescriptionFromDB(id);
+        return repo.delete(id);
     }
 
-    public boolean updatePrescriptionById(int id, PrescriptionModel pres) {
-        return repo.updatePrescription(id, pres);
+    public boolean updatePrescriptionById(int id, Prescription pres) {
+        return repo.update(id, pres);
     }
 
     public List<PrescriptionMedicationDTO> getMedicationsForPrescription(int prescriptionId) {

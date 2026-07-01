@@ -2,7 +2,7 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.clinicmvcspring.models.MedicationModel;
+import com.example.clinicmvcspring.models.Medication;
 import com.example.clinicmvcspring.services.MedicationService;
 
 import java.util.LinkedHashMap;
@@ -29,7 +29,7 @@ public class MedicationController {
 
    
     @GetMapping
-    public List<MedicationModel> getMedications() {
+    public List<Medication> getMedications() {
         return medicationService.getAllMedications();
     }
 
@@ -38,7 +38,7 @@ public class MedicationController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            MedicationModel med = medicationService.getMedicationByID(id);
+            Medication med = medicationService.getMedicationByID(id);
             if (med == null) {
                 response.put("message", "ERROR: Medication not found");
                 response.put("idRequested", id);
@@ -53,7 +53,7 @@ public class MedicationController {
     }
 
     @PostMapping
-    public Map<String, Object> addNewMedication(@RequestBody MedicationModel newMed) {
+    public Map<String, Object> addNewMedication(@RequestBody Medication newMed) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
@@ -73,7 +73,7 @@ public class MedicationController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            MedicationModel med = medicationService.getMedicationByID(id);
+            Medication med = medicationService.getMedicationByID(id);
 
             if (med == null) {
                 response.put("message", "ERROR: Medication not found");
@@ -103,11 +103,11 @@ public class MedicationController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateMedication(@PathVariable int id, @RequestBody MedicationModel med) {
+    public Map<String, Object> updateMedication(@PathVariable int id, @RequestBody Medication med) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            MedicationModel existingMed = medicationService.getMedicationByID(id);
+            Medication existingMed = medicationService.getMedicationByID(id);
 
             if (existingMed == null) {
                 response.put("message", "ERROR: Medication not found");
@@ -134,7 +134,7 @@ public class MedicationController {
         Map<String, Object> response = new LinkedHashMap<>();
 
         try {
-            MedicationModel existingMed = medicationService.getMedicationByID(id);
+            Medication existingMed = medicationService.getMedicationByID(id);
 
             if (existingMed == null) {
                 response.put("message", "ERROR: Medication not found");
