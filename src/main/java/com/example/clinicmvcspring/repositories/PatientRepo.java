@@ -51,6 +51,17 @@ public class PatientRepo {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
+    public List<Patient> findAllPagination(int page, int size) {
+        String sql = "SELECT * FROM patients LIMIT ? OFFSET ?";
+        int offset = page * size;
+        return jdbcTemplate.query(sql, rowMapper, size, offset);
+    }
+
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM patients";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
     public Patient getByID(int id) {
         String sql = "SELECT * FROM patients WHERE id = ?";
         try {

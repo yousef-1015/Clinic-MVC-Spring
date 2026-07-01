@@ -39,4 +39,12 @@ public class PatientService {
         return repo.update(id, pat);
     }
 
+    public List<Patient> getAllPatients(int page, int size) {
+        return repo.findAllPagination(page, size);
+    }
+
+    public int countPatients() {
+        return repo.count();
+    }
+
 }

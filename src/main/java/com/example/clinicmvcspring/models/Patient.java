@@ -4,14 +4,28 @@ import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 @JsonPropertyOrder({ "id", "firstName", "lastName", "email" })
 
 public class Patient {
 
     private int id;
+    @NotBlank(message = "First Name is Required")
+    @Size(max = 50, message = "First Name max size is 50 characters")
     private String firstName;
+
+    @NotBlank(message = "Last Name is Required")
+    @Size(max = 50, message = "Last Name max size is 50 characters")
     private String lastName;
+
+    @NotBlank(message = "Email is Required")
+    @Size(max = 100, message = "Email max size is 100 characters")
+    @Email(message = "Use Valid Email")
     private String email;
+
     private Timestamp createdAt;
 
     // for creating

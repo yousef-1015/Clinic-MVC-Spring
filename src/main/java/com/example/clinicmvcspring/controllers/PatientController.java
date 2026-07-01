@@ -1,15 +1,20 @@
 package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.models.Patient;
 import com.example.clinicmvcspring.services.PatientService;
+
+import jakarta.validation.Valid;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,130 +34,104 @@ public class PatientController {
     }
 
     @GetMapping("")
-    public List<Patient> getAllPatients() {
-        return patientService.getAllPatients();
+    public ResponseEntity<?> getAllPatients(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
 
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+
+        List<Patient> allPatients = patientService.getAllPatients(page, size);
+        int total = patientService.countPatients();
+        int totalPages = (int) Math.ceil((double) total / size);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("data", allPatients);
+        response.put("currentPage", page);
+        response.put("pageSize", size);
+        response.put("totalPatients", total);
+        response.put("totalPages", totalPages);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public Object getPatientByID(@PathVariable int id) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        try {
-            Patient pat = patientService.getPatientByID(id);
-            if (pat == null) {
-                response.put("message", "ERROR: Patient not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            return pat;
-        } catch (Exception e) {
-            response.put("message", "ERROR searching for patient");
-            response.put("reason", e.getMessage());
-            return response;
+    public ResponseEntity<?> getPatientByID(@PathVariable int id) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Patient pat = patientService.getPatientByID(id);
+        if (pat == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No patient found with id: " + id, 404));
+        }
+        return ResponseEntity.ok(pat);
     }
 
     @PostMapping
-    public Map<String, Object> addNewPatient(@RequestBody Patient newPatient) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        try {
-            patientService.addPatient(newPatient);
-            response.put("message", "Patient added successfully !!!");
-            response.put("firstName", newPatient.getFirstName());
-            response.put("lastName", newPatient.getLastName());
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR adding patient");
-            response.put("Reason", e.getMessage());
-            return response;
-        }
+    public ResponseEntity<?> addNewPatient(@Valid @RequestBody Patient newPatient) {
+        patientService.addPatient(newPatient);
+        return ResponseEntity.status(201).body(newPatient);
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, Object> deletePatient(@PathVariable int id) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        try {
-            Patient pat = patientService.getPatientByID(id);
-            if (pat == null) {
-                response.put("message", "ERROR: Patient not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            boolean isDeleted = patientService.deletePatientByID(id);
-            if (isDeleted == false) {
-                response.put("message", "ERROR: Patient was'nt Deleted");
-                response.put("idRequested", id);
-                return response;
-            }
-            response.put("message", "Patient Deleted Successfully !!!!");
-            response.put("idRequested", id);
-            response.put("deleted patient name", pat.getFirstName() + " " + pat.getLastName());
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR DELETING patient");
-            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("foreign key")) {
-                response.put("reason", "This patient has active appointments and cannot be deleted");
-            } else {
-                response.put("reason", e.getMessage());
-            }
-            return response;
+    public ResponseEntity<?> deletePatient(@PathVariable int id) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Patient pat = patientService.getPatientByID(id);
+        if (pat == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Patient found with id: " + id, 404));
+        }
+        patientService.deletePatientByID(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updatePatient(@PathVariable int id, @RequestBody Patient pat) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        try {
-            Patient existingPat = patientService.getPatientByID(id);
-            if (existingPat == null) {
-                response.put("message", "ERROR: Patient not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            patientService.updatePatientById(id, pat);
-            response.put("message", "Patient Updated Successfully !!!");
-            response.put("firstName", pat.getFirstName());
-            response.put("lastName", pat.getLastName());
-            response.put("email", pat.getEmail());
-            response.put("created date", existingPat.getCreatedAt());
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR Updating patient");
-            response.put("Reason", e.getMessage());
-            return response;
+    public ResponseEntity<?> updatePatient(@PathVariable int id, @Valid @RequestBody Patient pat) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Patient existingPat = patientService.getPatientByID(id);
+        if (existingPat == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Patient found with id: " + id, 404));
+        }
+        pat.setId(id);
+        pat.setCreatedAt(existingPat.getCreatedAt());
+        patientService.updatePatientById(id, pat);
+        return ResponseEntity.ok(pat);
     }
 
     @PatchMapping("/{id}")
-    public Map<String, Object> partialPatientUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        try {
-            Patient existingPat = patientService.getPatientByID(id);
-            if (existingPat == null) {
-                response.put("message", "ERROR: Patient not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            if (toUpdate.containsKey("firstName")) {
-                existingPat.setFirstName((String) toUpdate.get("firstName"));
-            }
-            if (toUpdate.containsKey("lastName")) {
-                existingPat.setLastName((String) toUpdate.get("lastName"));
-            }
-            if (toUpdate.containsKey("email")) {
-                existingPat.setEmail((String) toUpdate.get("email"));
-            }
-            patientService.updatePatientById(id, existingPat);
-            response.put("message", "Patient Updated Successfully !!!");
-            response.put("lastName", existingPat.getLastName());
-            response.put("email", existingPat.getEmail());
-            response.put("created date", existingPat.getCreatedAt());
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR Updating patient");
-            response.put("Reason", e.getMessage());
-            return response;
+    public ResponseEntity<?> partialPatientUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Patient existingPat = patientService.getPatientByID(id);
+        if (existingPat == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Patient found with id: " + id, 404));
+        }
+        if (toUpdate.containsKey("firstName")) {
+            existingPat.setFirstName((String) toUpdate.get("firstName"));
+        }
+        if (toUpdate.containsKey("lastName")) {
+            existingPat.setLastName((String) toUpdate.get("lastName"));
+        }
+        if (toUpdate.containsKey("email")) {
+            existingPat.setEmail((String) toUpdate.get("email"));
+        }
+        patientService.updatePatientById(id, existingPat);
+        return ResponseEntity.ok(existingPat);
     }
 
 }
