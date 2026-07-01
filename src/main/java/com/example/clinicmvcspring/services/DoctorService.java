@@ -40,7 +40,15 @@ public class DoctorService {
         return repo.updateDoctorInDB(doc);
     }
 
-    public boolean updateDoctorById(int id,DoctorModel doc) {
-        return repo.updateDoctor(id,doc);
+    public boolean updateDoctorById(int id, DoctorModel doc) {
+        return repo.updateDoctor(id, doc);
+    }
+
+    public List<DoctorModel> getAllDoctors(int page, int size) {
+        return repo.findAllDoctors(page, size);
+    }
+
+    public int countDoctors() {
+        return repo.countDoctors();
     }
 }

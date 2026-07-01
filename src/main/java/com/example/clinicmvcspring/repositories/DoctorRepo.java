@@ -55,6 +55,25 @@ public class DoctorRepo {
                 rs.getString("specialty")));
     }
 
+    public List<DoctorModel> findAllDoctors(int page, int size) {
+        String sql = "SELECT * FROM doctors LIMIT ? OFFSET ?";
+        int offset = page * size;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new DoctorModel(
+                rs.getInt("id"),
+                rs.getString("first_name"),
+                rs.getString("last_name"),
+                rs.getString("email"),
+                rs.getDouble("salary"),
+                rs.getDate("hire_date"),
+                rs.getString("specialty")), size, offset);
+
+    }
+
+    public int countDoctors() {
+        String sql = "SELECT COUNT(*) FROM doctors";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
     public boolean deleteDoctorFromDB(DoctorModel docToDelete) {
         String sql = "DELETE FROM doctors WHERE id = ?";
         int rowsAffected = jdbcTemplate.update(sql, docToDelete.getId());
@@ -100,7 +119,7 @@ public class DoctorRepo {
         return rowsAffected > 0;
     }
 
-        public boolean updateDoctor(int id,DoctorModel doc) {
+    public boolean updateDoctor(int id, DoctorModel doc) {
         String sql = "UPDATE doctors SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email, salary = :salary, specialty = :specialty WHERE id = :id";
 

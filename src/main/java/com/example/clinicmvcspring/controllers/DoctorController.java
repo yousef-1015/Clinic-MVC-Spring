@@ -8,6 +8,7 @@ import com.example.clinicmvcspring.services.DoctorService;
 
 import jakarta.validation.Valid;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1/doctors")
@@ -31,10 +33,35 @@ public class DoctorController {
     }
 
     // Get all doctors as JSON
-    @GetMapping
-    public ResponseEntity<List<DoctorModel>> getDoctors() {
-        List<DoctorModel> allDocs = doctorService.getAllDoctors();
-        return ResponseEntity.ok(allDocs);
+    // @GetMapping
+    // public ResponseEntity<List<DoctorModel>> getDoctors() {
+    // List<DoctorModel> allDocs = doctorService.getAllDoctors();
+    // return ResponseEntity.ok(allDocs);
+    // }
+
+    @GetMapping("")
+    public ResponseEntity<?> getDoctors(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+
+        List<DoctorModel> allDocs = doctorService.getAllDoctors(page, size);
+        int total = doctorService.countDoctors();
+        int totalPages = (int) Math.ceil((double) total / size);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("data", allDocs);
+        response.put("currentPage", page);
+        response.put("pageSize", size);
+        response.put("totalDoctors", total);
+        response.put("totalPages", totalPages);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
@@ -114,7 +141,6 @@ public class DoctorController {
             existingDoc.setSalary(((Number) toUpdate.get("salary")).doubleValue());
         doctorService.updateDoctorById(id, existingDoc);
         return ResponseEntity.ok(existingDoc); // 200
-        // DuplicateKeyException → GlobalExceptionHandler ✅
     }
 
 }
