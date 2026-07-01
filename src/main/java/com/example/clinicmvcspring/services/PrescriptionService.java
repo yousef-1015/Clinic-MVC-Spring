@@ -45,4 +45,12 @@ public class PrescriptionService {
         return repo.getMedicationsForPrescription(prescriptionId);
     }
 
+    public List<Prescription> getAllPrescriptionsPaginated(int page, int size) {
+        return repo.findAllPagination(page, size);
+    }
+
+    public int count() {
+        return repo.count();
+    }
+
 }

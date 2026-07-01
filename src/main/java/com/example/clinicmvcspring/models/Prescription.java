@@ -3,11 +3,17 @@ package com.example.clinicmvcspring.models;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.validation.constraints.*;
+
 @JsonPropertyOrder({ "id", "prescriptionNotes", "appointmentId", "createdAt" })
 public class Prescription {
 
     private int id;
+
+    @Size(max = 200, message = "Prescription notes max size is 200 characters")
     private String prescriptionNotes;
+
     private int appointmentId;
     private Timestamp createdAt;
 

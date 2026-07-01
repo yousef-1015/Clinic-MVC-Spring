@@ -48,6 +48,17 @@ public class PrescriptionRepo {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
+    public List<Prescription> findAllPagination(int page, int size) {
+        String sql = "SELECT * FROM prescriptions LIMIT ? OFFSET ?";
+        int offset = page * size;
+        return jdbcTemplate.query(sql, rowMapper, size, offset);
+    }
+
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM prescriptions";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
     public Prescription getByID(int id) {
         String sql = "SELECT * FROM prescriptions WHERE id = ?";
         try {
