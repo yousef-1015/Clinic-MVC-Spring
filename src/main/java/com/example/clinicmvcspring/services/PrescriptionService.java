@@ -11,7 +11,7 @@ import com.example.clinicmvcspring.repositories.*;
 @Service
 public class PrescriptionService {
 
-    private PrescriptionRepo repo;
+    private final PrescriptionRepo repo;
 
     public PrescriptionService(PrescriptionRepo repo) {
         this.repo = repo;

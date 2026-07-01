@@ -10,7 +10,7 @@ import com.example.clinicmvcspring.repositories.*;
 @Service
 public class MedicationService {
 
-    private MedicationRepo repo;
+    private final MedicationRepo repo;
 
     public MedicationService(MedicationRepo repo) {
         this.repo = repo;

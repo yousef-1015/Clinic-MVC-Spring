@@ -9,7 +9,7 @@ import com.example.clinicmvcspring.repositories.*;
 
 @Service
 public class PatientService {
-    private PatientRepo repo;
+    private final PatientRepo repo;
 
     public PatientService(PatientRepo repo) {
         this.repo = repo;
