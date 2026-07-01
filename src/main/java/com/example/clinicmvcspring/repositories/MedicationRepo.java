@@ -41,7 +41,7 @@ public class MedicationRepo {
                 .addValue("medicationName", med.getMedicationName());
         int rowsAffected = namedJdbcTemplate.update(sql, params);
 
-        return rowsAffected > 0 ? true : false;
+        return rowsAffected > 0;
 
     }
 
@@ -51,14 +51,24 @@ public class MedicationRepo {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public Medication getByID(int id) {
+    public Medication findByID(int id) {
         String sql = "SELECT * FROM medications WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, id);
         } catch (EmptyResultDataAccessException e) {
-            System.out.print(e.getMessage());
             return null;
         }
+    }
+
+    public List<Medication> findAllPagination(int page, int size) {
+        String sql = "SELECT * FROM medications LIMIT ? OFFSET ?";
+        int offset = page * size;
+        return jdbcTemplate.query(sql, rowMapper, size, offset);
+    }
+
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM medications";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
     public boolean delete(Medication med) {

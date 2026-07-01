@@ -25,7 +25,7 @@ public class MedicationService {
     }
 
     public Medication getMedicationByID(int id) {
-        return repo.getByID(id);
+        return repo.findByID(id);
     }
 
     public boolean deleteMedication(Medication med) {
@@ -40,4 +40,11 @@ public class MedicationService {
         return repo.update(id, med);
     }
 
+    public List<Medication> getAllMedications(int page, int size) {
+        return repo.findAllPagination(page, size);
+    }
+
+    public int countMedications() {
+        return repo.count();
+    }
 }

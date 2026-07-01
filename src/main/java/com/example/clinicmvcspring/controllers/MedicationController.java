@@ -2,18 +2,23 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.models.Medication;
 import com.example.clinicmvcspring.services.MedicationService;
+
+import jakarta.validation.Valid;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,135 +32,98 @@ public class MedicationController {
         this.medicationService = medicationService;
     }
 
-   
-    @GetMapping
-    public List<Medication> getMedications() {
-        return medicationService.getAllMedications();
+    @GetMapping("")
+    public ResponseEntity<?> getMedications(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+
+        List<Medication> allMeds = medicationService.getAllMedications(page, size);
+        int total = medicationService.countMedications();
+        int totalPages = (int) Math.ceil((double) total / size);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("data", allMeds);
+        response.put("currentPage", page);
+        response.put("pageSize", size);
+        response.put("totalMedications", total);
+        response.put("totalPages", totalPages);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public Object getMedicationByID(@PathVariable int id) {
-        Map<String, Object> response = new LinkedHashMap<>();
-
-        try {
-            Medication med = medicationService.getMedicationByID(id);
-            if (med == null) {
-                response.put("message", "ERROR: Medication not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            return med;
-        } catch (Exception e) {
-            response.put("message", "ERROR searching for medication");
-            response.put("reason", e.getMessage());
-            return response;
+    public ResponseEntity<?> getMedicationByID(@PathVariable int id) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Medication med = medicationService.getMedicationByID(id);
+        if (med == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No medication found with id: " + id, 404));
+        }
+        return ResponseEntity.ok(med);
     }
 
     @PostMapping
-    public Map<String, Object> addNewMedication(@RequestBody Medication newMed) {
-        Map<String, Object> response = new LinkedHashMap<>();
-
-        try {
-            medicationService.addMedication(newMed);
-            response.put("message", "Medication added successfully !!!");
-            response.put("medicationName", newMed.getMedicationName());
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR adding medication");
-            response.put("Reason", e.getMessage());
-            return response;
-        }
+    public ResponseEntity<?> addNewMedication(@Valid @RequestBody Medication newMed) {
+        medicationService.addMedication(newMed);
+        return ResponseEntity.status(201).body(newMed);
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, Object> deleteMedication(@PathVariable int id) {
-        Map<String, Object> response = new LinkedHashMap<>();
-
-        try {
-            Medication med = medicationService.getMedicationByID(id);
-
-            if (med == null) {
-                response.put("message", "ERROR: Medication not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            boolean isDeleted = medicationService.deleteMedicationByID(id);
-
-            if (isDeleted == false) {
-                response.put("message", "ERROR: Medication was'nt Deleted");
-                response.put("idRequested", id);
-                return response;
-            }
-            response.put("message", "Medication Deleted Successfully !!!!");
-            response.put("idRequested", id);
-            response.put("deleted medication name", med.getMedicationName());
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR DELETING medication");
-            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("foreign key")) {
-                response.put("reason", "This medication is linked to active prescriptions and cannot be deleted");
-            } else {
-                response.put("reason", e.getMessage());
-            }
-            return response;
+    public ResponseEntity<?> deleteMedication(@PathVariable int id) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Medication med = medicationService.getMedicationByID(id);
+        if (med == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Medication found with id: " + id, 404));
+        }
+        medicationService.deleteMedicationByID(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateMedication(@PathVariable int id, @RequestBody Medication med) {
-        Map<String, Object> response = new LinkedHashMap<>();
-
-        try {
-            Medication existingMed = medicationService.getMedicationByID(id);
-
-            if (existingMed == null) {
-                response.put("message", "ERROR: Medication not found");
-                response.put("idRequested", id);
-                return response;
-            }
-
-            medicationService.updateMedicationById(id, med);
-
-            response.put("message", "Medication Updated Successfully !!!");
-            response.put("medicationName", med.getMedicationName());
-            response.put("created date", existingMed.getCreatedAt());
-
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR Updating medication");
-            response.put("Reason", e.getMessage());
-            return response;
+    public ResponseEntity<?> updateMedication(@PathVariable int id, @Valid @RequestBody Medication med) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Medication existingMed = medicationService.getMedicationByID(id);
+        if (existingMed == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Medication found with id: " + id, 404));
+        }
+        med.setId(id);
+        med.setCreatedAt(existingMed.getCreatedAt());
+        medicationService.updateMedicationById(id, med);
+        return ResponseEntity.ok(med);
     }
 
     @PatchMapping("/{id}")
-    public Map<String, Object> partialMedicationUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
-        Map<String, Object> response = new LinkedHashMap<>();
-
-        try {
-            Medication existingMed = medicationService.getMedicationByID(id);
-
-            if (existingMed == null) {
-                response.put("message", "ERROR: Medication not found");
-                response.put("idRequested", id);
-                return response;
-            }
-            if (toUpdate.containsKey("medicationName")) {
-                existingMed.setMedicationName((String) toUpdate.get("medicationName"));
-            }
-
-            medicationService.updateMedicationById(id, existingMed);
-
-            response.put("message", "Medication Updated Successfully !!!");
-            response.put("medicationName", existingMed.getMedicationName());
-            response.put("created date", existingMed.getCreatedAt());
-
-            return response;
-        } catch (Exception e) {
-            response.put("message", "ERROR Updating medication");
-            response.put("Reason", e.getMessage());
-            return response;
+    public ResponseEntity<?> partialMedicationUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
+        if (id <= 0) {
+            return ResponseEntity.status(400)
+                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
+        Medication existingMed = medicationService.getMedicationByID(id);
+        if (existingMed == null) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Medication found with id: " + id, 404));
+        }
+        if (toUpdate.containsKey("medicationName")) {
+            existingMed.setMedicationName((String) toUpdate.get("medicationName"));
+        }
+        medicationService.updateMedicationById(id, existingMed);
+        return ResponseEntity.ok(existingMed);
     }
 }
