@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.repositories;
 import java.util.List;
 
 import javax.sql.DataSource;
+import org.springframework.jdbc.core.RowMapper;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,6 +26,14 @@ public class DoctorRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
+    private final RowMapper<DoctorModel> rowMapper = (rs, rowNum) -> new DoctorModel(rs.getInt("id"),
+            rs.getString("first_name"),
+            rs.getString("last_name"),
+            rs.getString("email"),
+            rs.getDouble("salary"),
+            rs.getDate("hire_date"),
+            rs.getString("specialty"));
+
     public boolean insertANewDoctor(DoctorModel doc) {
         String sql = "INSERT INTO doctors (first_name, last_name, email, salary, specialty) " +
                 "VALUES (:firstName, :lastName, :email, :salary, :specialty)";
@@ -45,27 +54,13 @@ public class DoctorRepo {
     public List<DoctorModel> findAllDoctors() {
         String sql = "SELECT * FROM doctors";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new DoctorModel(
-                rs.getInt("id"),
-                rs.getString("first_name"),
-                rs.getString("last_name"),
-                rs.getString("email"),
-                rs.getDouble("salary"),
-                rs.getDate("hire_date"),
-                rs.getString("specialty")));
+        return jdbcTemplate.query(sql, rowMapper);
     }
 
     public List<DoctorModel> findAllDoctors(int page, int size) {
         String sql = "SELECT * FROM doctors LIMIT ? OFFSET ?";
         int offset = page * size;
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new DoctorModel(
-                rs.getInt("id"),
-                rs.getString("first_name"),
-                rs.getString("last_name"),
-                rs.getString("email"),
-                rs.getDouble("salary"),
-                rs.getDate("hire_date"),
-                rs.getString("specialty")), size, offset);
+        return jdbcTemplate.query(sql, rowMapper, size, offset);
 
     }
 
@@ -90,14 +85,8 @@ public class DoctorRepo {
         String sql = "SELECT * FROM doctors WHERE id = ?";
 
         try {
-            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new DoctorModel(
-                    rs.getInt("id"),
-                    rs.getString("first_name"),
-                    rs.getString("last_name"),
-                    rs.getString("email"),
-                    rs.getDouble("salary"),
-                    rs.getDate("hire_date"),
-                    rs.getString("specialty")), id);
+            return jdbcTemplate.queryForObject(sql, rowMapper, id);
+
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
