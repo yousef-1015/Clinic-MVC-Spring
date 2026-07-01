@@ -4,16 +4,35 @@ import java.sql.Date;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.validation.constraints.*;
+
 @JsonPropertyOrder({ "id", "firstName", "lastName", "email", "specialty", "hireDate" })
 public class DoctorModel {
 
     // attributes
     private int id;
+
+    @NotBlank(message = "First Name is Required")
+    @Size(max = 50,message = "First Name max size is 50 characters")
     private String firstName;
+
+    @NotBlank(message = "Last Name is Required")
+    @Size(max = 50,message = "Last Name max size is 50 characters")
     private String lastName;
+
+    @NotBlank(message = "Email is Required")
+    @Size(max = 100,message = "Email max size is 100 characters")
+    @Email(message = "Use Valid Email")
     private String email;
+
+    // decimal(6,2) in sql
+    @DecimalMin(value = "0.0", message = "Salary must be 0 or greater")
+    @Digits(integer = 4, fraction = 2, message = "Salary format: max 4 digits before decimal, 2 after ")
     private double salary;
     private Date hireDate;
+
+    @NotBlank(message = "Specialty is Required")
+    @Size(max = 50,message = "Specialty max size is 50 characters")
     private String specialty;
 
     // for creating
