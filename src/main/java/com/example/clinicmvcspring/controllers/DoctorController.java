@@ -2,13 +2,18 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.models.DoctorModel;
 import com.example.clinicmvcspring.services.DoctorService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,133 +34,110 @@ public class DoctorController {
 
     // Get all doctors as JSON
     @GetMapping
-    public List<DoctorModel> getDoctors() {
-        return doctorService.getAllDoctors();
+    public ResponseEntity<List<DoctorModel>> getDoctors() {
+        List<DoctorModel> allDocs = doctorService.getAllDoctors();
+        return ResponseEntity.ok(allDocs);
     }
 
     @GetMapping("/{id}")
-    public Object getDoctorByID(@PathVariable int id) {
-        Map<String, Object> response = new LinkedHashMap<>();
+    // ? not MODEL because we might return error Dto
+    public ResponseEntity<?> getDoctorByID(@PathVariable int id) {
 
-        DoctorModel doc = doctorService.getDoctorByID(id);
         try {
+            DoctorModel doc = doctorService.getDoctorByID(id);
             if (doc == null) {
-                response.put("message", "ERROR: Doctor not found");
-                response.put("idRequested", id);
-                return response;
+                ErrorResponseDTO error = new ErrorResponseDTO("No doctor found with id: " + id, 404);
+                return ResponseEntity.status(404).body(error);
             }
-            return doc;
+
+            return ResponseEntity.ok(doc);
         } catch (Exception e) {
-            response.put("message", "ERROR searching for doctor");
-            response.put("reason", e.getMessage());
-            return response;
+            ErrorResponseDTO error = new ErrorResponseDTO(
+                    "Error Finding doctor: " + e.getMessage(), 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
 
     }
 
     @PostMapping
-    public Map<String, Object> addNewDoctor(@RequestBody DoctorModel newDoc) {
-        // json res
-        Map<String, Object> response = new LinkedHashMap<>();
+    public ResponseEntity<?> addNewDoctor(@RequestBody DoctorModel newDoc) {
 
         try {
             doctorService.addDoctor(newDoc);
-            response.put("message", "Doctor added successfully !!!");
-            response.put("firstName", newDoc.getFirstName());
-            response.put("lastName", newDoc.getLastName());
-            return response;
+            return ResponseEntity.status(201).body(newDoc);
+        } catch (DuplicateKeyException e) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Email already used: " + newDoc.getEmail(), 409);
+            return ResponseEntity.status(409).body(error);
         } catch (Exception e) {
-            response.put("message", "ERROR adding doctor");
-            response.put("Reason", e.getMessage());
-
-            return response;
-
+            ErrorResponseDTO error = new ErrorResponseDTO(
+                    "Error adding doctor: " + e.getMessage(), 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
 
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, Object> deleteDoctor(@PathVariable int id) {
-        Map<String, Object> response = new LinkedHashMap<>();
+    public ResponseEntity<?> deleteDoctor(@PathVariable int id) {
 
         try {
             DoctorModel doc = doctorService.getDoctorByID(id);
-
             if (doc == null) {
-                response.put("message", "ERROR: Doctor not found");
-                response.put("idRequested", id);
-                return response;
+                ErrorResponseDTO error = new ErrorResponseDTO("No Doctor found with id: " + id, 404);
+                return ResponseEntity.status(404).body(error); // 404
             }
-            boolean isDeleted = doctorService.deleteDoctorByID(id);
 
-            if (isDeleted == false) {
-                response.put("message", "ERROR: Doctor was'nt Deleted");
-                response.put("idRequested", id);
-                return response;
-            }
-            response.put("message", "Doctor Deleted Successfully !!!!");
-            response.put("idRequested", id);
-            response.put("deleted doctor name", doc.getFirstName() + " " + doc.getLastName());
-            return response;
+            doctorService.deleteDoctorByID(id);
+            return ResponseEntity.noContent().build(); // 204
+        } catch (DataIntegrityViolationException e) { // Violating DB constraint
+            // Doctor has appointments
+            ErrorResponseDTO error = new ErrorResponseDTO("Cannot delete: doctor has appointments", 409);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error); // 409
         } catch (Exception e) {
-            response.put("message", "ERROR DELETING doctor");
-            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("foreign key")) {
-                response.put("reason", "This doctor has active appointments and cannot be deleted");
-            } else {
-                response.put("reason", e.getMessage());
-            }
-            return response;
+            ErrorResponseDTO error = new ErrorResponseDTO(
+                    "Error deleting doctor: " + e.getMessage(), 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
 
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateDoctor(@PathVariable int id, @RequestBody DoctorModel doc) {
-        Map<String, Object> response = new LinkedHashMap<>();
+    public ResponseEntity<?> updateDoctor(@PathVariable int id, @RequestBody DoctorModel doc) {
 
         try {
 
             DoctorModel existingDoc = doctorService.getDoctorByID(id);
-
             if (existingDoc == null) {
-                response.put("message", "ERROR: Doctor not found");
-                response.put("idRequested", id);
-                return response;
+                ErrorResponseDTO error = new ErrorResponseDTO("No Doctor found with id: " + id, 404);
+                return ResponseEntity.status(404).body(error); // 404
             }
+
+            doc.setId(id);
+            doc.setHireDate(existingDoc.getHireDate());
             doctorService.updateDoctorById(id, doc);
-            response.put("message", "Doctor Updated Successfully !!!");
-            response.put("firstName", doc.getFirstName());
-            response.put("lastName", doc.getLastName());
-            response.put("email", doc.getEmail());
-            response.put("salary", doc.getSalary());
-            response.put("specialty", doc.getSpecialty());
-            response.put("hire date", doc.getHireDate());
-            response.put("hire date", existingDoc.getHireDate());
+            return ResponseEntity.ok(doc); // 200
 
-            return response;
+        } catch (DuplicateKeyException e) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Email already used: " + doc.getEmail(), 409);
+            return ResponseEntity.status(409).body(error);
         } catch (Exception e) {
-            response.put("message", "ERROR Updating doctor");
-            response.put("Reason", e.getMessage());
-
-            return response;
-
+            ErrorResponseDTO error = new ErrorResponseDTO(
+                    "Error Updating doctor: " + e.getMessage(), 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
 
     }
 
     @PatchMapping("/{id}")
-    public Map<String, Object> partialDocUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
-        Map<String, Object> response = new LinkedHashMap<>();
+    public ResponseEntity<?> partialDocUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
 
         try {
 
             DoctorModel existingDoc = doctorService.getDoctorByID(id);
-
             if (existingDoc == null) {
-                response.put("message", "ERROR: Doctor not found");
-                response.put("idRequested", id);
-                return response;
+                ErrorResponseDTO error = new ErrorResponseDTO("No Doctor found with id: " + id, 404);
+                return ResponseEntity.status(404).body(error); // 404
             }
+
             if (toUpdate.containsKey("firstName")) {
                 existingDoc.setFirstName((String) toUpdate.get("firstName"));
             }
@@ -174,23 +156,18 @@ public class DoctorController {
             }
 
             doctorService.updateDoctorById(id, existingDoc);
-            response.put("message", "Doctor Updated Successfully !!!");
+            return ResponseEntity.ok(existingDoc); // 200
 
-            response.put("lastName", existingDoc.getLastName());
-            response.put("email", existingDoc.getEmail());
-            response.put("salary", existingDoc.getSalary());
-            response.put("specialty", existingDoc.getSpecialty());
-            response.put("hire date", existingDoc.getHireDate());
-            response.put("hire date", existingDoc.getHireDate());
-
-            return response;
+        
+        } catch (DuplicateKeyException e) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Email already used: ", 409);
+            return ResponseEntity.status(409).body(error);
         } catch (Exception e) {
-            response.put("message", "ERROR Updating doctor");
-            response.put("Reason", e.getMessage());
-
-            return response;
-
+            ErrorResponseDTO error = new ErrorResponseDTO(
+                    "Error Updating doctor: " + e.getMessage(), 500);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
+
     }
 
 }
