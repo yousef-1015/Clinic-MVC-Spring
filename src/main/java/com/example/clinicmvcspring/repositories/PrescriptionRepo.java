@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
@@ -33,14 +35,15 @@ public class PrescriptionRepo {
             res.getInt("appointment_id"),
             res.getTimestamp("created_at"));
 
-    public boolean insert(Prescription pres) {
+    public int insert(Prescription pres) {
         String sql = "INSERT INTO prescriptions (prescription_notes, appointment_id) " +
                 "VALUES (:prescriptionNotes, :appointmentId)";
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("prescriptionNotes", pres.getPrescriptionNotes())
                 .addValue("appointmentId", pres.getAppointmentId());
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedJdbcTemplate.update(sql, params, keyHolder);
+        return keyHolder.getKey().intValue();
     }
 
     public List<Prescription> findAll() {
@@ -68,19 +71,19 @@ public class PrescriptionRepo {
         }
     }
 
-    public boolean delete(Prescription pres) {
+    public int delete(Prescription pres) {
         String sql = "DELETE FROM prescriptions WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, pres.getId());
-        return rowsAffected > 0;
+        jdbcTemplate.update(sql, pres.getId());
+        return pres.getId();
     }
 
-    public boolean delete(int id) {
+    public int delete(int id) {
         String sql = "DELETE FROM prescriptions WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
-        return rowsAffected > 0;
+        jdbcTemplate.update(sql, id);
+        return id;
     }
 
-    public boolean update(int id, Prescription pres) {
+    public int update(int id, Prescription pres) {
         String sql = "UPDATE prescriptions SET prescription_notes = :prescriptionNotes, " +
                 "appointment_id = :appointmentId WHERE id = :id";
 
@@ -89,8 +92,8 @@ public class PrescriptionRepo {
                 .addValue("appointmentId", pres.getAppointmentId())
                 .addValue("id", id);
 
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+        namedJdbcTemplate.update(sql, params);
+        return id;
     }
 
     public List<PrescriptionMedicationDTO> getMedicationsForPrescription(int prescriptionId) {

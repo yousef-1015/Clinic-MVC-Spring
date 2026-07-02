@@ -80,7 +80,8 @@ public class PrescriptionController {
     @PostMapping
     public ResponseEntity<?> addNewPrescription(@Valid @RequestBody Prescription newPres) {
 
-        prescriptionService.addPrescription(newPres);
+        int newID =prescriptionService.addPrescription(newPres);
+        newPres.setId(newID);
         return ResponseEntity.status(201).body(newPres);
 
     }
