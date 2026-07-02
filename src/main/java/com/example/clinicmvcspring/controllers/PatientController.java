@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -58,12 +59,12 @@ public class PatientController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Patient pat = patientService.getPatientByID(id);
-        if (pat == null) {
+        Optional<Patient> pat = patientService.getPatientByID(id);
+        if (pat.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No patient found with id: " + id, 404));
         }
-        return ResponseEntity.ok(pat);
+        return ResponseEntity.ok(pat.get());
     }
 
     @PostMapping
@@ -80,8 +81,8 @@ public class PatientController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Patient pat = patientService.getPatientByID(id);
-        if (pat == null) {
+        Optional<Patient> pat = patientService.getPatientByID(id);
+        if (pat.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Patient found with id: " + id, 404));
         }
@@ -95,13 +96,13 @@ public class PatientController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Patient existingPat = patientService.getPatientByID(id);
-        if (existingPat == null) {
+        Optional<Patient> existingPat = patientService.getPatientByID(id);
+        if (existingPat.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Patient found with id: " + id, 404));
         }
         pat.setId(id);
-        pat.setCreatedAt(existingPat.getCreatedAt());
+        pat.setCreatedAt(existingPat.get().getCreatedAt());
         patientService.updatePatientById(id, pat);
         return ResponseEntity.ok(pat);
     }
@@ -112,22 +113,22 @@ public class PatientController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Patient existingPat = patientService.getPatientByID(id);
-        if (existingPat == null) {
+        Optional<Patient> existingPat = patientService.getPatientByID(id);
+        if (existingPat.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Patient found with id: " + id, 404));
         }
         if (toUpdate.containsKey("firstName")) {
-            existingPat.setFirstName((String) toUpdate.get("firstName"));
+            existingPat.get().setFirstName((String) toUpdate.get("firstName"));
         }
         if (toUpdate.containsKey("lastName")) {
-            existingPat.setLastName((String) toUpdate.get("lastName"));
+            existingPat.get().setLastName((String) toUpdate.get("lastName"));
         }
         if (toUpdate.containsKey("email")) {
-            existingPat.setEmail((String) toUpdate.get("email"));
+            existingPat.get().setEmail((String) toUpdate.get("email"));
         }
-        patientService.updatePatientById(id, existingPat);
-        return ResponseEntity.ok(existingPat);
+        patientService.updatePatientById(id, existingPat.get());
+        return ResponseEntity.ok(existingPat.get());
     }
 
 }
