@@ -2,6 +2,8 @@ package com.example.clinicmvcspring.exceptions;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 // cathc exceptions for all rest controllers
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     // Catches @Valid
@@ -40,7 +43,10 @@ public class GlobalExceptionHandler {
     // Server error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneral(Exception e) {
-        ErrorResponseDTO error = new ErrorResponseDTO("Unexpected error: " + e.getMessage(), 500);
+
+        log.error("Unexpected server error occurred", e);// from the @Slf4j in the lombok library
+
+        ErrorResponseDTO error = new ErrorResponseDTO("Internal Server Error", 500);
         return ResponseEntity.status(500).body(error);
     }
 }
