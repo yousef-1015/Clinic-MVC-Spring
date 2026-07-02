@@ -3,12 +3,13 @@ package com.example.clinicmvcspring.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+import com.example.clinicmvcspring.dtos.PaginatedListDto;
 import com.example.clinicmvcspring.models.Medication;
 import com.example.clinicmvcspring.services.MedicationService;
 
 import jakarta.validation.Valid;
 
-import java.util.LinkedHashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -47,13 +48,7 @@ public class MedicationController {
 
         List<Medication> allMeds = medicationService.getAllMedications(page, size);
         int total = medicationService.countMedications();
-        int totalPages = (int) Math.ceil((double) total / size);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("data", allMeds);
-        response.put("currentPage", page);
-        response.put("pageSize", size);
-        response.put("totalMedications", total);
-        response.put("totalPages", totalPages);
+        PaginatedListDto<Medication> response = new PaginatedListDto<>(allMeds, page, size, total);
         return ResponseEntity.ok(response);
     }
 

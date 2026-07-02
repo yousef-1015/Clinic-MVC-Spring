@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+import com.example.clinicmvcspring.dtos.PaginatedListDto;
+
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,13 +49,7 @@ public class PrescriptionController {
         }
         List<Prescription> prescriptions = prescriptionService.getAllPrescriptionsPaginated(page, size);
         int total = prescriptionService.count();
-        int totalPages = (int) Math.ceil((double) total / size);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("data", prescriptions);
-        response.put("currentPage", page);
-        response.put("pageSize", size);
-        response.put("totalPrescriptions", total);
-        response.put("totalPages", totalPages);
+        PaginatedListDto<Prescription> response = new PaginatedListDto<>(prescriptions, page, size, total);
         return ResponseEntity.ok(response);
     }
 

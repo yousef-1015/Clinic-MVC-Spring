@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+import com.example.clinicmvcspring.dtos.PaginatedListDto;
 import com.example.clinicmvcspring.models.Appointment;
 import com.example.clinicmvcspring.models.AppointmentStatus;
 import com.example.clinicmvcspring.services.AppointmentService;
@@ -10,7 +11,6 @@ import com.example.clinicmvcspring.services.AppointmentService;
 import jakarta.validation.Valid;
 
 import java.sql.Timestamp;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,13 +47,7 @@ public class AppointmentController {
         }
         List<Appointment> allApps = appointmentService.getAllAppointments(page, size);
         int total = appointmentService.countAppointments();
-        int totalPages = (int) Math.ceil((double) total / size);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("data", allApps);
-        response.put("currentPage", page);
-        response.put("pageSize", size);
-        response.put("totalAppointments", total);
-        response.put("totalPages", totalPages);
+        PaginatedListDto<Appointment> response = new PaginatedListDto<>(allApps, page, size, total);
         return ResponseEntity.ok(response);
     }
 

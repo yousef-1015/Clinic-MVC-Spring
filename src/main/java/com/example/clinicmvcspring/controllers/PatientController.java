@@ -5,12 +5,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+import com.example.clinicmvcspring.dtos.PaginatedListDto;
 import com.example.clinicmvcspring.models.Patient;
 import com.example.clinicmvcspring.services.PatientService;
 
 import jakarta.validation.Valid;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,13 +48,7 @@ public class PatientController {
 
         List<Patient> allPatients = patientService.getAllPatients(page, size);
         int total = patientService.countPatients();
-        int totalPages = (int) Math.ceil((double) total / size);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("data", allPatients);
-        response.put("currentPage", page);
-        response.put("pageSize", size);
-        response.put("totalPatients", total);
-        response.put("totalPages", totalPages);
+        PaginatedListDto<Patient> response = new PaginatedListDto<>(allPatients, page, size, total);
         return ResponseEntity.ok(response);
     }
 
