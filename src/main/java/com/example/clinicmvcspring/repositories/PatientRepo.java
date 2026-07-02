@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.example.clinicmvcspring.models.Patient;
@@ -35,15 +37,18 @@ public class PatientRepo {
         return pat;
     };
 
-    public boolean insert(Patient newPatient) {
+    public int insert(Patient newPatient) {
         String sql = "INSERT INTO patients (first_name, last_name, email) " +
                 "VALUES (:firstName, :lastName, :email)";
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("firstName", newPatient.getFirstName())
                 .addValue("lastName", newPatient.getLastName())
                 .addValue("email", newPatient.getEmail());
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedJdbcTemplate.update(sql, params, keyHolder);
+        return keyHolder.getKey().intValue();
+
     }
 
     public List<Patient> getAll() {
@@ -71,19 +76,19 @@ public class PatientRepo {
         }
     }
 
-    public boolean delete(Patient pat) {
+    public int delete(Patient pat) {
         String sql = "DELETE FROM patients WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, pat.getId());
-        return rowsAffected > 0;
+        jdbcTemplate.update(sql, pat.getId());
+        return pat.getId();
     }
 
-    public boolean delete(int id) {
+    public int delete(int id) {
         String sql = "DELETE FROM patients WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
-        return rowsAffected > 0;
+        jdbcTemplate.update(sql, id);
+        return id;
     }
 
-    public boolean update(int id, Patient pat) {
+    public int update(int id, Patient pat) {
         String sql = "UPDATE patients SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email WHERE id = :id";
 
@@ -93,8 +98,8 @@ public class PatientRepo {
                 .addValue("email", pat.getEmail())
                 .addValue("id", id);
 
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+        namedJdbcTemplate.update(sql, params);
+        return id;
     }
 
 }

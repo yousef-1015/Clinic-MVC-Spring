@@ -15,7 +15,7 @@ public class PatientService {
         this.repo = repo;
     }
 
-    public boolean addPatient(Patient newPatient) {
+    public int addPatient(Patient newPatient) {
         return repo.insert(newPatient);// the job lies on the repo to access the DB
     }
 
@@ -23,7 +23,7 @@ public class PatientService {
         return repo.getAll();// the job lies on the repo to access the DB
     }
 
-    public boolean deletePatient(Patient pat) {
+    public int deletePatient(Patient pat) {
         return repo.delete(pat);
     }
 
@@ -31,11 +31,11 @@ public class PatientService {
         return repo.getByID(id);
     }
 
-    public boolean deletePatientByID(int id) {
+    public int deletePatientByID(int id) {
         return repo.delete(id);
     }
 
-    public boolean updatePatientById(int id, Patient pat) {
+    public int updatePatientById(int id, Patient pat) {
         return repo.update(id, pat);
     }
 

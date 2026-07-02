@@ -68,7 +68,9 @@ public class PatientController {
 
     @PostMapping
     public ResponseEntity<?> addNewPatient(@Valid @RequestBody Patient newPatient) {
-        patientService.addPatient(newPatient);
+        int newId = patientService.addPatient(newPatient);
+        newPatient.setId(newId);
+
         return ResponseEntity.status(201).body(newPatient);
     }
 
