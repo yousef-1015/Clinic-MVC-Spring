@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.RowMapper;
@@ -57,12 +58,12 @@ public class MedicationRepo {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public Medication findByID(int id) {
+    public Optional<Medication> findByID(int id) {
         String sql = "SELECT * FROM medications WHERE id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, rowMapper, id);
+            return Optional.of( jdbcTemplate.queryForObject(sql, rowMapper, id));
         } catch (EmptyResultDataAccessException e) {
-            return null;
+            return Optional.empty();
         }
     }
 

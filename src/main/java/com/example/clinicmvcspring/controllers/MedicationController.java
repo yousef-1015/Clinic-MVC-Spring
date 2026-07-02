@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -58,12 +59,12 @@ public class MedicationController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Medication med = medicationService.getMedicationByID(id);
-        if (med == null) {
+        Optional<Medication> med = medicationService.getMedicationByID(id);
+        if (med.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No medication found with id: " + id, 404));
         }
-        return ResponseEntity.ok(med);
+        return ResponseEntity.ok(med.get());
     }
 
     @PostMapping
@@ -79,8 +80,8 @@ public class MedicationController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Medication med = medicationService.getMedicationByID(id);
-        if (med == null) {
+        Optional<Medication> med = medicationService.getMedicationByID(id);
+        if (med.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Medication found with id: " + id, 404));
         }
@@ -94,13 +95,13 @@ public class MedicationController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Medication existingMed = medicationService.getMedicationByID(id);
-        if (existingMed == null) {
+        Optional<Medication> existingMed = medicationService.getMedicationByID(id);
+        if (existingMed.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Medication found with id: " + id, 404));
         }
         med.setId(id);
-        med.setCreatedAt(existingMed.getCreatedAt());
+        med.setCreatedAt(existingMed.get().getCreatedAt());
         medicationService.updateMedicationById(id, med);
         return ResponseEntity.ok(med);
     }
@@ -111,15 +112,15 @@ public class MedicationController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Medication existingMed = medicationService.getMedicationByID(id);
-        if (existingMed == null) {
+        Optional<Medication> existingMed = medicationService.getMedicationByID(id);
+        if (existingMed.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Medication found with id: " + id, 404));
         }
         if (toUpdate.containsKey("medicationName")) {
-            existingMed.setMedicationName((String) toUpdate.get("medicationName"));
+            existingMed.get().setMedicationName((String) toUpdate.get("medicationName"));
         }
-        medicationService.updateMedicationById(id, existingMed);
-        return ResponseEntity.ok(existingMed);
+        medicationService.updateMedicationById(id, existingMed.get());
+        return ResponseEntity.ok(existingMed.get());
     }
 }
