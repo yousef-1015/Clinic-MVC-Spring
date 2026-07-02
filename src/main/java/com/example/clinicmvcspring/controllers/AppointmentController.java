@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -57,13 +58,13 @@ public class AppointmentController {
             return ResponseEntity.status(400).body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
 
-        Appointment app = appointmentService.getAppointmentByID(id);
-        if (app == null) {
+        Optional<Appointment> app = appointmentService.getAppointmentByID(id);
+        if (app.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No appointment found with id: " + id, 404));
         }
 
-        return ResponseEntity.ok(app);
+        return ResponseEntity.ok(app.get());
 
     }
 
@@ -82,9 +83,9 @@ public class AppointmentController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Appointment app = appointmentService.getAppointmentByID(id);
+        Optional<Appointment> app = appointmentService.getAppointmentByID(id);
 
-        if (app == null) {
+        if (app.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Appointment found with id: " + id, 404));
         }
@@ -98,15 +99,15 @@ public class AppointmentController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Appointment existingApp = appointmentService.getAppointmentByID(id);
+        Optional<Appointment> existingApp = appointmentService.getAppointmentByID(id);
 
-        if (existingApp == null) {
+        if (existingApp.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Appointment found with id: " + id, 404));
         }
 
         app.setId(id);
-        app.setCreatedAt(existingApp.getCreatedAt());
+        app.setCreatedAt(existingApp.get().getCreatedAt());
         appointmentService.updateAppointmentById(id, app);
         return ResponseEntity.ok(app);
 
@@ -119,31 +120,31 @@ public class AppointmentController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Appointment existingApp = appointmentService.getAppointmentByID(id);
+        Optional<Appointment> existingApp = appointmentService.getAppointmentByID(id);
 
-        if (existingApp == null) {
+        if (existingApp.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Appointment found with id: " + id, 404));
         }
 
         if (toUpdate.containsKey("dateAndTime")) {
             String dtStr = (String) toUpdate.get("dateAndTime");
-            existingApp.setDateAndTime(Timestamp.valueOf(dtStr));
+            existingApp.get().setDateAndTime(Timestamp.valueOf(dtStr));
         }
 
         if (toUpdate.containsKey("patientId")) {
-            existingApp.setPatientId(((Number) toUpdate.get("patientId")).intValue());
+            existingApp.get().setPatientId(((Number) toUpdate.get("patientId")).intValue());
         }
         if (toUpdate.containsKey("doctorId")) {
-            existingApp.setDoctorId(((Number) toUpdate.get("doctorId")).intValue());
+            existingApp.get().setDoctorId(((Number) toUpdate.get("doctorId")).intValue());
         }
         if (toUpdate.containsKey("status")) {
-            existingApp.setStatus(AppointmentStatus.valueOf((String) toUpdate.get("status")));
+            existingApp.get().setStatus(AppointmentStatus.valueOf((String) toUpdate.get("status")));
         }
 
-        appointmentService.updateAppointmentById(id, existingApp);
+        appointmentService.updateAppointmentById(id, existingApp.get());
 
-        return ResponseEntity.ok(existingApp);
+        return ResponseEntity.ok(existingApp.get());
 
     }
 }
