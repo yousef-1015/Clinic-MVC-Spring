@@ -17,7 +17,7 @@ public class AppointmentService {
         this.repo = repo;
     }
 
-    public boolean addAppointment(Appointment app) {
+    public int addAppointment(Appointment app) {
         return repo.insert(app);
     }
 
@@ -29,15 +29,15 @@ public class AppointmentService {
         return repo.findByID(id);
     }
 
-    public boolean deleteAppointment(Appointment app) {
+    public int deleteAppointment(Appointment app) {
         return repo.delete(app);
     }
 
-    public boolean deleteAppointmentByID(int id) {
+    public int deleteAppointmentByID(int id) {
         return repo.delete(id);
     }
 
-    public boolean updateAppointmentById(int id, Appointment app) {
+    public int updateAppointmentById(int id, Appointment app) {
         return repo.update(id, app);
     }
 

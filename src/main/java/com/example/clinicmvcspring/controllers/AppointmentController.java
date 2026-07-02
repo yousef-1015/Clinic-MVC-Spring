@@ -70,7 +70,8 @@ public class AppointmentController {
     @PostMapping
     public ResponseEntity<?> addNewAppointment(@Valid @RequestBody Appointment newApp) {
 
-        appointmentService.addAppointment(newApp);
+        int newId = appointmentService.addAppointment(newApp);
+        newApp.setId(newId);
         return ResponseEntity.status(201).body(newApp);
 
     }
