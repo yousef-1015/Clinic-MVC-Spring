@@ -3,7 +3,7 @@ package com.example.clinicmvcspring.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-import com.example.clinicmvcspring.dtos.PaginatedListDto;
+import com.example.clinicmvcspring.dtos.PaginatedListDTO;
 import com.example.clinicmvcspring.models.Medication;
 import com.example.clinicmvcspring.services.MedicationService;
 
@@ -49,7 +49,7 @@ public class MedicationController {
 
         List<Medication> allMeds = medicationService.getAllMedications(page, size);
         int total = medicationService.countMedications();
-        PaginatedListDto<Medication> response = new PaginatedListDto<>(allMeds, page, size, total);
+        PaginatedListDTO<Medication> response = new PaginatedListDTO<>(allMeds, page, size, total);
         return ResponseEntity.ok(response);
     }
 

@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-import com.example.clinicmvcspring.dtos.PaginatedListDto;
+import com.example.clinicmvcspring.dtos.PaginatedListDTO;
 import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
 
 import jakarta.validation.Valid;
@@ -50,7 +50,7 @@ public class PrescriptionController {
         }
         List<Prescription> prescriptions = prescriptionService.getAllPrescriptionsPaginated(page, size);
         int total = prescriptionService.count();
-        PaginatedListDto<Prescription> response = new PaginatedListDto<>(prescriptions, page, size, total);
+        PaginatedListDTO<Prescription> response = new PaginatedListDTO<>(prescriptions, page, size, total);
         return ResponseEntity.ok(response);
     }
 

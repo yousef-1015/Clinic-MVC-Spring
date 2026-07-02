@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-import com.example.clinicmvcspring.dtos.PaginatedListDto;
+import com.example.clinicmvcspring.dtos.PaginatedListDTO;
 import com.example.clinicmvcspring.models.Patient;
 import com.example.clinicmvcspring.services.PatientService;
 
@@ -49,7 +49,7 @@ public class PatientController {
 
         List<Patient> allPatients = patientService.getAllPatients(page, size);
         int total = patientService.countPatients();
-        PaginatedListDto<Patient> response = new PaginatedListDto<>(allPatients, page, size, total);
+        PaginatedListDTO<Patient> response = new PaginatedListDTO<>(allPatients, page, size, total);
         return ResponseEntity.ok(response);
     }
 

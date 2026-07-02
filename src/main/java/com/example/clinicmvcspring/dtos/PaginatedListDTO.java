@@ -2,7 +2,7 @@ package com.example.clinicmvcspring.dtos;
 
 import java.util.List;
 
-public class PaginatedListDto<T> {
+public class PaginatedListDTO<T> {
 
     private int currentPage;
     private int pageSize;
@@ -10,7 +10,7 @@ public class PaginatedListDto<T> {
     private int totalPages;
     private int totalItems;
 
-    public PaginatedListDto(List<T> data, int currentPage, int pageSize, int totalItems) {
+    public PaginatedListDTO(List<T> data, int currentPage, int pageSize, int totalItems) {
         this.data = data;
         this.currentPage = currentPage;
         this.pageSize = pageSize;
