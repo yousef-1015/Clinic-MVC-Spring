@@ -51,12 +51,12 @@ public class PrescriptionRepo {
     }
 
     public List<Prescription> findAll() {
-        String sql = "SELECT * FROM prescriptions";
+        String sql = "SELECT * FROM prescriptions ORDER BY id";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
     public List<Prescription> findAllPagination(int page, int size) {
-        String sql = "SELECT * FROM prescriptions LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM prescriptions ORDER BY id LIMIT ? OFFSET ?";
         int offset = page * size;
         return jdbcTemplate.query(sql, rowMapper, size, offset);
     }

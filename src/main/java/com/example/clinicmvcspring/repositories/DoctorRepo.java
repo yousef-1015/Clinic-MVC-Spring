@@ -56,13 +56,13 @@ public class DoctorRepo {
     }
 
     public List<Doctor> findAll() {
-        String sql = "SELECT * FROM doctors";
+        String sql = "SELECT * FROM doctors ORDER BY id";
 
         return jdbcTemplate.query(sql, rowMapper);
     }
 
     public List<Doctor> findAllPagination(int page, int size) {
-        String sql = "SELECT * FROM doctors LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM doctors ORDER BY id LIMIT ? OFFSET ?";
         int offset = page * size;
         return jdbcTemplate.query(sql, rowMapper, size, offset);
 

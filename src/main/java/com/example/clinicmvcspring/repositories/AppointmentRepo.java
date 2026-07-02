@@ -58,12 +58,12 @@ public class AppointmentRepo {
     }
 
     public List<Appointment> findAll() {
-        String sql = "SELECT * FROM appointments";
+        String sql = "SELECT * FROM appointments ORDER BY id";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
     public List<Appointment> findAllPagination(int page, int size) {
-        String sql = "SELECT * FROM appointments LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM appointments ORDER BY id LIMIT ? OFFSET ?";
         int offset = page * size;
         return jdbcTemplate.query(sql, rowMapper, size, offset);
     }
