@@ -74,7 +74,8 @@ public class DoctorController {
 
     @PostMapping
     public ResponseEntity<?> addNewDoctor(@Valid @RequestBody Doctor newDoc) {
-        doctorService.addDoctor(newDoc);
+        int newID = doctorService.addDoctor(newDoc);
+        newDoc.setId(newID);
         return ResponseEntity.status(201).body(newDoc); // 201
 
     }

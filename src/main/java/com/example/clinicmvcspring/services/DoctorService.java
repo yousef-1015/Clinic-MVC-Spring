@@ -16,7 +16,7 @@ public class DoctorService {
         this.repo = repo;
     }
 
-    public boolean addDoctor(Doctor newDoctor) {
+    public int addDoctor(Doctor newDoctor) {
         return repo.insert(newDoctor);// the job lies on the repo to access the DB
     }
 
@@ -24,23 +24,23 @@ public class DoctorService {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
-    public boolean deleteDoctor(Doctor docToDelete) {
-        return repo.deleteObj(docToDelete);
+    public int deleteDoctor(Doctor docToDelete) {
+        return repo.delete(docToDelete);
     }
 
     public Doctor getDoctorByID(int id) {
         return repo.findByID(id);
     }
 
-    public boolean deleteDoctorByID(int id) {
+    public int deleteDoctorByID(int id) {
         return repo.delete(id);
     }
 
-    public boolean updateDoctor(Doctor doc) {
-        return repo.updateObj(doc);
+    public int updateDoctor(Doctor doc) {
+        return repo.update(doc);
     }
 
-    public boolean updateDoctorById(int id, Doctor doc) {
+    public int updateDoctorById(int id, Doctor doc) {
         return repo.update(id, doc);
     }
 

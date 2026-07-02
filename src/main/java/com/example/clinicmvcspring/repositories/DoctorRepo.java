@@ -9,6 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.example.clinicmvcspring.models.Doctor;
@@ -34,7 +36,7 @@ public class DoctorRepo {
             rs.getDate("hire_date"),
             rs.getString("specialty"));
 
-    public boolean insert(Doctor doc) {
+    public int insert(Doctor doc) {
         String sql = "INSERT INTO doctors (first_name, last_name, email, salary, specialty) " +
                 "VALUES (:firstName, :lastName, :email, :salary, :specialty)";
 
@@ -45,10 +47,9 @@ public class DoctorRepo {
                 .addValue("salary", doc.getSalary())
                 .addValue("specialty", doc.getSpecialty());
 
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        // execute query, map the args, return num of rows changes
-
-        return rowsAffected > 0;
+        KeyHolder keyHolder = new GeneratedKeyHolder(); // from spring to hold ID generated fro DB
+        namedJdbcTemplate.update(sql, params, keyHolder);
+        return keyHolder.getKey().intValue(); // GETS THE PRIMARY KEY
     }
 
     public List<Doctor> findAll() {
@@ -69,16 +70,16 @@ public class DoctorRepo {
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
-    public boolean deleteObj(Doctor docToDelete) {
+    public int delete(Doctor docToDelete) {
         String sql = "DELETE FROM doctors WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, docToDelete.getId());
-        return rowsAffected > 0;
+        jdbcTemplate.update(sql, docToDelete.getId());
+        return docToDelete.getId();
     }
 
-    public boolean delete(int id) {
+    public int delete(int id) {
         String sql = "DELETE FROM doctors WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
-        return rowsAffected > 0;
+        jdbcTemplate.update(sql, id);
+        return id;
     }
 
     public Doctor findByID(int id) {
@@ -92,7 +93,7 @@ public class DoctorRepo {
         }
     }
 
-    public boolean updateObj(Doctor doc) {
+    public int update(Doctor doc) {
         String sql = "UPDATE doctors SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email, salary = :salary, specialty = :specialty WHERE id = :id";
 
@@ -104,11 +105,11 @@ public class DoctorRepo {
                 .addValue("specialty", doc.getSpecialty())
                 .addValue("id", doc.getId());
 
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+        namedJdbcTemplate.update(sql, params);
+        return doc.getId();
     }
 
-    public boolean update(int id, Doctor doc) {
+    public int update(int id, Doctor doc) {
         String sql = "UPDATE doctors SET first_name = :firstName, last_name = :lastName, " +
                 "email = :email, salary = :salary, specialty = :specialty WHERE id = :id";
 
@@ -120,8 +121,8 @@ public class DoctorRepo {
                 .addValue("specialty", doc.getSpecialty())
                 .addValue("id", id);
 
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+        namedJdbcTemplate.update(sql, params);
+        return id;
     }
 
 }
