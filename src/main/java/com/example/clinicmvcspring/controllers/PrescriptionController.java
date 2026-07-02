@@ -9,6 +9,8 @@ import com.example.clinicmvcspring.services.PrescriptionService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,8 +62,8 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("ID must be greater than 0", 400));
         }
-        Prescription pres = prescriptionService.getPrescriptionByID(id);
-        if (pres == null) {
+        Optional<Prescription> pres = prescriptionService.getPrescriptionByID(id);
+        if (pres.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponseDTO("Prescription not found with ID: " + id, 404));
         }
@@ -69,10 +71,10 @@ public class PrescriptionController {
         List<PrescriptionMedicationDTO> meds = prescriptionService.getMedicationsForPrescription(id);
 
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("id", pres.getId());
-        response.put("prescriptionNotes", pres.getPrescriptionNotes());
-        response.put("appointmentId", pres.getAppointmentId());
-        response.put("createdAt", pres.getCreatedAt());
+        response.put("id", pres.get().getId());
+        response.put("prescriptionNotes", pres.get().getPrescriptionNotes());
+        response.put("appointmentId", pres.get().getAppointmentId());
+        response.put("createdAt", pres.get().getCreatedAt());
         response.put("medications", meds);
         return ResponseEntity.ok(response);
     }
@@ -93,9 +95,9 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("ID must be greater than 0", 400));
         }
-        Prescription pres = prescriptionService.getPrescriptionByID(id);
+        Optional<Prescription> pres = prescriptionService.getPrescriptionByID(id);
 
-        if (pres == null) {
+        if (pres.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponseDTO("Prescription not found with ID: " + id, 404));
         }
@@ -109,14 +111,14 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("ID must be greater than 0", 400));
         }
-        Prescription existingPres = prescriptionService.getPrescriptionByID(id);
+        Optional<Prescription> existingPres = prescriptionService.getPrescriptionByID(id);
 
-        if (existingPres == null) {
+        if (existingPres.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponseDTO("Prescription not found with ID: " + id, 404));
         }
         pres.setId(id);
-        pres.setCreatedAt(existingPres.getCreatedAt());
+        pres.setCreatedAt(existingPres.get().getCreatedAt());
         prescriptionService.updatePrescriptionById(id, pres);
         return ResponseEntity.ok(pres);
 
@@ -129,22 +131,22 @@ public class PrescriptionController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Prescription existingPres = prescriptionService.getPrescriptionByID(id);
+        Optional<Prescription> existingPres = prescriptionService.getPrescriptionByID(id);
 
-        if (existingPres == null) {
+        if (existingPres.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Prescription found with id: " + id, 404));
         }
         if (toUpdate.containsKey("prescriptionNotes")) {
-            existingPres.setPrescriptionNotes((String) toUpdate.get("prescriptionNotes"));
+            existingPres.get().setPrescriptionNotes((String) toUpdate.get("prescriptionNotes"));
         }
         if (toUpdate.containsKey("appointmentId")) {
-            existingPres.setAppointmentId(((Number) toUpdate.get("appointmentId")).intValue());
+            existingPres.get().setAppointmentId(((Number) toUpdate.get("appointmentId")).intValue());
         }
 
-        prescriptionService.updatePrescriptionById(id, existingPres);
+        prescriptionService.updatePrescriptionById(id, existingPres.get());
 
-        return ResponseEntity.ok(existingPres); // 200
+        return ResponseEntity.ok(existingPres.get()); // 200
 
     }
 

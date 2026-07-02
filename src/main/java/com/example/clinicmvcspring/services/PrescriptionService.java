@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class PrescriptionService {
         return repo.findAll();
     }
 
-    public Prescription getPrescriptionByID(int id) {
+    public Optional<Prescription> getPrescriptionByID(int id) {
         return repo.getByID(id);
     }
 
