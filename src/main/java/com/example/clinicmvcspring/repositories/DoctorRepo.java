@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.RowMapper;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -28,13 +29,15 @@ public class DoctorRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    private final RowMapper<Doctor> rowMapper = (rs, rowNum) -> new Doctor(rs.getInt("id"),
-            rs.getString("first_name"),
-            rs.getString("last_name"),
-            rs.getString("email"),
-            rs.getDouble("salary"),
-            rs.getDate("hire_date"),
-            rs.getString("specialty"));
+    // private final RowMapper<Doctor> rowMapper = (rs, rowNum) -> new
+    // Doctor(rs.getInt("id"),
+    // rs.getString("first_name"),
+    // rs.getString("last_name"),
+    // rs.getString("email"),
+    // rs.getDouble("salary"),
+    // rs.getDate("hire_date"),
+    // rs.getString("specialty"));
+    private final RowMapper<Doctor> rowMapper = new BeanPropertyRowMapper<>(Doctor.class);
 
     public int insert(Doctor doc) {
         String sql = "INSERT INTO doctors (first_name, last_name, email, salary, specialty) " +

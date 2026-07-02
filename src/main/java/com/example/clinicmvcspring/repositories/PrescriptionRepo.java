@@ -5,6 +5,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -29,11 +30,14 @@ public class PrescriptionRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    private final RowMapper<Prescription> rowMapper = (res, rowNum) -> new Prescription(
-            res.getInt("id"),
-            res.getString("prescription_notes"),
-            res.getInt("appointment_id"),
-            res.getTimestamp("created_at"));
+    // private final RowMapper<Prescription> rowMapper = (res, rowNum) -> new
+    // Prescription(
+    // res.getInt("id"),
+    // res.getString("prescription_notes"),
+    // res.getInt("appointment_id"),
+    // res.getTimestamp("created_at"));
+
+    private final RowMapper<Prescription> rowMapper = new BeanPropertyRowMapper<>(Prescription.class);
 
     public int insert(Prescription pres) {
         String sql = "INSERT INTO prescriptions (prescription_notes, appointment_id) " +

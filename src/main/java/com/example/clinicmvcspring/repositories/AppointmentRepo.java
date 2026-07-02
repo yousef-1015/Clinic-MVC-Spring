@@ -37,6 +37,11 @@ public class AppointmentRepo {
             AppointmentStatus.valueOf(res.getString("status")),
             res.getTimestamp("created_at"));
 
+    // private final RowMapper<Appointment> rowMapper = new
+    // BeanPropertyRowMapper<>(Appointment.class);
+    // ! Wont work because the AppointmentStatus.valueOf(res.getString("status")),
+    // needs to be done manually
+
     public int insert(Appointment app) {
         String sql = "INSERT INTO appointments (date_and_time, patient_id, doctor_id, status) " +
                 "VALUES (:dateAndTime, :patientId, :doctorId, :status)";

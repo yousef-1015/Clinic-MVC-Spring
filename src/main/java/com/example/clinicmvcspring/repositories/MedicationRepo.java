@@ -5,6 +5,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -27,14 +28,15 @@ public class MedicationRepo {
         this.namedJdbcTemplate = namedJdbcTemplate;
     }
 
-    RowMapper<Medication> rowMapper = (res, rowNum) -> {
-        Medication med = new Medication();
-        med.setId(res.getInt("id"));
-        med.setMedicationName(res.getString("medication_name"));
-        med.setCreatedAt(res.getTimestamp("created_at"));
-        return med;
+    // RowMapper<Medication> rowMapper = (res, rowNum) -> {
+    // Medication med = new Medication();
+    // med.setId(res.getInt("id"));
+    // med.setMedicationName(res.getString("medication_name"));
+    // med.setCreatedAt(res.getTimestamp("created_at"));
+    // return med;
 
-    };
+    // };
+    private final RowMapper<Medication> rowMapper = new BeanPropertyRowMapper<>(Medication.class);
 
     public int insert(Medication med) {
         String sql = "INSERT INTO medications (medication_name) VALUES (:medicationName)";
@@ -84,7 +86,7 @@ public class MedicationRepo {
 
     public int delete(int id) {
         String sql = "DELETE FROM medications WHERE id = ?";
-         jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(sql, id);
 
         return id;
 
