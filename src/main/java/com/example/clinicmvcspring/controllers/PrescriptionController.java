@@ -2,11 +2,9 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
 import com.example.clinicmvcspring.models.Prescription;
 import com.example.clinicmvcspring.services.PrescriptionService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.dtos.PaginatedListDto;
+import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
 
 import jakarta.validation.Valid;
 
@@ -62,27 +61,22 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("ID must be greater than 0", 400));
         }
-        Optional<Prescription> pres = prescriptionService.getPrescriptionByID(id);
-        if (pres.isEmpty()) {
+
+        // Fetch the detailed DTO directly
+        Optional<PrescriptionDetailDTO> details = prescriptionService.getPrescriptionDetailsByID(id);
+
+        if (details.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponseDTO("Prescription not found with ID: " + id, 404));
         }
 
-        List<PrescriptionMedicationDTO> meds = prescriptionService.getMedicationsForPrescription(id);
-
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("id", pres.get().getId());
-        response.put("prescriptionNotes", pres.get().getPrescriptionNotes());
-        response.put("appointmentId", pres.get().getAppointmentId());
-        response.put("createdAt", pres.get().getCreatedAt());
-        response.put("medications", meds);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(details.get());
     }
 
     @PostMapping
     public ResponseEntity<?> addNewPrescription(@Valid @RequestBody Prescription newPres) {
 
-        int newID =prescriptionService.addPrescription(newPres);
+        int newID = prescriptionService.addPrescription(newPres);
         newPres.setId(newID);
         return ResponseEntity.status(201).body(newPres);
 

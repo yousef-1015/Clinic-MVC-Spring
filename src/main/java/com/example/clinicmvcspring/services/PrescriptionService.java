@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
 import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
@@ -28,6 +29,27 @@ public class PrescriptionService {
 
     public Optional<Prescription> getPrescriptionByID(int id) {
         return repo.getByID(id);
+    }
+
+    public Optional<PrescriptionDetailDTO> getPrescriptionDetailsByID(int id) {
+        Optional<Prescription> presOpt = repo.getByID(id);
+
+        if (presOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Prescription pres = presOpt.get();
+        List<PrescriptionMedicationDTO> meds = repo.getMedicationsForPrescription(id);
+
+        // Assemble the complete DTO
+        PrescriptionDetailDTO details = new PrescriptionDetailDTO(
+                pres.getId(),
+                pres.getPrescriptionNotes(),
+                pres.getAppointmentId(),
+                pres.getCreatedAt(),
+                meds);
+
+        return Optional.of(details);
     }
 
     public int deletePrescription(Prescription pres) {
