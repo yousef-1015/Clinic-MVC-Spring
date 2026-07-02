@@ -16,7 +16,7 @@ public class MedicationService {
         this.repo = repo;
     }
 
-    public boolean addMedication(Medication med) {
+    public int addMedication(Medication med) {
         return repo.insert(med);
     }
 
@@ -28,15 +28,15 @@ public class MedicationService {
         return repo.findByID(id);
     }
 
-    public boolean deleteMedication(Medication med) {
+    public int deleteMedication(Medication med) {
         return repo.delete(med);
     }
 
-    public boolean deleteMedicationByID(int id) {
+    public int deleteMedicationByID(int id) {
         return repo.delete(id);
     }
 
-    public boolean updateMedicationById(int id, Medication med) {
+    public int updateMedicationById(int id, Medication med) {
         return repo.update(id, med);
     }
 

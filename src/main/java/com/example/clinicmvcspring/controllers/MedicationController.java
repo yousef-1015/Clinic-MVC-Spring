@@ -68,7 +68,8 @@ public class MedicationController {
 
     @PostMapping
     public ResponseEntity<?> addNewMedication(@Valid @RequestBody Medication newMed) {
-        medicationService.addMedication(newMed);
+        int newID = medicationService.addMedication(newMed);
+        newMed.setId(newID);
         return ResponseEntity.status(201).body(newMed);
     }
 

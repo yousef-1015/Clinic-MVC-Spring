@@ -8,6 +8,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.example.clinicmvcspring.models.Medication;
@@ -34,14 +36,16 @@ public class MedicationRepo {
 
     };
 
-    public boolean insert(Medication med) {
+    public int insert(Medication med) {
         String sql = "INSERT INTO medications (medication_name) VALUES (:medicationName)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("medicationName", med.getMedicationName());
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
 
-        return rowsAffected > 0;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedJdbcTemplate.update(sql, params, keyHolder);
+
+        return keyHolder.getKey().intValue();
 
     }
 
@@ -71,30 +75,30 @@ public class MedicationRepo {
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
-    public boolean delete(Medication med) {
+    public int delete(Medication med) {
         String sql = "DELETE FROM medications WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, med.getId());
+        jdbcTemplate.update(sql, med.getId());
 
-        return rowsAffected > 0;
+        return med.getId();
     }
 
-    public boolean delete(int id) {
+    public int delete(int id) {
         String sql = "DELETE FROM medications WHERE id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, id);
+         jdbcTemplate.update(sql, id);
 
-        return rowsAffected > 0;
+        return id;
 
     }
 
-    public boolean update(int id, Medication med) {
+    public int update(int id, Medication med) {
         String sql = "UPDATE medications SET medication_name = :medicationName WHERE id = :id";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("medicationName", med.getMedicationName())
                 .addValue("id", id);
 
-        int rowsAffected = namedJdbcTemplate.update(sql, params);
-        return rowsAffected > 0;
+        namedJdbcTemplate.update(sql, params);
+        return id;
     }
 
 }
