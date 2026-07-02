@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,12 +65,12 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Doctor doc = doctorService.getDoctorByID(id);
-        if (doc == null) {// Empty from repo exception
+        Optional<Doctor> doc = doctorService.getDoctorByID(id);
+        if (doc.isEmpty()) {// Empty from repo exception
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No doctor found with id: " + id, 404));
         }
-        return ResponseEntity.ok(doc);
+        return ResponseEntity.ok(doc.get());
     }
 
     @PostMapping
@@ -86,8 +87,8 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Doctor doc = doctorService.getDoctorByID(id);
-        if (doc == null) {
+        Optional<Doctor> doc = doctorService.getDoctorByID(id);
+        if (doc.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Doctor found with id: " + id, 404));
         }
@@ -102,13 +103,13 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Doctor existingDoc = doctorService.getDoctorByID(id);
-        if (existingDoc == null) {
+        Optional<Doctor> existingDoc = doctorService.getDoctorByID(id);
+        if (existingDoc.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Doctor found with id: " + id, 404));
         }
         doc.setId(id);
-        doc.setHireDate(existingDoc.getHireDate());
+        doc.setHireDate(existingDoc.get().getHireDate());
         doctorService.updateDoctorById(id, doc);
         return ResponseEntity.ok(doc); // 200
     }
@@ -119,23 +120,23 @@ public class DoctorController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Doctor existingDoc = doctorService.getDoctorByID(id);
-        if (existingDoc == null) {
+        Optional<Doctor> existingDoc = doctorService.getDoctorByID(id);
+        if (existingDoc.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No Doctor found with id: " + id, 404));
         }
         if (toUpdate.containsKey("firstName"))
-            existingDoc.setFirstName((String) toUpdate.get("firstName"));
+            existingDoc.get().setFirstName((String) toUpdate.get("firstName"));
         if (toUpdate.containsKey("lastName"))
-            existingDoc.setLastName((String) toUpdate.get("lastName"));
+            existingDoc.get().setLastName((String) toUpdate.get("lastName"));
         if (toUpdate.containsKey("email"))
-            existingDoc.setEmail((String) toUpdate.get("email"));
+            existingDoc.get().setEmail((String) toUpdate.get("email"));
         if (toUpdate.containsKey("specialty"))
-            existingDoc.setSpecialty((String) toUpdate.get("specialty"));
+            existingDoc.get().setSpecialty((String) toUpdate.get("specialty"));
         if (toUpdate.containsKey("salary"))
-            existingDoc.setSalary(((Number) toUpdate.get("salary")).doubleValue());
-        doctorService.updateDoctorById(id, existingDoc);
-        return ResponseEntity.ok(existingDoc); // 200
+            existingDoc.get().setSalary(((Number) toUpdate.get("salary")).doubleValue());
+        doctorService.updateDoctorById(id, existingDoc.get());
+        return ResponseEntity.ok(existingDoc.get()); // 200
     }
 
 }

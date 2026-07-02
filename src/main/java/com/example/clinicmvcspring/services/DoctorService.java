@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class DoctorService {
         return repo.delete(docToDelete);
     }
 
-    public Doctor getDoctorByID(int id) {
+    public Optional<Doctor> getDoctorByID(int id) {
         return repo.findByID(id);
     }
 
