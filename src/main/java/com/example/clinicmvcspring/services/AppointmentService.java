@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.services;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AppointmentService {
@@ -51,6 +54,20 @@ public class AppointmentService {
 
     public long countAppointments() {
         return repo.count();
+    }
+
+    @Transactional
+    public void transferPatient(int appointmentId, int doctorId) {
+        Optional<Appointment> appOpt = repo.findById(appointmentId);
+
+        if (appOpt.isEmpty()) {
+            throw new NoSuchElementException("Appointment not found with id: " + appointmentId);
+        }
+
+        Appointment app = appOpt.get();
+        app.setDoctorId(doctorId);
+
+        repo.save(app);
     }
 
 }
