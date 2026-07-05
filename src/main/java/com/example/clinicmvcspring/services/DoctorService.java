@@ -3,10 +3,12 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
+
 
 @Service
 public class DoctorService {
@@ -17,39 +19,40 @@ public class DoctorService {
         this.repo = repo;
     }
 
-    public int addDoctor(Doctor newDoctor) {
-        return repo.insert(newDoctor);// the job lies on the repo to access the DB
+    public Doctor addDoctor(Doctor newDoctor) {
+        return repo.save(newDoctor);// using the .save from the built in methods in JpaRepositories
     }
 
     public List<Doctor> getAllDoctors() {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
-    public int deleteDoctor(Doctor docToDelete) {
-        return repo.delete(docToDelete);
+    public void deleteDoctor(Doctor docToDelete) {
+        repo.delete(docToDelete);
     }
 
     public Optional<Doctor> getDoctorByID(int id) {
-        return repo.findByID(id);
+        return repo.findById(id);
     }
 
-    public int deleteDoctorByID(int id) {
-        return repo.delete(id);
+    public void deleteDoctorByID(int id) {
+        repo.deleteById(id);
     }
 
-    public int updateDoctor(Doctor doc) {
-        return repo.update(doc);
+    public Doctor updateDoctor(Doctor doc) {
+        return repo.save(doc);
     }
 
-    public int updateDoctorById(int id, Doctor doc) {
-        return repo.update(id, doc);
+    public Doctor updateDoctorById(int id, Doctor doc) {
+        doc.setId(id);
+        return repo.save(doc);
     }
 
     public List<Doctor> getAllDoctors(int page, int size) {
-        return repo.findAllPagination(page, size);
+        return repo.findAll(PageRequest.of(page, size)).getContent();
     }
 
-    public int countDoctors() {
+    public long countDoctors() {
         return repo.count();
     }
 }

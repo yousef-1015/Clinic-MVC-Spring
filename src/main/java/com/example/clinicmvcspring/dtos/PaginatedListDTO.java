@@ -8,9 +8,9 @@ public class PaginatedListDTO<T> {
     private int pageSize;
     private List<T> data;
     private int totalPages;
-    private int totalItems;
+    private long totalItems;
 
-    public PaginatedListDTO(List<T> data, int currentPage, int pageSize, int totalItems) {
+    public PaginatedListDTO(List<T> data, int currentPage, int pageSize, long totalItems) {
         this.data = data;
         this.currentPage = currentPage;
         this.pageSize = pageSize;
@@ -41,7 +41,7 @@ public class PaginatedListDTO<T> {
         return this.totalPages;
     }
 
-    public int getTotalItems() {
+    public long getTotalItems() {
         return this.totalItems;
     }
 

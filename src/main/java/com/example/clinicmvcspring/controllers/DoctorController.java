@@ -9,6 +9,7 @@ import com.example.clinicmvcspring.services.DoctorService;
 
 import jakarta.validation.Valid;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class DoctorController {
         }
 
         List<Doctor> allDocs = doctorService.getAllDoctors(page, size);
-        int total = doctorService.countDoctors();
+        long total = doctorService.countDoctors();
         PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(allDocs, page, size, total);
         return ResponseEntity.ok(response);
     }
@@ -75,9 +76,7 @@ public class DoctorController {
 
     @PostMapping
     public ResponseEntity<?> addNewDoctor(@Valid @RequestBody Doctor newDoc) {
-        int newID = doctorService.addDoctor(newDoc);
-        newDoc.setId(newID);
-        return ResponseEntity.status(201).body(newDoc); // 201
+        return ResponseEntity.status(201).body(doctorService.addDoctor(newDoc)); // 201
 
     }
 
@@ -134,7 +133,7 @@ public class DoctorController {
         if (toUpdate.containsKey("specialty"))
             existingDoc.get().setSpecialty((String) toUpdate.get("specialty"));
         if (toUpdate.containsKey("salary"))
-            existingDoc.get().setSalary(((Number) toUpdate.get("salary")).doubleValue());
+            existingDoc.get().setSalary(new BigDecimal(toUpdate.get("salary").toString()));
         doctorService.updateDoctorById(id, existingDoc.get());
         return ResponseEntity.ok(existingDoc.get()); // 200
     }
