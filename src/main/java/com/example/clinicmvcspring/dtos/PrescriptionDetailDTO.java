@@ -4,16 +4,16 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class PrescriptionDetailDTO {
-    private int id;
+    private Integer id;
     private String prescriptionNotes;
-    private int appointmentId;
+    private Integer appointmentId;
     private Timestamp createdAt;
     private List<PrescriptionMedicationDTO> medications;
 
     public PrescriptionDetailDTO() {
     }
 
-    public PrescriptionDetailDTO(int id, String prescriptionNotes, int appointmentId, Timestamp createdAt,
+    public PrescriptionDetailDTO(Integer id, String prescriptionNotes, Integer appointmentId, Timestamp createdAt,
             List<PrescriptionMedicationDTO> medications) {
         this.id = id;
         this.prescriptionNotes = prescriptionNotes;
@@ -22,11 +22,11 @@ public class PrescriptionDetailDTO {
         this.medications = medications;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -38,11 +38,11 @@ public class PrescriptionDetailDTO {
         this.prescriptionNotes = prescriptionNotes;
     }
 
-    public int getAppointmentId() {
+    public Integer getAppointmentId() {
         return appointmentId;
     }
 
-    public void setAppointmentId(int appointmentId) {
+    public void setAppointmentId(Integer appointmentId) {
         this.appointmentId = appointmentId;
     }
 

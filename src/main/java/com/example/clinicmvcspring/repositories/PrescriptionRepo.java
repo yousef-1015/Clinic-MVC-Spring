@@ -1,117 +1,29 @@
 package com.example.clinicmvcspring.repositories;
 
 import java.util.List;
-import java.util.Optional;
 
-import javax.sql.DataSource;
-
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
-
-import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import com.example.clinicmvcspring.models.Prescription;
 
-@Repository
-public class PrescriptionRepo {
-    private final DataSource dataSource;
-    private final JdbcTemplate jdbcTemplate;
-    private final NamedParameterJdbcTemplate namedJdbcTemplate;
+public interface PrescriptionRepo extends JpaRepository<Prescription, Integer> {
+    @Query(value = "SELECT pm.medication_id as medicationId, m.medication_name as medicationName, pm.dosage as dosage, pm.frequency as frequency "
+            +
+            "FROM prescription_medications pm " +
+            "JOIN medications m ON pm.medication_id = m.id " +
+            "WHERE pm.prescription_id = :prescriptionId", nativeQuery = true)
+    // prescriptionId like the jdbcNamedParameter
+    List<PrescriptionMedicationProjection> getMedicationsForPrescription(@Param("prescriptionId") int prescriptionId);
 
-    public PrescriptionRepo(DataSource dataSource, JdbcTemplate jdbcTemplate,
-            NamedParameterJdbcTemplate namedJdbcTemplate) {
-        this.dataSource = dataSource;
-        this.jdbcTemplate = jdbcTemplate;
-        this.namedJdbcTemplate = namedJdbcTemplate;
-    }
-
-    // private final RowMapper<Prescription> rowMapper = (res, rowNum) -> new
-    // Prescription(
-    // res.getInt("id"),
-    // res.getString("prescription_notes"),
-    // res.getInt("appointment_id"),
-    // res.getTimestamp("created_at"));
-
-    private final RowMapper<Prescription> rowMapper = new BeanPropertyRowMapper<>(Prescription.class);
-
-    public int insert(Prescription pres) {
-        String sql = "INSERT INTO prescriptions (prescription_notes, appointment_id) " +
-                "VALUES (:prescriptionNotes, :appointmentId)";
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("prescriptionNotes", pres.getPrescriptionNotes())
-                .addValue("appointmentId", pres.getAppointmentId());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedJdbcTemplate.update(sql, params, keyHolder);
-        return keyHolder.getKey().intValue();
-    }
-
-    public List<Prescription> findAll() {
-        String sql = "SELECT * FROM prescriptions ORDER BY id";
-        return jdbcTemplate.query(sql, rowMapper);
-    }
-
-    public List<Prescription> findAllPagination(int page, int size) {
-        String sql = "SELECT * FROM prescriptions ORDER BY id LIMIT ? OFFSET ?";
-        int offset = page * size;
-        return jdbcTemplate.query(sql, rowMapper, size, offset);
-    }
-
-    public int count() {
-        String sql = "SELECT COUNT(*) FROM prescriptions";
-        return jdbcTemplate.queryForObject(sql, Integer.class);
-    }
-
-    public Optional<Prescription> getByID(int id) {
-        String sql = "SELECT * FROM prescriptions WHERE id = ?";
-        try {
-            return Optional.of( jdbcTemplate.queryForObject(sql, rowMapper, id));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    public int delete(Prescription pres) {
-        String sql = "DELETE FROM prescriptions WHERE id = ?";
-        jdbcTemplate.update(sql, pres.getId());
-        return pres.getId();
-    }
-
-    public int delete(int id) {
-        String sql = "DELETE FROM prescriptions WHERE id = ?";
-        jdbcTemplate.update(sql, id);
-        return id;
-    }
-
-    public int update(int id, Prescription pres) {
-        String sql = "UPDATE prescriptions SET prescription_notes = :prescriptionNotes, " +
-                "appointment_id = :appointmentId WHERE id = :id";
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("prescriptionNotes", pres.getPrescriptionNotes())
-                .addValue("appointmentId", pres.getAppointmentId())
-                .addValue("id", id);
-
-        namedJdbcTemplate.update(sql, params);
-        return id;
-    }
-
-    public List<PrescriptionMedicationDTO> getMedicationsForPrescription(int prescriptionId) {
-        String sql = "SELECT pm.medication_id, m.medication_name, pm.dosage, pm.frequency " +
-                "FROM prescription_medications pm " +
-                "JOIN medications m ON pm.medication_id = m.id " +
-                "WHERE pm.prescription_id = ?";
-
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new PrescriptionMedicationDTO(
-                rs.getInt("medication_id"),
-                rs.getString("medication_name"),
-                rs.getString("dosage"),
-                rs.getString("frequency")), prescriptionId);
-    }
-
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO prescription_medications (prescription_id, medication_id, dosage, frequency) " +
+            "VALUES (:prescriptionId, :medicationId, :dosage, :frequency)", nativeQuery = true)
+    void addMedicationToPrescription(@Param("prescriptionId") int prescriptionId,
+            @Param("medicationId") int medicationId,
+            @Param("dosage") String dosage,
+            @Param("frequency") String frequency);
 }

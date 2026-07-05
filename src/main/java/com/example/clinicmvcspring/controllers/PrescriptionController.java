@@ -49,7 +49,7 @@ public class PrescriptionController {
                     .body(new ErrorResponseDTO("Page size must be between 1 and 50", 400));
         }
         List<Prescription> prescriptions = prescriptionService.getAllPrescriptionsPaginated(page, size);
-        int total = prescriptionService.count();
+        long total = prescriptionService.count();
         PaginatedListDTO<Prescription> response = new PaginatedListDTO<>(prescriptions, page, size, total);
         return ResponseEntity.ok(response);
     }
@@ -74,12 +74,8 @@ public class PrescriptionController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addNewPrescription(@Valid @RequestBody Prescription newPres) {
-
-        int newID = prescriptionService.addPrescription(newPres);
-        newPres.setId(newID);
-        return ResponseEntity.status(201).body(newPres);
-
+    public ResponseEntity<?> addNewPrescription(@Valid @RequestBody PrescriptionDetailDTO newPresDto) {
+        return ResponseEntity.status(201).body(prescriptionService.addPrescriptionWithMedications(newPresDto));
     }
 
     @DeleteMapping("/{id}")
