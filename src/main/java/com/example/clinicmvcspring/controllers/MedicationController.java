@@ -9,7 +9,6 @@ import com.example.clinicmvcspring.services.MedicationService;
 
 import jakarta.validation.Valid;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +47,7 @@ public class MedicationController {
         }
 
         List<Medication> allMeds = medicationService.getAllMedications(page, size);
-        int total = medicationService.countMedications();
+        long total = medicationService.countMedications();
         PaginatedListDTO<Medication> response = new PaginatedListDTO<>(allMeds, page, size, total);
         return ResponseEntity.ok(response);
     }
@@ -69,9 +68,8 @@ public class MedicationController {
 
     @PostMapping
     public ResponseEntity<?> addNewMedication(@Valid @RequestBody Medication newMed) {
-        int newID = medicationService.addMedication(newMed);
-        newMed.setId(newID);
-        return ResponseEntity.status(201).body(newMed);
+
+        return ResponseEntity.status(201).body(medicationService.addMedication(newMed));
     }
 
     @DeleteMapping("/{id}")

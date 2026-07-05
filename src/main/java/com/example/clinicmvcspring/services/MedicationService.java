@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
@@ -17,8 +18,8 @@ public class MedicationService {
         this.repo = repo;
     }
 
-    public int addMedication(Medication med) {
-        return repo.insert(med);
+    public Medication addMedication(Medication med) {
+        return repo.save(med);
     }
 
     public List<Medication> getAllMedications() {
@@ -26,26 +27,27 @@ public class MedicationService {
     }
 
     public Optional<Medication> getMedicationByID(int id) {
-        return repo.findByID(id);
+        return repo.findById(id);
     }
 
-    public int deleteMedication(Medication med) {
-        return repo.delete(med);
+    public void deleteMedication(Medication med) {
+        repo.delete(med);
     }
 
-    public int deleteMedicationByID(int id) {
-        return repo.delete(id);
+    public void deleteMedicationByID(int id) {
+        repo.deleteById(id);
     }
 
-    public int updateMedicationById(int id, Medication med) {
-        return repo.update(id, med);
+    public Medication updateMedicationById(int id, Medication med) {
+        med.setId(id);
+        return repo.save(med);
     }
 
     public List<Medication> getAllMedications(int page, int size) {
-        return repo.findAllPagination(page, size);
+        return repo.findAll(PageRequest.of(page, size)).getContent();
     }
 
-    public int countMedications() {
+    public long countMedications() {
         return repo.count();
     }
 }
