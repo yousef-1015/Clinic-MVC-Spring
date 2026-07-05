@@ -2,30 +2,47 @@ package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@Entity
+@Table(name = "patients")
 @JsonPropertyOrder({ "id", "firstName", "lastName", "email" })
 
 public class Patient {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @NotBlank(message = "First Name is Required")
     @Size(max = 50, message = "First Name max size is 50 characters")
+    @Column(name = "first_name")
     private String firstName;
 
     @NotBlank(message = "Last Name is Required")
     @Size(max = 50, message = "Last Name max size is 50 characters")
+    @Column(name = "last_name")
     private String lastName;
 
     @NotBlank(message = "Email is Required")
     @Size(max = 100, message = "Email max size is 100 characters")
     @Email(message = "Use Valid Email")
+    @Column(name = "email")
     private String email;
 
+    @Column(name = "created_at")
+    @CreationTimestamp
     private Timestamp createdAt;
 
     // for creating

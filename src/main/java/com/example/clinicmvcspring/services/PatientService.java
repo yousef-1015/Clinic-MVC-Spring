@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
@@ -16,35 +17,36 @@ public class PatientService {
         this.repo = repo;
     }
 
-    public int addPatient(Patient newPatient) {
-        return repo.insert(newPatient);// the job lies on the repo to access the DB
+    public Patient addPatient(Patient newPatient) {
+        return repo.save(newPatient);// the job lies on the repo to access the DB
     }
 
     public List<Patient> getAllPatients() {
-        return repo.getAll();// the job lies on the repo to access the DB
+        return repo.findAll();// the job lies on the repo to access the DB
     }
 
-    public int deletePatient(Patient pat) {
-        return repo.delete(pat);
+    public void deletePatient(Patient pat) {
+        repo.delete(pat);
     }
 
     public Optional<Patient> getPatientByID(int id) {
-        return repo.getByID(id);
+        return repo.findById(id);
     }
 
-    public int deletePatientByID(int id) {
-        return repo.delete(id);
+    public void deletePatientByID(int id) {
+        repo.deleteById(id);
     }
 
-    public int updatePatientById(int id, Patient pat) {
-        return repo.update(id, pat);
+    public Patient updatePatientById(int id, Patient pat) {
+        pat.setId(id);
+        return repo.save(pat);
     }
 
     public List<Patient> getAllPatients(int page, int size) {
-        return repo.findAllPagination(page, size);
+        return repo.findAll(PageRequest.of(page, size)).getContent();
     }
 
-    public int countPatients() {
+    public long countPatients() {
         return repo.count();
     }
 

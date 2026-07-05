@@ -48,7 +48,7 @@ public class PatientController {
         }
 
         List<Patient> allPatients = patientService.getAllPatients(page, size);
-        int total = patientService.countPatients();
+        long total = patientService.countPatients();
         PaginatedListDTO<Patient> response = new PaginatedListDTO<>(allPatients, page, size, total);
         return ResponseEntity.ok(response);
     }
@@ -69,10 +69,8 @@ public class PatientController {
 
     @PostMapping
     public ResponseEntity<?> addNewPatient(@Valid @RequestBody Patient newPatient) {
-        int newId = patientService.addPatient(newPatient);
-        newPatient.setId(newId);
 
-        return ResponseEntity.status(201).body(newPatient);
+        return ResponseEntity.status(201).body(patientService.addPatient(newPatient));
     }
 
     @DeleteMapping("/{id}")
