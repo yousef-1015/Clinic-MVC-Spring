@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
@@ -18,8 +19,8 @@ public class AppointmentService {
         this.repo = repo;
     }
 
-    public int addAppointment(Appointment app) {
-        return repo.insert(app);
+    public Appointment addAppointment(Appointment app) {
+        return repo.save(app);
     }
 
     public List<Appointment> getAllAppointments() {
@@ -27,26 +28,28 @@ public class AppointmentService {
     }
 
     public Optional<Appointment> getAppointmentByID(int id) {
-        return repo.findByID(id);
+        return repo.findById(id);
     }
 
-    public int deleteAppointment(Appointment app) {
-        return repo.delete(app);
+    public void deleteAppointment(Appointment app) {
+        repo.delete(app);
     }
 
-    public int deleteAppointmentByID(int id) {
-        return repo.delete(id);
+    public void deleteAppointmentByID(int id) {
+        repo.deleteById(id);
     }
 
-    public int updateAppointmentById(int id, Appointment app) {
-        return repo.update(id, app);
+    public Appointment updateAppointmentById(int id, Appointment app) {
+        app.setId(id);
+        return repo.save(app);
+
     }
 
     public List<Appointment> getAllAppointments(int page, int size) {
-        return repo.findAllPagination(page, size);
+        return repo.findAll(PageRequest.of(page, size)).getContent();
     }
 
-    public int countAppointments() {
+    public long countAppointments() {
         return repo.count();
     }
 

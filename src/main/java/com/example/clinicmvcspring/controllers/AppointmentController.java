@@ -47,7 +47,7 @@ public class AppointmentController {
             return ResponseEntity.status(400).body(error);
         }
         List<Appointment> allApps = appointmentService.getAllAppointments(page, size);
-        int total = appointmentService.countAppointments();
+        long total = appointmentService.countAppointments();
         PaginatedListDTO<Appointment> response = new PaginatedListDTO<>(allApps, page, size, total);
         return ResponseEntity.ok(response);
     }
@@ -71,9 +71,7 @@ public class AppointmentController {
     @PostMapping
     public ResponseEntity<?> addNewAppointment(@Valid @RequestBody Appointment newApp) {
 
-        int newId = appointmentService.addAppointment(newApp);
-        newApp.setId(newId);
-        return ResponseEntity.status(201).body(newApp);
+        return ResponseEntity.status(201).body(appointmentService.addAppointment(newApp));
 
     }
 
