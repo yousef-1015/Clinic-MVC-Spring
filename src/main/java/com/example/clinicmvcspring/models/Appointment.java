@@ -2,9 +2,12 @@ package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
 
+
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jakarta.persistence.CascadeType;
@@ -15,6 +18,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -36,8 +41,13 @@ public class Appointment {
     @Column(name = "patient_id")
     private int patientId;
 
-    @Column(name = "doctor_id")
-    private int doctorId;
+    // @Column(name = "doctor_id")
+    // private int doctorId;
+
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    @JsonIgnore
+    private Doctor doctor;
 
     @NotNull(message = "Status is Required")
     @Column(name = "status")
@@ -53,20 +63,20 @@ public class Appointment {
     private Prescription prescription;
 
     // for adding
-    public Appointment(Timestamp dateAndTime, int patientId, int doctorId, AppointmentStatus status) {
+    public Appointment(Timestamp dateAndTime, int patientId, Doctor doctor, AppointmentStatus status) {
         this.dateAndTime = dateAndTime;
         this.patientId = patientId;
-        this.doctorId = doctorId;
+        this.doctor = doctor;
         this.status = status;
     }
 
     // for getting
-    public Appointment(int id, Timestamp dateAndTime, int patientId, int doctorId, AppointmentStatus status,
+    public Appointment(int id, Timestamp dateAndTime, int patientId, Doctor doctor, AppointmentStatus status,
             Timestamp createdAt) {
         this.id = id;
         this.dateAndTime = dateAndTime;
         this.patientId = patientId;
-        this.doctorId = doctorId;
+        this.doctor = doctor;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -98,12 +108,12 @@ public class Appointment {
         this.patientId = patientId;
     }
 
-    public int getDoctorId() {
-        return doctorId;
+    public Doctor getDoctor() {
+        return doctor;
     }
 
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
     }
 
     public AppointmentStatus getStatus() {
@@ -130,12 +140,25 @@ public class Appointment {
         this.prescription = prescription;
     }
 
+    @JsonProperty("doctorId")
+    public Integer getDoctorId() {
+        return this.doctor != null ? this.doctor.getId() : null;
+    }
+
+    @JsonProperty("doctorId")
+    public void setDoctorId(Integer doctorId) {
+        if (doctorId != null) {
+            this.doctor = new Doctor();
+            this.doctor.setId(doctorId);
+        }
+    }
+
     @Override
     public String toString() {
         return "ID: " + id
                 + " | Date & Time: " + dateAndTime
                 + " | Patient ID: " + patientId
-                + " | Doctor ID: " + doctorId
+                + " | Doctor ID: " + doctor.getId()
                 + " | Status: " + status
                 + " | Created: " + createdAt;
     }
