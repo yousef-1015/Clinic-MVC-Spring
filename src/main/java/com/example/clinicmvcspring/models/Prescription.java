@@ -1,11 +1,9 @@
 package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -15,8 +13,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
@@ -36,19 +32,13 @@ public class Prescription {
     // owning entity
     @OneToOne // every prescription has one appointment
     @JoinColumn(name = "appointment_id")
-    @JsonBackReference // in owning entity to avoid infinite back and forth calls
     private Appointment appointment;
 
     @CreationTimestamp
     @Column(name = "created_at")
     private Timestamp createdAt;
 
-    @ManyToMany
-    @JoinTable(name = "prescription_medications", // Name of the join table
-            joinColumns = @JoinColumn(name = "prescription_id"), // FK
-            inverseJoinColumns = @JoinColumn(name = "medication_id") // FK
-    )
-    private List<Medication> medications;
+    
     // for adding
 
     public Prescription(String prescriptionNotes, Appointment appointment) {

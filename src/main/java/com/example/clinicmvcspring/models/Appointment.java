@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -64,7 +63,6 @@ public class Appointment {
     private Timestamp createdAt;
 
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
-    @JsonManagedReference // The inverse entity
     private Prescription prescription;
 
     // for adding

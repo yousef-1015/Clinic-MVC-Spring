@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.dtos.AppointmentDTO;
+import com.example.clinicmvcspring.dtos.PrescriptionDTO;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +24,19 @@ public class AppointmentService {
         this.repo = repo;
     }
 
-    public Appointment addAppointment(Appointment app) {
-        return repo.save(app);
+    public AppointmentDTO addAppointment(Appointment app) {
+        return convertToDTO(repo.save(app));
     }
 
-    public List<Appointment> getAllAppointments() {
-        return repo.findAll();
+    public List<AppointmentDTO> getAllAppointments() {
+        return repo.findAll().stream().map(app -> convertToDTO(app)).toList();
     }
 
-    public Optional<Appointment> getAppointmentByID(int id) {
+    public Optional<AppointmentDTO> getAppointmentByID(int id) {
+        return repo.findById(id).map(app -> convertToDTO(app));
+    }
+
+    public Optional<Appointment> getAppointmentEntityByID(int id) {
         return repo.findById(id);
     }
 
@@ -42,18 +48,38 @@ public class AppointmentService {
         repo.deleteById(id);
     }
 
-    public Appointment updateAppointmentById(int id, Appointment app) {
+    public AppointmentDTO updateAppointmentById(int id, Appointment app) {
         app.setId(id);
-        return repo.save(app);
+        return convertToDTO(repo.save(app));
 
     }
 
-    public List<Appointment> getAllAppointments(int page, int size) {
-        return repo.findAll(PageRequest.of(page, size)).getContent();
+    public List<AppointmentDTO> getAllAppointments(int page, int size) {
+        return repo.findAll(PageRequest.of(page, size)).getContent().stream().map(app -> convertToDTO(app)).toList();
     }
 
     public long countAppointments() {
         return repo.count();
+    }
+
+    public AppointmentDTO convertToDTO(Appointment app) {
+        PrescriptionDTO presDto = null;
+
+        if (app.getPrescription() != null) {
+            presDto = new PrescriptionDTO(
+                    app.getPrescription().getId(),
+                    app.getPrescription().getPrescriptionNotes(),
+                    app.getPrescription().getCreatedAt());
+        }
+
+        return new AppointmentDTO(
+                app.getId(),
+                app.getDateAndTime(),
+                app.getPatient() != null ? app.getPatient().getId() : 0,
+                app.getDoctor() != null ? app.getDoctor().getId() : 0,
+                app.getStatus(),
+                app.getCreatedAt(),
+                presDto);
     }
 
     @Transactional

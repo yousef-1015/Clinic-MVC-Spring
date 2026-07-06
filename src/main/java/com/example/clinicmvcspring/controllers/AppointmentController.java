@@ -2,6 +2,7 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.dtos.AppointmentDTO;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.dtos.PaginatedListDTO;
 import com.example.clinicmvcspring.models.Appointment;
@@ -46,9 +47,9 @@ public class AppointmentController {
             ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
             return ResponseEntity.status(400).body(error);
         }
-        List<Appointment> allApps = appointmentService.getAllAppointments(page, size);
+        List<AppointmentDTO> allApps = appointmentService.getAllAppointments(page, size);
         long total = appointmentService.countAppointments();
-        PaginatedListDTO<Appointment> response = new PaginatedListDTO<>(allApps, page, size, total);
+        PaginatedListDTO<AppointmentDTO> response = new PaginatedListDTO<>(allApps, page, size, total);
         return ResponseEntity.ok(response);
     }
 
@@ -58,7 +59,7 @@ public class AppointmentController {
             return ResponseEntity.status(400).body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
 
-        Optional<Appointment> app = appointmentService.getAppointmentByID(id);
+        Optional<AppointmentDTO> app = appointmentService.getAppointmentByID(id);
         if (app.isEmpty()) {
             return ResponseEntity.status(404)
                     .body(new ErrorResponseDTO("No appointment found with id: " + id, 404));
@@ -81,7 +82,7 @@ public class AppointmentController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Optional<Appointment> app = appointmentService.getAppointmentByID(id);
+        Optional<Appointment> app = appointmentService.getAppointmentEntityByID(id);
 
         if (app.isEmpty()) {
             return ResponseEntity.status(404)
@@ -97,7 +98,7 @@ public class AppointmentController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Optional<Appointment> existingApp = appointmentService.getAppointmentByID(id);
+        Optional<AppointmentDTO> existingApp = appointmentService.getAppointmentByID(id);
 
         if (existingApp.isEmpty()) {
             return ResponseEntity.status(404)
@@ -106,8 +107,8 @@ public class AppointmentController {
 
         app.setId(id);
         app.setCreatedAt(existingApp.get().getCreatedAt());
-        appointmentService.updateAppointmentById(id, app);
-        return ResponseEntity.ok(app);
+        
+        return ResponseEntity.ok(appointmentService.updateAppointmentById(id, app));
 
     }
 
@@ -118,7 +119,7 @@ public class AppointmentController {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
-        Optional<Appointment> existingApp = appointmentService.getAppointmentByID(id);
+        Optional<Appointment> existingApp = appointmentService.getAppointmentEntityByID(id);
 
         if (existingApp.isEmpty()) {
             return ResponseEntity.status(404)
@@ -140,9 +141,9 @@ public class AppointmentController {
             existingApp.get().setStatus(AppointmentStatus.valueOf((String) toUpdate.get("status")));
         }
 
-        appointmentService.updateAppointmentById(id, existingApp.get());
+        
 
-        return ResponseEntity.ok(existingApp.get());
+        return ResponseEntity.ok(appointmentService.updateAppointmentById(id, existingApp.get()));
 
     }
 }

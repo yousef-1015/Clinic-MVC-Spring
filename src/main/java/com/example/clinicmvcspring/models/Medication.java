@@ -1,7 +1,6 @@
 package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -12,7 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
 
@@ -32,9 +30,6 @@ public class Medication {
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
-
-    @ManyToMany(mappedBy = "medications")
-    private List<Prescription> prescriptions;
 
     // for adding
     public Medication(String medicationName) {
