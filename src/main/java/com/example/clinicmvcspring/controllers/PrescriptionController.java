@@ -2,6 +2,7 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.models.Appointment;
 import com.example.clinicmvcspring.models.Prescription;
 import com.example.clinicmvcspring.services.PrescriptionService;
 
@@ -131,7 +132,9 @@ public class PrescriptionController {
             existingPres.get().setPrescriptionNotes((String) toUpdate.get("prescriptionNotes"));
         }
         if (toUpdate.containsKey("appointmentId")) {
-            existingPres.get().setAppointmentId(((Number) toUpdate.get("appointmentId")).intValue());
+            Appointment appo = new Appointment();
+            appo.setId(((Number) toUpdate.get("appointmentId")).intValue());
+            existingPres.get().setAppointment(appo);
         }
 
         prescriptionService.updatePrescriptionById(id, existingPres.get());

@@ -4,8 +4,10 @@ import java.sql.Timestamp;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
@@ -44,6 +47,10 @@ public class Appointment {
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
+
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    @JsonManagedReference // The inverse entity
+    private Prescription prescription;
 
     // for adding
     public Appointment(Timestamp dateAndTime, int patientId, int doctorId, AppointmentStatus status) {
@@ -113,6 +120,14 @@ public class Appointment {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Prescription getPrescription() {
+        return prescription;
+    }
+
+    public void setPrescription(Prescription prescription) {
+        this.prescription = prescription;
     }
 
     @Override

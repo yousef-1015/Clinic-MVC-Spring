@@ -15,9 +15,12 @@ import com.example.clinicmvcspring.repositories.*;
 public class PrescriptionService {
 
     private final PrescriptionRepo repo;
+    private final AppointmentRepo appointmentRepo;
 
-    public PrescriptionService(PrescriptionRepo repo) {
+    public PrescriptionService(PrescriptionRepo repo, AppointmentRepo appointmentRepo) {
         this.repo = repo;
+        this.appointmentRepo = appointmentRepo;
+
     }
 
     public Prescription addPrescription(Prescription pres) {
@@ -46,7 +49,7 @@ public class PrescriptionService {
         PrescriptionDetailDTO details = new PrescriptionDetailDTO(
                 pres.getId(),
                 pres.getPrescriptionNotes(),
-                pres.getAppointmentId(),
+                pres.getAppointment().getId(),
                 pres.getCreatedAt(),
                 meds);
 
@@ -85,7 +88,10 @@ public class PrescriptionService {
     }
 
     public PrescriptionDetailDTO addPrescriptionWithMedications(PrescriptionDetailDTO inputDTO) {
-        Prescription pres = new Prescription(inputDTO.getPrescriptionNotes(), inputDTO.getAppointmentId());
+        Appointment appointment = new Appointment();
+        appointment.setId(inputDTO.getAppointmentId());
+    Prescription pres = new Prescription(inputDTO.getPrescriptionNotes(), appointment);
+
         Prescription savedPres = repo.save(pres);
 
         if (inputDTO.getMedications() != null) {

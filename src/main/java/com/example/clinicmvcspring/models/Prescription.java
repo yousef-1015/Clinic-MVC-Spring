@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jakarta.persistence.Column;
@@ -11,6 +13,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
 
@@ -26,24 +30,27 @@ public class Prescription {
     @Column(name = "prescription_notes")
     private String prescriptionNotes;
 
-    @Column(name = "appointment_id")
-    private int appointmentId;
+    // owning entity
+    @OneToOne // every prescription has one appointment
+    @JoinColumn(name = "appointment_id")
+    @JsonBackReference // in owning entity to avoid infinite back and forth calls
+    private Appointment appointment;
 
     @CreationTimestamp
     @Column(name = "created_at")
     private Timestamp createdAt;
 
     // for adding
-    public Prescription(String prescriptionNotes, int appointmentId) {
+    public Prescription(String prescriptionNotes, Appointment appointment) {
         this.prescriptionNotes = prescriptionNotes;
-        this.appointmentId = appointmentId;
+        this.appointment = appointment;
     }
 
     // for getting
-    public Prescription(int id, String prescriptionNotes, int appointmentId, Timestamp createdAt) {
+    public Prescription(int id, String prescriptionNotes, Appointment appointment, Timestamp createdAt) {
         this.id = id;
         this.prescriptionNotes = prescriptionNotes;
-        this.appointmentId = appointmentId;
+        this.appointment = appointment;
         this.createdAt = createdAt;
     }
 
@@ -66,12 +73,12 @@ public class Prescription {
         this.prescriptionNotes = prescriptionNotes;
     }
 
-    public int getAppointmentId() {
-        return appointmentId;
+    public Appointment getAppointment() {
+        return appointment;
     }
 
-    public void setAppointmentId(int appointmentId) {
-        this.appointmentId = appointmentId;
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
     }
 
     public Timestamp getCreatedAt() {
@@ -82,11 +89,24 @@ public class Prescription {
         this.createdAt = createdAt;
     }
 
+    @JsonProperty("appointmentId")
+    public Integer getAppointmentId() {
+        return this.appointment != null ? this.appointment.getId() : null;
+    }
+
+    @JsonProperty("appointmentId")
+    public void setAppointmentId(Integer appointmentId) {
+        if (appointmentId != null) {
+            this.appointment = new Appointment();
+            this.appointment.setId(appointmentId);
+        }
+    }
+
     @Override
     public String toString() {
         return "ID: " + id
                 + " | Notes: " + prescriptionNotes
-                + " | Appointment ID: " + appointmentId
+                + " | Appointment ID: " + appointment
                 + " | Created: " + createdAt;
     }
 
