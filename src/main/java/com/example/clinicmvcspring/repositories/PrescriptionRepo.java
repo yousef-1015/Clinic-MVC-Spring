@@ -15,7 +15,8 @@ public interface PrescriptionRepo extends JpaRepository<Prescription, Integer> {
             "FROM prescription_medications pm " +
             "JOIN medications m ON pm.medication_id = m.id " +
             "WHERE pm.prescription_id = :prescriptionId", nativeQuery = true)
-    // prescriptionId like the jdbcNamedParameter
+    // prescriptionId like the jdbcNamedParameter se we use th @Param to map from
+    // sql query to variable
     List<PrescriptionMedicationProjection> getMedicationsForPrescription(@Param("prescriptionId") int prescriptionId);
 
     @Modifying

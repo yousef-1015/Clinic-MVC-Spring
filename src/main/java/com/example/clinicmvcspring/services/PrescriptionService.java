@@ -89,7 +89,7 @@ public class PrescriptionService {
         Prescription savedPres = repo.save(pres);
 
         if (inputDTO.getMedications() != null) {
-            // add each med and pres to the table
+            // add each med to the pres
             for (PrescriptionMedicationDTO med : inputDTO.getMedications()) {
                 repo.addMedicationToPrescription(
                         savedPres.getId(),
