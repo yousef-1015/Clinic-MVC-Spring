@@ -49,9 +49,9 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("Page size must be between 1 and 50", 400));
         }
-        List<Prescription> prescriptions = prescriptionService.getAllPrescriptionsPaginated(page, size);
+        List<PrescriptionDetailDTO> prescriptions = prescriptionService.getAllPrescriptionsPaginated(page, size);
         long total = prescriptionService.count();
-        PaginatedListDTO<Prescription> response = new PaginatedListDTO<>(prescriptions, page, size, total);
+        PaginatedListDTO<PrescriptionDetailDTO> response = new PaginatedListDTO<>(prescriptions, page, size, total);
         return ResponseEntity.ok(response);
     }
 
@@ -110,8 +110,8 @@ public class PrescriptionController {
         }
         pres.setId(id);
         pres.setCreatedAt(existingPres.get().getCreatedAt());
-        prescriptionService.updatePrescriptionById(id, pres);
-        return ResponseEntity.ok(pres);
+
+        return ResponseEntity.ok(prescriptionService.updatePrescriptionById(id, pres));
 
     }
 
@@ -137,9 +137,9 @@ public class PrescriptionController {
             existingPres.get().setAppointment(appo);
         }
 
-        prescriptionService.updatePrescriptionById(id, existingPres.get());
+        
 
-        return ResponseEntity.ok(existingPres.get()); // 200
+        return ResponseEntity.ok(prescriptionService.updatePrescriptionById(id, existingPres.get())); // 200
 
     }
 

@@ -27,8 +27,10 @@ public class PrescriptionService {
         return repo.save(pres);
     }
 
-    public List<Prescription> getAllPrescriptions() {
-        return repo.findAll();
+    public List<PrescriptionDetailDTO> getAllPrescriptions() {
+        return repo.findAll().stream()
+                .map(this::convertToDetailDTO)
+                .toList();
     }
 
     public Optional<Prescription> getPrescriptionByID(int id) {
@@ -64,9 +66,9 @@ public class PrescriptionService {
         repo.deleteById(id);
     }
 
-    public Prescription updatePrescriptionById(int id, Prescription pres) {
+    public PrescriptionDetailDTO updatePrescriptionById(int id, Prescription pres) {
         pres.setId(id);
-        return repo.save(pres);
+        return convertToDetailDTO(repo.save(pres));
     }
 
     public List<PrescriptionMedicationDTO> getMedicationsForPrescription(int prescriptionId) {
@@ -79,8 +81,10 @@ public class PrescriptionService {
                 .toList();
     }
 
-    public List<Prescription> getAllPrescriptionsPaginated(int page, int size) {
-        return repo.findAll(PageRequest.of(page, size)).getContent();
+    public List<PrescriptionDetailDTO> getAllPrescriptionsPaginated(int page, int size) {
+        return repo.findAll(PageRequest.of(page, size)).getContent().stream()
+                .map(this::convertToDetailDTO)
+                .toList();
     }
 
     public long count() {
@@ -90,7 +94,7 @@ public class PrescriptionService {
     public PrescriptionDetailDTO addPrescriptionWithMedications(PrescriptionDetailDTO inputDTO) {
         Appointment appointment = new Appointment();
         appointment.setId(inputDTO.getAppointmentId());
-    Prescription pres = new Prescription(inputDTO.getPrescriptionNotes(), appointment);
+        Prescription pres = new Prescription(inputDTO.getPrescriptionNotes(), appointment);
 
         Prescription savedPres = repo.save(pres);
 
@@ -109,4 +113,15 @@ public class PrescriptionService {
         inputDTO.setCreatedAt(savedPres.getCreatedAt());
         return inputDTO;
     }
+
+    public PrescriptionDetailDTO convertToDetailDTO(Prescription pres) {
+        List<PrescriptionMedicationDTO> meds = getMedicationsForPrescription(pres.getId());
+        return new PrescriptionDetailDTO(
+                pres.getId(),
+                pres.getPrescriptionNotes(),
+                pres.getAppointment() != null ? pres.getAppointment().getId() : null,
+                pres.getCreatedAt(),
+                meds);
+    }
+
 }
