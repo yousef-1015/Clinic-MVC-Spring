@@ -2,7 +2,6 @@ package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
 
-
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -38,15 +37,21 @@ public class Appointment {
     @Column(name = "date_and_time")
     private Timestamp dateAndTime;
 
-    @Column(name = "patient_id")
-    private int patientId;
+    // @Column(name = "patient_id")
+    // private int patientId;
 
     // @Column(name = "doctor_id")
-    // private int doctorId;
+    // private int doctorId;;
 
-    @ManyToOne
-    @JoinColumn(name = "doctor_id")
+    @ManyToOne // one patient many appointments
+    @JoinColumn(name = "patient_id")
     @JsonIgnore
+    private Patient patient;
+
+    @ManyToOne // one doctor many appointments
+    // NO CASCADE HERE
+    @JoinColumn(name = "doctor_id") // foreign key at many side
+    @JsonIgnore // don't show all doctor info like salary and hire date they don't belong here
     private Doctor doctor;
 
     @NotNull(message = "Status is Required")
@@ -63,19 +68,19 @@ public class Appointment {
     private Prescription prescription;
 
     // for adding
-    public Appointment(Timestamp dateAndTime, int patientId, Doctor doctor, AppointmentStatus status) {
+    public Appointment(Timestamp dateAndTime, Patient patient, Doctor doctor, AppointmentStatus status) {
         this.dateAndTime = dateAndTime;
-        this.patientId = patientId;
+        this.patient = patient;
         this.doctor = doctor;
         this.status = status;
     }
 
     // for getting
-    public Appointment(int id, Timestamp dateAndTime, int patientId, Doctor doctor, AppointmentStatus status,
+    public Appointment(int id, Timestamp dateAndTime, Patient patient, Doctor doctor, AppointmentStatus status,
             Timestamp createdAt) {
         this.id = id;
         this.dateAndTime = dateAndTime;
-        this.patientId = patientId;
+        this.patient = patient;
         this.doctor = doctor;
         this.status = status;
         this.createdAt = createdAt;
@@ -100,12 +105,12 @@ public class Appointment {
         this.dateAndTime = dateAndTime;
     }
 
-    public int getPatientId() {
-        return patientId;
+    public Patient getPatient() {
+        return patient;
     }
 
-    public void setPatientId(int patientId) {
-        this.patientId = patientId;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
     public Doctor getDoctor() {
@@ -153,11 +158,24 @@ public class Appointment {
         }
     }
 
+    @JsonProperty("patientId")
+    public Integer getPatientId() {
+        return this.patient != null ? this.patient.getId() : null;
+    }
+
+    @JsonProperty("patientId")
+    public void setPatientId(Integer patientId) {
+        if (patientId != null) {
+            this.patient = new Patient();
+            this.patient.setId(patientId);
+        }
+    }
+
     @Override
     public String toString() {
         return "ID: " + id
                 + " | Date & Time: " + dateAndTime
-                + " | Patient ID: " + patientId
+                + " | Patient ID: " + patient.getId()
                 + " | Doctor ID: " + doctor.getId()
                 + " | Status: " + status
                 + " | Created: " + createdAt;
