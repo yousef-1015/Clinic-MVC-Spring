@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.clinicmvcspring.dtos.DoctorDTO;
+import com.example.clinicmvcspring.mappers.DoctorMapper;
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
 import com.example.clinicmvcspring.specifications.DoctorSpecifications;
@@ -17,9 +19,11 @@ import com.example.clinicmvcspring.specifications.DoctorSpecifications;
 public class DoctorService {
 
     private final DoctorRepo repo;
+    private final DoctorMapper mapper;
 
-    public DoctorService(DoctorRepo repo) {
+    public DoctorService(DoctorRepo repo, DoctorMapper mapper) {
         this.repo = repo;
+        this.mapper = mapper;
     }
 
     public Doctor addDoctor(Doctor newDoctor) {
@@ -51,8 +55,9 @@ public class DoctorService {
         return repo.save(doc);
     }
 
-    public Page<Doctor> getAllDoctors(Pageable pageable) {
-        return repo.findAll(pageable);
+    public Page<DoctorDTO> getAllDoctors(Pageable pageable) {
+        Page<Doctor> doctorPage = repo.findAll(pageable);
+        return doctorPage.map(doc -> mapper.doctorToDoctorDTO(doc));
     }
 
     public Page<Doctor> findDoctorsBySpecialty(String specialty, Pageable pageable) {
@@ -66,7 +71,6 @@ public class DoctorService {
                 .where(DoctorSpecifications.hasSpecialty(specialty))
                 .and(DoctorSpecifications.salaryGreaterThan(salary));
 
-        
         return repo.findAll(spec, pageable);
     }
 }

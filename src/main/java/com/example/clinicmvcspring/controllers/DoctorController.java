@@ -2,6 +2,7 @@ package com.example.clinicmvcspring.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.clinicmvcspring.dtos.DoctorDTO;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.dtos.PaginatedListDTO;
 import com.example.clinicmvcspring.models.Doctor;
@@ -58,9 +59,9 @@ public class DoctorController {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Doctor> doctorPage = doctorService.getAllDoctors(pageable);
+        Page<DoctorDTO> doctorPage = doctorService.getAllDoctors(pageable);
         long total = doctorPage.getTotalElements();
-        PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(doctorPage.getContent(), page, size, total);
+        PaginatedListDTO<DoctorDTO> response = new PaginatedListDTO<>(doctorPage.getContent(), page, size, total);
         return ResponseEntity.ok(response);
     }
 
