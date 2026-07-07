@@ -14,7 +14,7 @@ import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
 import com.example.clinicmvcspring.specifications.AppointmentSpecification;
 import com.example.clinicmvcspring.dtos.AppointmentDTO;
-import com.example.clinicmvcspring.dtos.PrescriptionDTO;
+import com.example.clinicmvcspring.mappers.AppointmentMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,22 +22,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class AppointmentService {
 
     private final AppointmentRepo repo;
+    private final AppointmentMapper mapper;
 
     // spring boot will automatically do the dependency injection
-    public AppointmentService(AppointmentRepo repo) {
+    public AppointmentService(AppointmentRepo repo, AppointmentMapper mapper) {
         this.repo = repo;
+        this.mapper = mapper;
     }
 
     public AppointmentDTO addAppointment(Appointment app) {
-        return convertToDTO(repo.save(app));
+        return mapper.appointmentToAppointmentDTO(repo.save(app));
     }
 
     public List<AppointmentDTO> getAllAppointments() {
-        return repo.findAll().stream().map(app -> convertToDTO(app)).toList();
+        return repo.findAll().stream().map(app -> mapper.appointmentToAppointmentDTO(app)).toList();
     }
 
     public Optional<AppointmentDTO> getAppointmentByID(int id) {
-        return repo.findById(id).map(app -> convertToDTO(app));
+        return repo.findById(id).map(app -> mapper.appointmentToAppointmentDTO(app));
     }
 
     public Optional<Appointment> getAppointmentEntityByID(int id) {
@@ -54,33 +56,13 @@ public class AppointmentService {
 
     public AppointmentDTO updateAppointmentById(int id, Appointment app) {
         app.setId(id);
-        return convertToDTO(repo.save(app));
+        return mapper.appointmentToAppointmentDTO(repo.save(app));
 
     }
 
     public Page<AppointmentDTO> getAllAppointments(Pageable pageable) {
         Page<Appointment> appointmentPage = repo.findAll(pageable);
-        return appointmentPage.map(app -> convertToDTO(app));// convert to the DTO
-    }
-
-    public AppointmentDTO convertToDTO(Appointment app) {
-        PrescriptionDTO presDto = null;
-
-        if (app.getPrescription() != null) {
-            presDto = new PrescriptionDTO(
-                    app.getPrescription().getId(),
-                    app.getPrescription().getPrescriptionNotes(),
-                    app.getPrescription().getCreatedAt());
-        }
-
-        return new AppointmentDTO(
-                app.getId(),
-                app.getDateAndTime(),
-                app.getPatient() != null ? app.getPatient().getId() : 0,
-                app.getDoctor() != null ? app.getDoctor().getId() : 0,
-                app.getStatus(),
-                app.getCreatedAt(),
-                presDto);
+        return appointmentPage.map(app -> mapper.appointmentToAppointmentDTO(app));// convert to the DTO
     }
 
     @Transactional
@@ -100,17 +82,16 @@ public class AppointmentService {
     public Page<AppointmentDTO> findAppointmentByStatus(AppointmentStatus status, Pageable pageable) {
         Page<Appointment> appointmentPage = repo.findByStatus(status, pageable);
 
-        return appointmentPage.map(app -> convertToDTO(app));
+        return appointmentPage.map(app -> mapper.appointmentToAppointmentDTO(app));
     }
 
     public Page<AppointmentDTO> findAppointmentByDate(Timestamp start, Timestamp end, Pageable pageable) {
-
 
         Specification<Appointment> spec = Specification.where(AppointmentSpecification.isBetweenDates(start, end));
 
         Page<Appointment> appointmentPage = repo.findAll(spec, pageable);
 
-        return appointmentPage.map(app -> convertToDTO(app));
+        return appointmentPage.map(app -> mapper.appointmentToAppointmentDTO(app));
     }
 
 }
