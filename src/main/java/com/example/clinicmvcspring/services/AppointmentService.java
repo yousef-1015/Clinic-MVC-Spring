@@ -1,15 +1,18 @@
 package com.example.clinicmvcspring.services;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.specifications.AppointmentSpecification;
 import com.example.clinicmvcspring.dtos.AppointmentDTO;
 import com.example.clinicmvcspring.dtos.PrescriptionDTO;
 
@@ -96,6 +99,16 @@ public class AppointmentService {
 
     public Page<AppointmentDTO> findAppointmentByStatus(AppointmentStatus status, Pageable pageable) {
         Page<Appointment> appointmentPage = repo.findByStatus(status, pageable);
+
+        return appointmentPage.map(app -> convertToDTO(app));
+    }
+
+    public Page<AppointmentDTO> findAppointmentByDate(Timestamp start, Timestamp end, Pageable pageable) {
+
+
+        Specification<Appointment> spec = Specification.where(AppointmentSpecification.isBetweenDates(start, end));
+
+        Page<Appointment> appointmentPage = repo.findAll(spec, pageable);
 
         return appointmentPage.map(app -> convertToDTO(app));
     }

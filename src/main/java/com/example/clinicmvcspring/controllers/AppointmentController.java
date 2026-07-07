@@ -172,4 +172,34 @@ public class AppointmentController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/search/date")
+    public ResponseEntity<?> getAppointmentsByDateRange(
+            @RequestParam(required = false) Timestamp start,
+            @RequestParam(required = false) Timestamp end,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AppointmentDTO> appPage = appointmentService.findAppointmentByDate(start, end, pageable);
+
+        long total = appPage.getTotalElements();
+        PaginatedListDTO<AppointmentDTO> response = new PaginatedListDTO<>(
+                appPage.getContent(),
+                page,
+                size,
+                total);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
