@@ -6,10 +6,12 @@ import com.example.clinicmvcspring.models.Appointment;
 import com.example.clinicmvcspring.models.Prescription;
 import com.example.clinicmvcspring.services.PrescriptionService;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,9 +51,11 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("Page size must be between 1 and 50", 400));
         }
-        List<PrescriptionDetailDTO> prescriptions = prescriptionService.getAllPrescriptionsPaginated(page, size);
-        long total = prescriptionService.count();
-        PaginatedListDTO<PrescriptionDetailDTO> response = new PaginatedListDTO<>(prescriptions, page, size, total);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PrescriptionDetailDTO> presPage = prescriptionService.getAllPrescriptionsPaginated(pageable);
+        long total = presPage.getTotalElements();
+        PaginatedListDTO<PrescriptionDetailDTO> response = new PaginatedListDTO<>(presPage.getContent(), page, size, total);
         return ResponseEntity.ok(response);
     }
 

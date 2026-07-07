@@ -3,7 +3,8 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
@@ -81,14 +82,9 @@ public class PrescriptionService {
                 .toList();
     }
 
-    public List<PrescriptionDetailDTO> getAllPrescriptionsPaginated(int page, int size) {
-        return repo.findAll(PageRequest.of(page, size)).getContent().stream()
-                .map(this::convertToDetailDTO)
-                .toList();
-    }
-
-    public long count() {
-        return repo.count();
+    public Page<PrescriptionDetailDTO> getAllPrescriptionsPaginated(Pageable pageable) {
+        Page<Prescription> prePage = repo.findAll(pageable);
+        return prePage.map(pre -> convertToDetailDTO(pre));
     }
 
     public PrescriptionDetailDTO addPrescriptionWithMedications(PrescriptionDetailDTO inputDTO) {
