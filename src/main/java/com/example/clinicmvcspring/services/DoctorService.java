@@ -1,14 +1,17 @@
 package com.example.clinicmvcspring.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.specifications.DoctorSpecifications;
 
 @Service
 public class DoctorService {
@@ -56,4 +59,14 @@ public class DoctorService {
         return repo.findBySpecialty(specialty, pageable);
     }
 
+    public Page<Doctor> findDoctorsBySpecialtyAndSalary(String specialty, BigDecimal salary, Pageable pageable) {
+
+        // Combine specifications
+        Specification<Doctor> spec = Specification
+                .where(DoctorSpecifications.hasSpecialty(specialty))
+                .and(DoctorSpecifications.salaryGreaterThan(salary));
+
+        
+        return repo.findAll(spec, pageable);
+    }
 }

@@ -170,4 +170,33 @@ public class DoctorController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchDoctors(
+            @RequestParam(required = false) String specialty,
+            @RequestParam(required = false) BigDecimal salary,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Doctor> docPage = doctorService.findDoctorsBySpecialtyAndSalary(specialty, salary, pageable);
+
+        long total = docPage.getTotalElements();
+        PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(
+                docPage.getContent(),
+                page,
+                size,
+                total);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
