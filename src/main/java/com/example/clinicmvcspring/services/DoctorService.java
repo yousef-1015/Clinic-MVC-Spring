@@ -3,12 +3,12 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.models.*;
 import com.example.clinicmvcspring.repositories.*;
-
 
 @Service
 public class DoctorService {
@@ -48,11 +48,8 @@ public class DoctorService {
         return repo.save(doc);
     }
 
-    public List<Doctor> getAllDoctors(int page, int size) {
-        return repo.findAll(PageRequest.of(page, size)).getContent();
+    public Page<Doctor> getAllDoctors(Pageable pageable) {
+        return repo.findAll(pageable);
     }
 
-    public long countDoctors() {
-        return repo.count();
-    }
 }

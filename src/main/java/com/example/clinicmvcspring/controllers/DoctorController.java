@@ -10,9 +10,12 @@ import com.example.clinicmvcspring.services.DoctorService;
 import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,10 +56,11 @@ public class DoctorController {
             ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
             return ResponseEntity.status(400).body(error);
         }
-
-        List<Doctor> allDocs = doctorService.getAllDoctors(page, size);
-        long total = doctorService.countDoctors();
-        PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(allDocs, page, size, total);
+    
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Doctor> doctorPage  = doctorService.getAllDoctors(pageable);
+        long total = doctorPage .getTotalElements();
+        PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(doctorPage.getContent(), page, size, total);
         return ResponseEntity.ok(response);
     }
 
