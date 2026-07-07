@@ -111,7 +111,7 @@ public class AppointmentController {
 
         app.setId(id);
         app.setCreatedAt(existingApp.get().getCreatedAt());
-        
+
         return ResponseEntity.ok(appointmentService.updateAppointmentById(id, app));
 
     }
@@ -145,9 +145,31 @@ public class AppointmentController {
             existingApp.get().setStatus(AppointmentStatus.valueOf((String) toUpdate.get("status")));
         }
 
-        
-
         return ResponseEntity.ok(appointmentService.updateAppointmentById(id, existingApp.get()));
 
+    }
+
+    @GetMapping("status")
+    public ResponseEntity<?> getAppointmentByStatus(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size, @RequestParam AppointmentStatus status) {
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AppointmentDTO> appPage = appointmentService.findAppointmentByStatus(status, pageable);
+
+        long total = appPage.getTotalElements();
+        PaginatedListDTO<AppointmentDTO> response = new PaginatedListDTO<>(
+                appPage.getContent(),
+                page,
+                size,
+                total);
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -94,4 +94,10 @@ public class AppointmentService {
         repo.save(app);
     }
 
+    public Page<AppointmentDTO> findAppointmentByStatus(AppointmentStatus status, Pageable pageable) {
+        Page<Appointment> appointmentPage = repo.findByStatus(status, pageable);
+
+        return appointmentPage.map(app -> convertToDTO(app));
+    }
+
 }
