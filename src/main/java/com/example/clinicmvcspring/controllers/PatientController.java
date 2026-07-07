@@ -11,10 +11,12 @@ import com.example.clinicmvcspring.services.PatientService;
 
 import jakarta.validation.Valid;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,9 +49,11 @@ public class PatientController {
             return ResponseEntity.status(400).body(error);
         }
 
-        List<Patient> allPatients = patientService.getAllPatients(page, size);
-        long total = patientService.countPatients();
-        PaginatedListDTO<Patient> response = new PaginatedListDTO<>(allPatients, page, size, total);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Patient> PatientPage = patientService.getAllPatients(pageable);
+        long total = PatientPage.getTotalElements();
+        PaginatedListDTO<Patient> response = new PaginatedListDTO<>(PatientPage.getContent(), page, size, total);
         return ResponseEntity.ok(response);
     }
 
