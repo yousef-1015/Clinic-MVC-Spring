@@ -43,12 +43,12 @@ public class Appointment {
     // @Column(name = "doctor_id")
     // private int doctorId;;
 
-    @ManyToOne // one patient many appointments
+    @ManyToOne(fetch = FetchType.EAGER)  // one patient many appointments
     @JoinColumn(name = "patient_id")
     @JsonIgnore
     private Patient patient;
 
-    @ManyToOne // one doctor many appointments
+    @ManyToOne(fetch = FetchType.EAGER) // one doctor many appointments
     // NO CASCADE HERE
     @JoinColumn(name = "doctor_id") // foreign key at many side
     @JsonIgnore // don't show all doctor info like salary and hire date they don't belong here
