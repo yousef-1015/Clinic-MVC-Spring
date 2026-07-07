@@ -13,6 +13,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -61,8 +62,8 @@ public class Appointment {
     @Column(name = "created_at")
     @CreationTimestamp
     private Timestamp createdAt;
-
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+//fetch type is EAGER by default
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
     private Prescription prescription;
 
     // for adding
