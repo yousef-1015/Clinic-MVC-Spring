@@ -52,4 +52,8 @@ public class DoctorService {
         return repo.findAll(pageable);
     }
 
+    public Page<Doctor> findDoctorsBySpecialty(String specialty, Pageable pageable) {
+        return repo.findBySpecialty(specialty, pageable);
+    }
+
 }

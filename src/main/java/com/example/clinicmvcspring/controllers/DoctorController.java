@@ -56,10 +56,10 @@ public class DoctorController {
             ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
             return ResponseEntity.status(400).body(error);
         }
-    
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<Doctor> doctorPage  = doctorService.getAllDoctors(pageable);
-        long total = doctorPage .getTotalElements();
+        Page<Doctor> doctorPage = doctorService.getAllDoctors(pageable);
+        long total = doctorPage.getTotalElements();
         PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(doctorPage.getContent(), page, size, total);
         return ResponseEntity.ok(response);
     }
@@ -140,6 +140,34 @@ public class DoctorController {
             existingDoc.get().setSalary(new BigDecimal(toUpdate.get("salary").toString()));
         doctorService.updateDoctorById(id, existingDoc.get());
         return ResponseEntity.ok(existingDoc.get()); // 200
+    }
+
+    @GetMapping("/specialty")
+    public ResponseEntity<?> getDoctorsBySpecialty(
+            @RequestParam String specialty,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        if (page < 0) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+        if (size <= 0 || size > 50) {
+            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
+            return ResponseEntity.status(400).body(error);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Doctor> docPage = doctorService.findDoctorsBySpecialty(specialty, pageable);
+
+        long total = docPage.getTotalElements();
+        PaginatedListDTO<Doctor> response = new PaginatedListDTO<>(
+                docPage.getContent(),
+                page,
+                size,
+                total);
+
+        return ResponseEntity.ok(response);
     }
 
 }
