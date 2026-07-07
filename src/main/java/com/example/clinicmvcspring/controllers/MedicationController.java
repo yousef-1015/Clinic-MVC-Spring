@@ -9,10 +9,12 @@ import com.example.clinicmvcspring.services.MedicationService;
 
 import jakarta.validation.Valid;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,9 +48,11 @@ public class MedicationController {
             return ResponseEntity.status(400).body(error);
         }
 
-        List<Medication> allMeds = medicationService.getAllMedications(page, size);
-        long total = medicationService.countMedications();
-        PaginatedListDTO<Medication> response = new PaginatedListDTO<>(allMeds, page, size, total);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Medication> medPage = medicationService.getAllMedications(pageable);
+        long total = medPage.getTotalElements();
+        PaginatedListDTO<Medication> response = new PaginatedListDTO<>(medPage.getContent(), page, size, total);
         return ResponseEntity.ok(response);
     }
 
