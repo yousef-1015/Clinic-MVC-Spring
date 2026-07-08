@@ -73,11 +73,13 @@ public class AppointmentService {
             throw new NoSuchElementException("Appointment not found with id: " + appointmentId);
         }
 
-        Appointment app = appOpt.get();
-        app.setDoctorId(doctorId);
+        Appointment app = appOpt.get();// Managed Entity
+        app.setDoctorId(doctorId);// The Managed Entity is now DIRTY
 
-        repo.save(app);
-    }
+        // Because of the @Transactional annotation, hibernate saved the appointment
+        // automatically
+        // repo.save(app);
+    }// app is now a DETACHED entity
 
     public Page<AppointmentDTO> findAppointmentByStatus(AppointmentStatus status, Pageable pageable) {
         Page<Appointment> appointmentPage = repo.findByStatus(status, pageable);
