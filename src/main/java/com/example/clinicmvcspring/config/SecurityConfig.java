@@ -14,6 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final CustomAuthEntryPoint customAuthEntryPoint;
+
+    public SecurityConfig(CustomAuthEntryPoint customAuthEntryPoint) {
+        this.customAuthEntryPoint = customAuthEntryPoint;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,7 +47,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())// disable cross site request forgery protection for postman
                 .authorizeHttpRequests(req -> req.anyRequest().authenticated())// all requests must be authenticated
                 .httpBasic(basic -> {
-                });// use basic username and password in the request header
+                })// use basic username and password in the request header
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthEntryPoint));
 
         return http.build();
 
