@@ -45,7 +45,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())// disable cross site request forgery protection for postman
-                .authorizeHttpRequests(req -> req.anyRequest().authenticated())// all requests must be authenticated
+                .authorizeHttpRequests(req -> req // AUTHORIZATION
+                        .requestMatchers("/api/v1/doctors/**").hasRole("ADMIN")//(**)means that any endpoint with this path 
+                        .requestMatchers("/api/v1/patients/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/medications/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/appointments/**").hasAnyRole("ADMIN", "DOCTOR")
+                        .requestMatchers("/api/v1/prescriptions/**").hasAnyRole("ADMIN", "DOCTOR")
+
+                        .anyRequest().authenticated())// everything else 
+
                 .httpBasic(basic -> {
                 })// use basic username and password in the request header
                 .exceptionHandling(ex -> ex
