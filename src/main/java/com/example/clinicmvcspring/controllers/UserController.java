@@ -58,20 +58,13 @@ public class UserController {
     @PostMapping("signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
 
-        AppUser newUser = new AppUser();
-        newUser.setUsername(request.getUsername());
-        newUser.setPassword(request.getPassword());
-        newUser.setRole(request.getRole());
-        newUser.setEnabled(true);
-        AppUser savedUser = userService.addUser(newUser);
+        // If it's a DOCTOR perform all validations
+        Doctor doctorToLink = null;
         if (request.getRole() == Role.DOCTOR) {
             if (request.getForeignId() != null) {
                 Optional<Doctor> docOp = doctorService.getDoctorByID(request.getForeignId());
-                if (docOp.isPresent()) {
-                    Doctor doctor = docOp.get();
-                    doctor.setUserId(savedUser.getId());
-                    doctorService.updateDoctorById(doctor.getId(), doctor);
-                } else {
+
+                if (docOp.isEmpty()) {
                     return new ResponseEntity<>(
                             Map.of(
                                     "status", 400,
@@ -79,9 +72,35 @@ public class UserController {
                                     "message", "Doctor with ID " + request.getForeignId() + " not found."),
                             HttpStatus.BAD_REQUEST);
                 }
-            }
 
+                doctorToLink = docOp.get();
+                if (doctorToLink.getUserId() != null) {
+                    return new ResponseEntity<>(
+                            Map.of(
+                                    "status", 400,
+                                    "error", "Bad Request",
+                                    "message",
+                                    "Doctor with ID " + request.getForeignId() + " already has a user account."),
+                            HttpStatus.BAD_REQUEST);
+                }
+            }
         }
+
+        // All validations passed
+        AppUser newUser = new AppUser();
+        newUser.setUsername(request.getUsername());
+        newUser.setPassword(request.getPassword());
+        newUser.setRole(request.getRole());
+        newUser.setEnabled(true);
+
+        AppUser savedUser = userService.addUser(newUser);
+
+        // Link the doctor to the saved user
+        if (doctorToLink != null) {
+            doctorToLink.setUserId(savedUser.getId());
+            doctorService.updateDoctorById(doctorToLink.getId(), doctorToLink);
+        }
+
         return new ResponseEntity<>(
                 Map.of(
                         "status", 201,
