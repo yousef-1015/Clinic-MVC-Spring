@@ -62,6 +62,9 @@ public class Doctor {
     // ATTRIBUTE NAME)
     private String specialty;
 
+    @Column(name = "user_id") // maps to the user_id column in users
+    private Integer userId;
+
     // for creating
     public Doctor(String firstName, String lastName, String email, BigDecimal salary, String specialty) {
         this.firstName = firstName;
@@ -140,6 +143,14 @@ public class Doctor {
 
     public void setSpecialty(String specialty) {
         this.specialty = specialty;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     @Override

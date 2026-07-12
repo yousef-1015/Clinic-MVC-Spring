@@ -7,6 +7,7 @@ public class SignupRequest {
     private String username;
     private String password;
     private Role role;
+    private Integer foreignId;
 
     public String getUsername() {
         return username;
@@ -30,6 +31,14 @@ public class SignupRequest {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Integer getForeignId() {
+        return foreignId;
+    }
+
+    public void setForeignId(Integer foreignId) {
+        this.foreignId = foreignId;
     }
 
 }
