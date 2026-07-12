@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/medications/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/appointments/**").hasAnyRole("ADMIN", "DOCTOR")
                         .requestMatchers("/api/v1/prescriptions/**").hasAnyRole("ADMIN", "DOCTOR")
+                        .requestMatchers("/api/v1/users/signup").hasRole("ADMIN")
 
                         .anyRequest().authenticated())// everything else
 
