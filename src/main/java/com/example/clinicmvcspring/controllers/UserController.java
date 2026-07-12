@@ -74,9 +74,10 @@ public class UserController {
                 } else {
                     return new ResponseEntity<>(
                             Map.of(
-                                    "status", 201,
-                                    "message", "User registered successfully!"),
-                            HttpStatus.CREATED);
+                                    "status", 400,
+                                    "error", "Bad Request",
+                                    "message", "Doctor with ID " + request.getForeignId() + " not found."),
+                            HttpStatus.BAD_REQUEST);
                 }
             }
 
