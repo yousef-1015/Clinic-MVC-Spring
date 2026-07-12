@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.46, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: hospitaldb
+-- Host: localhost    Database: hospitaldb
 -- ------------------------------------------------------
 -- Server version	8.0.46
 
@@ -33,9 +33,10 @@ CREATE TABLE `appointments` (
   UNIQUE KEY `unique_doctor_schedule` (`doctor_id`,`date_and_time`),
   UNIQUE KEY `unique_patient_schedule` (`patient_id`,`date_and_time`),
   KEY `idx_appointment_date` (`date_and_time`),
+  KEY `idx_appt_doc_pat` (`doctor_id`,`patient_id`),
   CONSTRAINT `fk_appointment_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `fk_appointment_patient` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +45,7 @@ CREATE TABLE `appointments` (
 
 LOCK TABLES `appointments` WRITE;
 /*!40000 ALTER TABLE `appointments` DISABLE KEYS */;
-INSERT INTO `appointments` VALUES (1,'2026-06-19 10:00:00',1,1,'Completed','2026-06-18 13:00:00'),(2,'2026-06-20 11:30:00',2,2,'Completed','2026-06-18 13:30:00'),(3,'2026-06-22 09:00:00',3,1,'Scheduled','2026-06-19 05:15:00'),(4,'2026-06-23 14:00:00',4,3,'Scheduled','2026-06-19 06:00:00'),(5,'2026-06-24 09:00:00',6,1,'Cancelled','2026-06-21 07:58:59'),(6,'2026-06-26 14:30:00',6,2,'Scheduled','2026-06-21 07:58:59'),(7,'2024-10-12 11:00:00',7,1,'Completed','2024-10-12 06:00:00'),(8,'2026-06-25 10:00:00',1,1,'Scheduled','2026-06-21 12:37:01'),(9,'2026-06-25 10:30:00',6,1,'Scheduled','2026-06-21 12:37:01'),(10,'2026-06-25 12:00:00',7,1,'Scheduled','2026-06-21 12:37:01');
+INSERT INTO `appointments` VALUES (1,'2026-06-19 10:00:00',1,1,'Completed','2026-06-18 13:00:00'),(2,'2026-06-20 11:30:00',2,2,'Completed','2026-06-18 13:30:00'),(4,'2026-06-23 14:00:00',4,3,'Scheduled','2026-06-19 06:00:00'),(7,'2024-10-12 11:00:00',7,1,'Completed','2024-10-12 06:00:00'),(8,'2026-06-25 10:00:00',1,1,'Scheduled','2026-06-21 12:37:01'),(10,'2026-06-25 12:00:00',7,1,'Scheduled','2026-06-21 12:37:01'),(11,'2026-07-01 10:00:00',2,2,'Scheduled','2026-06-23 08:10:02'),(12,'2026-07-20 10:00:00',1,2,'Scheduled','2026-07-06 10:36:07');
 /*!40000 ALTER TABLE `appointments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -63,10 +64,13 @@ CREATE TABLE `doctors` (
   `salary` decimal(6,2) NOT NULL,
   `hire_date` date NOT NULL DEFAULT (curdate()),
   `specialty` varchar(50) NOT NULL,
+  `user_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  KEY `idx_doctor_specialty` (`specialty`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `idx_doctor_specialty` (`specialty`),
+  KEY `fk_doctor_user` (`user_id`),
+  CONSTRAINT `fk_doctor_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -75,7 +79,7 @@ CREATE TABLE `doctors` (
 
 LOCK TABLES `doctors` WRITE;
 /*!40000 ALTER TABLE `doctors` DISABLE KEYS */;
-INSERT INTO `doctors` VALUES (1,'Tarek','Nimer','tarek@email.com',850.50,'2022-01-15','Cardiology'),(2,'Rami','Odeh','rami@email.com',920.00,'2023-06-10','Pediatrics'),(3,'Sami','Zaid','sami@email.com',780.25,'2024-03-20','Cardiology'),(4,'Ali','Mansour','Ali.mansour@hospital.com',4500.00,'2026-06-21','Pediatrics'),(5,'Fadi','Al-Alami','fadi.alami@hospital.com',5200.00,'2026-06-21','Cardiology');
+INSERT INTO `doctors` VALUES (1,'Tarek','Ziad','tarek.newemail@email.com',999.50,'2022-01-15','Cardiology',NULL),(2,'Rami','Odeh','rami@email.com',920.00,'2023-06-10','Pediatrics',NULL),(3,'Sami','Zaid','sami@email.com',780.25,'2024-03-20','Cardiology',NULL),(4,'Ali','Mansour','Ali.mansour@hospital.com',4500.00,'2026-06-21','Pediatrics',NULL),(6,'raed','malek','raed.malek@clinic.com',8500.50,'2026-06-22','Cardiology',NULL),(9,'moath','malek','moath.malek@clinic.com',9500.50,'2026-06-23','Cardiology',NULL),(18,'khaled','moha','khaleed@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(20,'khaled','mohammad','khaleeed@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(24,'mohannad','hussien','huss@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(26,'Maher','samer','maher.samer@gmail.com',9050.00,'2026-06-30','Cardiology',NULL);
 /*!40000 ALTER TABLE `doctors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -91,7 +95,7 @@ CREATE TABLE `medications` (
   `medication_name` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,7 +104,7 @@ CREATE TABLE `medications` (
 
 LOCK TABLES `medications` WRITE;
 /*!40000 ALTER TABLE `medications` DISABLE KEYS */;
-INSERT INTO `medications` VALUES (1,'Amoxicillin','2026-06-18 09:00:00'),(2,'Ibuprofen','2026-06-18 09:00:00'),(3,'Lipitor','2026-06-18 09:00:00'),(4,'Metformin','2026-06-18 09:00:00');
+INSERT INTO `medications` VALUES (1,'Amoxicillin','2026-06-18 09:00:00'),(2,'Ibuprofen','2026-06-18 09:00:00'),(3,'Lipitor','2026-06-18 09:00:00'),(5,'Paracetamol','2026-06-23 08:36:31');
 /*!40000 ALTER TABLE `medications` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -119,7 +123,7 @@ CREATE TABLE `patients` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -128,7 +132,7 @@ CREATE TABLE `patients` (
 
 LOCK TABLES `patients` WRITE;
 /*!40000 ALTER TABLE `patients` DISABLE KEYS */;
-INSERT INTO `patients` VALUES (1,'Ahmad','Mansour','ahmad@email.com','2026-06-18 12:59:02'),(2,'Mohammad','Ali','mohammad@email.com','2026-06-18 12:59:02'),(3,'Omar','Hassan','omar@email.com','2026-06-18 12:59:02'),(4,'Emad','Mohammd','emad@email.com','2026-06-18 12:59:02'),(5,'Khaled','Sadiq','khaled@email.com','2026-06-18 12:59:02'),(6,'kareem','Hassan','kareem@email.com','2026-06-21 07:15:00'),(7,'Sami','rami','sami@email.com','2024-09-01 06:00:00');
+INSERT INTO `patients` VALUES (1,'Ahmad','Mansour','ahmad@email.com','2026-06-18 12:59:02'),(2,'Mohammad','Ali','mohammad@email.com','2026-06-18 12:59:02'),(3,'Omar','Hassan','omar@email.com','2026-06-18 12:59:02'),(4,'Emad','Mohammd','emad@email.com','2026-06-18 12:59:02'),(5,'Khaled','Sadiq','khaled@email.com','2026-06-18 12:59:02'),(7,'Sami','rami','sami@email.com','2024-09-01 06:00:00'),(8,'zaid','yazan','zaid.yazan@email.com','2026-06-22 12:32:37'),(9,'sara','ahmad','sara.ahmad@email.com','2026-06-23 07:42:47');
 /*!40000 ALTER TABLE `patients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -157,7 +161,7 @@ CREATE TABLE `prescription_medications` (
 
 LOCK TABLES `prescription_medications` WRITE;
 /*!40000 ALTER TABLE `prescription_medications` DISABLE KEYS */;
-INSERT INTO `prescription_medications` VALUES (1,3,'10mg','Once daily at bedtime'),(2,1,'500mg','Three times daily for 7 days'),(2,2,'400mg','Every 6 hours as needed for pain');
+INSERT INTO `prescription_medications` VALUES (1,3,'10mg','Once daily at bedtime'),(2,1,'500mg','Three times daily for 7 days'),(2,2,'400mg','Every 6 hours as needed for pain'),(13,1,'500mg','Once daily'),(13,2,'400mg','Twice daily'),(15,3,'10mg','Once daily at bedtime');
 /*!40000 ALTER TABLE `prescription_medications` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,7 +180,7 @@ CREATE TABLE `prescriptions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_appointment` (`appointment_id`),
   CONSTRAINT `fk_prescription_appointment` FOREIGN KEY (`appointment_id`) REFERENCES `appointments` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -185,8 +189,36 @@ CREATE TABLE `prescriptions` (
 
 LOCK TABLES `prescriptions` WRITE;
 /*!40000 ALTER TABLE `prescriptions` DISABLE KEYS */;
-INSERT INTO `prescriptions` VALUES (1,'Take after meals. Follow up in two weeks.',1,'2026-06-19 07:45:00'),(2,'Keep hydrated. Complete the full course.',2,'2026-06-20 09:00:00');
+INSERT INTO `prescriptions` VALUES (1,'Take after meals. Follow up in two weeks.',1,'2026-06-19 07:45:00'),(2,'Keep hydrated. Complete the full course.',2,'2026-06-20 09:00:00'),(5,'Take after meals. Rest for 3 days.',4,'2026-06-23 08:54:57'),(12,'Testing many-to-many database crash',8,'2026-07-05 09:18:23'),(13,'Take one tablet of medicine every morning.',10,'2026-07-06 07:35:15'),(15,'Rest for 3 days and drink plenty of water.',11,'2026-07-06 10:39:23');
 /*!40000 ALTER TABLE `prescriptions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('DOCTOR','ACCOUNTANT','ADMIN') NOT NULL,
+  `enabled` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'admin','PLACEHOLDER','ADMIN',1);
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -198,4 +230,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-22 10:01:47
+-- Dump completed on 2026-07-12 10:22:23
