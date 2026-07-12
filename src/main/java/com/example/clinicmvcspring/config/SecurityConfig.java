@@ -2,12 +2,15 @@ package com.example.clinicmvcspring.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.example.clinicmvcspring.services.AppUserDetailsService;
+
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
 @Configuration
@@ -28,12 +31,20 @@ public class SecurityConfig {
     public DaoAuthenticationProvider authenticationProvider() {
         // built in from spring spring security, a class that does the auth (get
         // credentials and compare)
-        // DaoAuthenticationProvider needs a class that implements UserDetails service
+        // DaoAuthenticationProvider needs a class that implements UserDetailsService
+
         // (appUserDetailService)
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(appUserDetailsService);
         // DaoAuthenticationProvider needs password encoder for password hashing
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
+    }
+
+    // Manager that delegates the authentication obj to providers
+    // this way i can mae use of multiple authProvidors in my system
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager(); // Spring automatically links the provider above
     }
 
     @Bean
