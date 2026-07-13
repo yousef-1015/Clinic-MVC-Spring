@@ -5,8 +5,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.clinicmvcspring.services.AppUserDetailsService;
 
@@ -19,12 +21,14 @@ public class SecurityConfig {
     private final CustomAuthEntryPoint customAuthEntryPoint;
     private final AppUserDetailsService appUserDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtAuthFilter jwtAuthFilter;
 
     public SecurityConfig(CustomAuthEntryPoint customAuthEntryPoint, AppUserDetailsService appUserDetailsService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, JwtAuthFilter jwtAuthFilter) {
         this.customAuthEntryPoint = customAuthEntryPoint;
         this.appUserDetailsService = appUserDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
@@ -53,6 +57,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .csrf(csrf -> csrf.disable())// disable cross site request forgery protection for postman
                 .authorizeHttpRequests(req -> req // AUTHORIZATION
+                        .requestMatchers("/api/v1/users/login").permitAll() // so users can only login
+
                         .requestMatchers("/api/v1/doctors/**").hasRole("ADMIN")// (**)means that any endpoint with this
                                                                                // path
                         .requestMatchers("/api/v1/patients/**").hasRole("ADMIN")
@@ -63,10 +69,11 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated())// everything else
 
-                .httpBasic(basic -> {
-                })// use basic username and password in the request header
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(customAuthEntryPoint));
+                        .authenticationEntryPoint(customAuthEntryPoint))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 
