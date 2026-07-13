@@ -6,14 +6,18 @@ import com.example.clinicmvcspring.dtos.AuthResponse;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.dtos.LoginRequest;
 import com.example.clinicmvcspring.dtos.PaginatedListDTO;
+import com.example.clinicmvcspring.dtos.RefreshRequestDTO;
+import com.example.clinicmvcspring.dtos.RefreshResponseDTO;
 import com.example.clinicmvcspring.dtos.SignupRequest;
 import com.example.clinicmvcspring.models.AppUser;
 import com.example.clinicmvcspring.models.CustomUserDetails;
 import com.example.clinicmvcspring.models.Doctor;
+import com.example.clinicmvcspring.models.RefreshToken;
 import com.example.clinicmvcspring.models.Role;
 import com.example.clinicmvcspring.services.AppUserDetailsService;
 import com.example.clinicmvcspring.services.DoctorService;
 import com.example.clinicmvcspring.services.JwtService;
+import com.example.clinicmvcspring.services.RefreshTokenService;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,13 +45,16 @@ public class UserController {
     private final DoctorService doctorService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public UserController(AppUserDetailsService userService, DoctorService doctorService,
-            AuthenticationManager authenticationManager, JwtService jwtService) {
+            AuthenticationManager authenticationManager, JwtService jwtService,
+            RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.doctorService = doctorService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @GetMapping("")
@@ -129,8 +136,9 @@ public class UserController {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         final UserDetails userDetailsToLogin = userService.loadUserByUsername(request.getUsername());
         final String token = jwtService.generateToken(userDetailsToLogin);
+        final RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetailsToLogin.getUsername());
 
-        return ResponseEntity.ok(new AuthResponse(token, (CustomUserDetails) userDetailsToLogin));
+        return ResponseEntity.ok(new AuthResponse(token, (CustomUserDetails) userDetailsToLogin, refreshToken));
     }
 
     @PostMapping("/logout")
@@ -142,5 +150,28 @@ public class UserController {
         }
 
         return ResponseEntity.ok(Map.of("message", "Logged out successfully!"));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody RefreshRequestDTO request) {
+
+        Optional<RefreshToken> refToken = refreshTokenService.findByToken(request.getRefreshToken()); // get the
+        if (refToken.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("This Refresh Token was not found", 404));
+        }
+
+        try {
+            refreshTokenService.verifyExpiration(refToken.get());// verify that the refresh token is not expired
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403)
+                    .body(new ErrorResponseDTO(e.getMessage(), 403));
+        }
+
+        AppUser user = refToken.get().getUser();
+        final UserDetails userDetailsToRefresh = userService.loadUserByUsername(user.getUsername());
+        final String token = jwtService.generateToken(userDetailsToRefresh);
+        return ResponseEntity.ok(new RefreshResponseDTO(token));
+
     }
 }
