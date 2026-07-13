@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())// disable cross site request forgery protection for postman
                 .authorizeHttpRequests(req -> req // AUTHORIZATION
                         .requestMatchers("/api/v1/users/login").permitAll() // so users can only login
+                        .requestMatchers("/api/v1/users/logout").permitAll() // so users can only logout
 
                         .requestMatchers("/api/v1/doctors/**").hasRole("ADMIN")// (**)means that any endpoint with this
                                                                                // path

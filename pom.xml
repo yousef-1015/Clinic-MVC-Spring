@@ -138,7 +138,6 @@
                 <path>
                   <groupId>org.projectlombok</groupId>
                   <artifactId>lombok</artifactId>
-                  <!-- We match Lombok version 1.18.46 which is in your repository -->
                   <version>1.18.46</version>
                 </path>
                 <path>

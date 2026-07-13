@@ -2,7 +2,9 @@ package com.example.clinicmvcspring.services;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.HexFormat;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +19,8 @@ public class JwtService {
     // Read the key from application.properties
     @Value("${application.security.jwt.secret-key}") // this value is a random hex value
     private String jwtSecret;
+    // A set to store logged Out tokens in memory
+    private final Set<String> tokenBlacklist = new HashSet<>();
 
     private Key getSigningKey() {
         byte[] keyBytes = HexFormat.of().parseHex(jwtSecret);// decode the hex values into a an array of bytes
@@ -38,20 +42,20 @@ public class JwtService {
                 .compact(); // Build into a String
     }
 
-    public String extractUsername(String token) 
-    {
+    public String extractUsername(String token) {
         // i use these 5 lines are always when getting a value from the token
         return Jwts.parserBuilder()// create the token reader
-                .setSigningKey(getSigningKey())// use the key to see if the yoken was tampered with 
-                .build()//compile parses (reader)
-                .parseClaimsJws(token)//open the token
-                .getBody()//claims in payload of the token
-                .getSubject();//get any field i want (username here)
+                .setSigningKey(getSigningKey())// use the key to see if the yoken was tampered with
+                .build()// compile parses (reader)
+                .parseClaimsJws(token)// open the token
+                .getBody()// claims in payload of the token
+                .getSubject();// get any field i want (username here)
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token)
+                && !tokenBlacklist.contains(token));// check after logout
     }
 
     private boolean isTokenExpired(String token) {
@@ -62,5 +66,12 @@ public class JwtService {
                 .getBody()
                 .getExpiration();
         return expiration.before(new Date());
+    }
+
+    // Adds a token to the blacklist AFTER logout
+    public void invalidateToken(String token) {
+        tokenBlacklist.add(token);
+        System.out.println("Token blacklisted: " + token);
+
     }
 }
