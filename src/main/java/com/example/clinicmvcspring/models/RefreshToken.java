@@ -2,6 +2,7 @@ package com.example.clinicmvcspring.models;
 
 import java.sql.Timestamp;
 
+
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -20,7 +21,7 @@ public class RefreshToken {
 
     @Column(nullable = false, unique = true)
     private String token;
-    @OneToOne
+    @ManyToOne //one user can have many refresh tokens (login from multiple devices)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private AppUser user;
     @Column(nullable = false, name = "expiry_date")

@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,6 @@ import com.example.clinicmvcspring.repositories.UserRepo;
 @Service
 public class RefreshTokenService {
 
-    
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
 
@@ -37,7 +37,8 @@ public class RefreshTokenService {
         AppUser user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        refreshTokenRepo.deleteByUser(user);// delete old token
+        // refreshTokenRepo.deleteByUser(user);// delete old token
+        // NOW USERS CAN HAVE MULTIPLE REFRESH TOKENS (MULTI DEVICE LOGIN)
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
@@ -61,4 +62,13 @@ public class RefreshTokenService {
                 .map(refreshTokenRepo::deleteByUser)
                 .orElse(0);
     }
+
+    // This cron expression means: run at 3:00 AM every day
+    // second minute hour dayOfTheMonth Month DayOfTheWeek
+    @Scheduled(cron = "0 0 3 * * *")
+    public void cleanUpExpiredTokens() {
+        int deletedTokens = refreshTokenRepo.deleteAllExpiredTokens();
+        System.out.println("Cleanup: Deleted " + deletedTokens + " expired tokens.");
+    }
+
 }

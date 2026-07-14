@@ -79,7 +79,7 @@ CREATE TABLE `doctors` (
 
 LOCK TABLES `doctors` WRITE;
 /*!40000 ALTER TABLE `doctors` DISABLE KEYS */;
-INSERT INTO `doctors` VALUES (1,'Tarek','Ziad','tarek.newemail@email.com',999.50,'2022-01-15','Cardiology',NULL),(2,'Rami','Odeh','rami@email.com',920.00,'2023-06-10','Pediatrics',NULL),(3,'Sami','Zaid','sami@email.com',780.25,'2024-03-20','Cardiology',NULL),(4,'Ali','Mansour','Ali.mansour@hospital.com',4500.00,'2026-06-21','Pediatrics',NULL),(6,'raed','malek','raed.malek@clinic.com',8500.50,'2026-06-22','Cardiology',NULL),(9,'moath','malek','moath.malek@clinic.com',9500.50,'2026-06-23','Cardiology',NULL),(18,'khaled','moha','khaleed@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(20,'khaled','mohammad','khaleeed@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(24,'mohannad','hussien','huss@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(26,'Maher','samer','maher.samer@gmail.com',9050.00,'2026-06-30','Cardiology',NULL);
+INSERT INTO `doctors` VALUES (1,'Tarek','Ziad','tarek.newemail@email.com',999.50,'2022-01-15','Cardiology',NULL),(2,'Rami','Odeh','rami@email.com',920.00,'2023-06-10','Pediatrics',NULL),(3,'Sami','Zaid','sami@email.com',780.25,'2024-03-20','Cardiology',8),(4,'Ali','Mansour','Ali.mansour@hospital.com',4500.00,'2026-06-21','Pediatrics',NULL),(6,'raed','malek','raed.malek@clinic.com',8500.50,'2026-06-22','Cardiology',NULL),(9,'moath','malek','moath.malek@clinic.com',9500.50,'2026-06-23','Cardiology',4),(18,'khaled','moha','khaleed@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(20,'khaled','mohammad','khaleeed@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(24,'mohannad','hussien','huss@gmail.com',6004.00,'2026-06-25','Cardiology',NULL),(26,'Maher','samer','maher.samer@gmail.com',9050.00,'2026-06-30','Cardiology',NULL);
 /*!40000 ALTER TABLE `doctors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -194,6 +194,35 @@ INSERT INTO `prescriptions` VALUES (1,'Take after meals. Follow up in two weeks.
 UNLOCK TABLES;
 
 --
+-- Table structure for table `refresh_tokens`
+--
+
+DROP TABLE IF EXISTS `refresh_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `refresh_tokens` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `expiry_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`),
+  UNIQUE KEY `user_id` (`user_id`),
+  CONSTRAINT `refresh_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `refresh_tokens`
+--
+
+LOCK TABLES `refresh_tokens` WRITE;
+/*!40000 ALTER TABLE `refresh_tokens` DISABLE KEYS */;
+INSERT INTO `refresh_tokens` VALUES (6,'7ad4fcaf-35d4-4f36-be3a-c2375b2f3fc0',2,'2026-07-20 13:52:58');
+/*!40000 ALTER TABLE `refresh_tokens` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
 --
 
@@ -208,7 +237,7 @@ CREATE TABLE `users` (
   `enabled` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -217,7 +246,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin','PLACEHOLDER','ADMIN',1);
+INSERT INTO `users` VALUES (1,'admin','$2a$12$b4Np/tnxalo04DJccAdwJOGjF3bC0HFR/bM2hTJW8NxO9xOukHNJO','ADMIN',1),(2,'yazan','$2a$10$Mydq0yvntfhePbRVLwZ7r.uJApLc83E2u3LhLcxKmWHTGQ//AmGt6','DOCTOR',1),(3,'mahmoud','$2a$10$MnPOloBhoTyhhGsfH660r.5592kovopnQcV9ST6RLZfEXjA9Ws56e','DOCTOR',1),(4,'moath_doc','$2a$10$yD2xFrETUGeodo8ekobMruXRgbncf.uHWQPABMoXdRmq4OmfWkKB6','DOCTOR',1),(6,'moathss_doc','$2a$10$kvfofek6ik12.CQSah9PKeOCcLWBIkH8Cby/.fOgYH287uJhxP3a2','DOCTOR',1),(7,'sami_zaid','$2a$10$tnzTVyREsuvyzHT/2/bUNu6HredEOtixS3WtLGgW.VI375bteDaG2','DOCTOR',1),(8,'sami_zaid_username','$2a$10$7Ini46ILkibzJQDLG01/KO30Il86hz274W1XpkqtERDv6JTwW8EqS','DOCTOR',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -230,4 +259,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-12 10:22:23
+-- Dump completed on 2026-07-14 10:15:11
