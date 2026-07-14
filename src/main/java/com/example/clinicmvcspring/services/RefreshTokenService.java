@@ -1,6 +1,9 @@
 package com.example.clinicmvcspring.services;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,7 +32,7 @@ public class RefreshTokenService {
     }
 
     public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepo.findByToken(token);
+        return refreshTokenRepo.findByToken(hashToken(token)); // sreach by hashed one in db
     }
 
     @Transactional
@@ -42,7 +45,9 @@ public class RefreshTokenService {
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
-        refreshToken.setToken(UUID.randomUUID().toString());
+        String rawToken = UUID.randomUUID().toString();
+        refreshToken.setPlainTextToken(rawToken);
+        refreshToken.setToken(hashToken(rawToken));
         refreshToken.setExpiryDate(new Timestamp(System.currentTimeMillis() + refreshExpiration));
 
         return refreshTokenRepo.save(refreshToken);
@@ -70,9 +75,18 @@ public class RefreshTokenService {
         int deletedTokens = refreshTokenRepo.deleteAllExpiredTokens();
         System.out.println("Cleanup: Deleted " + deletedTokens + " expired tokens.");
     }
-    
-    public void deleteToken(RefreshToken token)
-    {
+
+    public void deleteToken(RefreshToken token) {
         refreshTokenRepo.delete(token);
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); // hashing algo not same as BCRYPT
+            byte[] hash = digest.digest(token.getBytes());// digest only takes bytes not string
+            return Base64.getEncoder().encodeToString(hash);// from bytes to string
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Hashing error", e);
+        }
     }
 }

@@ -182,7 +182,7 @@ public class UserController {
         final String token = jwtService.generateToken(userDetailsToRefresh);
         refreshTokenService.deleteToken(refToken.get());
         RefreshToken newRefToken = refreshTokenService.createRefreshToken(user.getUsername());
-        return ResponseEntity.ok(new RefreshResponseDTO(token, newRefToken.getToken()));
+        return ResponseEntity.ok(new RefreshResponseDTO(token, newRefToken.getPlainTextToken()));
 
     }
 }

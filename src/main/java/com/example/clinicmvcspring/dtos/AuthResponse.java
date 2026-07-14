@@ -27,7 +27,7 @@ public class AuthResponse {
 
     public String getRefreshToken()
     {
-        return refreshToken.getToken();
+        return refreshToken.getPlainTextToken();
     }
 
 
