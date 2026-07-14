@@ -142,10 +142,19 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader,
+            @RequestBody RefreshRequestDTO request) {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7); // Remove "Bearer "
+
+            Optional<RefreshToken> refToken = refreshTokenService.findByToken(request.getRefreshToken()); // get the
+            if (refToken.isEmpty()) {
+                return ResponseEntity.status(404)
+                        .body(new ErrorResponseDTO("This Refresh Token was not found", 404));
+            }
+
+            refreshTokenService.deleteToken(refToken.get());
             jwtService.invalidateToken(token); // Add to blacklist
         }
 
@@ -172,8 +181,8 @@ public class UserController {
         final UserDetails userDetailsToRefresh = userService.loadUserByUsername(user.getUsername());
         final String token = jwtService.generateToken(userDetailsToRefresh);
         refreshTokenService.deleteToken(refToken.get());
-        RefreshToken newRefToken =  refreshTokenService.createRefreshToken(user.getUsername());
-        return ResponseEntity.ok(new RefreshResponseDTO(token,newRefToken.getToken()));
+        RefreshToken newRefToken = refreshTokenService.createRefreshToken(user.getUsername());
+        return ResponseEntity.ok(new RefreshResponseDTO(token, newRefToken.getToken()));
 
     }
 }
