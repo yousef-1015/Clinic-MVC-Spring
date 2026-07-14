@@ -5,11 +5,13 @@ import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.authentication.BadCredentialsException;
 
 // cathc exceptions for all rest controllers
 @RestControllerAdvice
@@ -38,6 +40,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleDataIntegrity(DataIntegrityViolationException e) {
         ErrorResponseDTO error = new ErrorResponseDTO("Cannot complete: data integrity violation", 409);
         return ResponseEntity.status(409).body(error);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentials(BadCredentialsException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("Invalid username or password", 401);
+        return ResponseEntity.status(401).body(error);
     }
 
     // Server error
