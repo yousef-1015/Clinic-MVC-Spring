@@ -70,5 +70,9 @@ public class RefreshTokenService {
         int deletedTokens = refreshTokenRepo.deleteAllExpiredTokens();
         System.out.println("Cleanup: Deleted " + deletedTokens + " expired tokens.");
     }
-
+    
+    public void deleteToken(RefreshToken token)
+    {
+        refreshTokenRepo.delete(token);
+    }
 }
