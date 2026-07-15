@@ -1,6 +1,5 @@
 package com.example.clinicmvcspring.controllers;
 
-
 import com.example.clinicmvcspring.models.AppUser;
 import com.example.clinicmvcspring.services.AppUserDetailsService;
 import com.example.clinicmvcspring.services.DoctorService;
@@ -12,9 +11,12 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,7 +31,7 @@ import static org.mockito.Mockito.when;
 public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
-//in mockMvc assert and act phases are together
+    // in mockMvc assert and act phases are together
     @MockitoBean
     private AppUserDetailsService userService;
     @MockitoBean
@@ -41,28 +43,23 @@ public class UserControllerTest {
     @MockitoBean
     private RefreshTokenService refreshTokenService;
 
-   // test get all users endpoint
+    // test get all users endpoint
 
     @Test
-    public void UserController_GetAllUsers_ReturnsOk()throws Exception
-    {
+    public void UserController_GetAllUsers_ReturnsOk() throws Exception {
         // arrange
         Page<AppUser> fakePage = new PageImpl<>(Collections.emptyList());
         when(userService.getAllUsers(any())).thenReturn(fakePage);
 
-
         // act and assert
 
-        // ACT & ASSERT
         mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk());
 
     }
 
-
     @Test
-    public void UserController_GetAllUsersWithNegativePage_ReturnsBadRequest() throws Exception
-    {
+    public void UserController_GetAllUsersWithNegativePage_ReturnsBadRequest() throws Exception {
         // arrange
         // nothing i want to only test bad response based on bad page number in url
 
@@ -72,10 +69,29 @@ public class UserControllerTest {
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("$.message").value("Page Number can't be negative"));
 
-
-
     }
 
+    @Test
+    public void UserController_registerUser_ReturnsCreatedSuccessfully() throws Exception {
+        // arrange
+        AppUser fakeSavedUser = new AppUser();
+        fakeSavedUser.setId(55);
+        when(userService.addUser(any())).thenReturn(fakeSavedUser);
 
+        // act and assert
+        mockMvc.perform(post("/api/v1/users/signup")
+                .contentType(MediaType.APPLICATION_JSON)// req body of post in perform
+                .content("""
+                {
+                    "username": "name",
+                    "password": "1234",
+                    "role": "DOCTOR"
+                }
+                """)//JSON BODY REQ
+            )
+                .andExpect(status().is(201))
+                .andExpect(jsonPath("$.message").value("User registered successfully!"));
+
+    }
 
 }
