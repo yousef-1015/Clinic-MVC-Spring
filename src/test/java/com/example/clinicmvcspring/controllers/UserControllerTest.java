@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
@@ -57,4 +58,24 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
 
     }
+
+
+    @Test
+    public void UserController_GetAllUsersWithNegativePage_ReturnsBadRequest() throws Exception
+    {
+        // arrange
+        // nothing i want to only test bad response based on bad page number in url
+
+        // act and assert
+
+        mockMvc.perform(get("/api/v1/users?page=-1"))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.message").value("Page Number can't be negative"));
+
+
+
+    }
+
+
+
 }
