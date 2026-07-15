@@ -1,9 +1,9 @@
 package com.example.clinicmvcspring.repositories;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import  org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -51,9 +51,35 @@ public void RefreshTokenRepo_Save_ReturnSavedRefreshToken ()
 
 
     //3 ASSERT*****************
-assertNotNull(savedRefreshToken);
-assertTrue(savedRefreshToken.getId() > 0);
+Assertions.assertNotNull(savedRefreshToken);
+Assertions.assertTrue(savedRefreshToken.getId() > 0);
 }
 
-    
+    @Test
+public void RefreshTokenRepo_findByTOKEN_ReturnDesiredRefreshToken ()
+{
+//ARRANGE
+    AppUser user = new AppUser();
+    user.setUsername("testUsername");
+    user.setPassword("testPassword");
+    user.setRole(Role.DOCTOR);
+    AppUser savedUser = userRepo.save(user);
+    RefreshToken refreshToken =  new RefreshToken();
+    refreshToken.setToken("fake-test-token");
+    refreshToken.setUser(savedUser);
+    refreshToken.setExpiryDate(new Timestamp(System.currentTimeMillis() + 100000));
+    RefreshToken savedRefreshToken = refreshTokenRepo.save(refreshToken);
+
+//ACT
+
+Optional<RefreshToken> fetchedToken = refreshTokenRepo.findByToken(savedRefreshToken.getToken());
+
+
+//ASSERT
+
+Assertions.assertTrue(fetchedToken.isPresent()); // i actually got a token (not empty)
+
+Assertions.assertEquals(savedRefreshToken.getId(),fetchedToken.get().getId()); // did i fetch the same token i saved
+
+}
 }
