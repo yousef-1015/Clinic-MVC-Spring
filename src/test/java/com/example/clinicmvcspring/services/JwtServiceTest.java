@@ -20,6 +20,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 @ExtendWith(MockitoExtension.class)
 
@@ -134,6 +135,32 @@ public class JwtServiceTest {
             // .parseClaimsJws(token)// open the token throw ExpiredJwtException
             // if the token passed is expired
             jwtService.validateToken(expiredToken, fakeUserDetails);
+        });
+
+    }
+
+    @Test
+    void JwtService_validateToken_InvalidSignature() {
+
+        // ARRANGE
+        byte[] differentKeyBytes = HexFormat.of()
+                .parseHex("aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899");
+        Key differentKey = Keys.hmacShaKeyFor(differentKeyBytes);
+
+        String badToken = Jwts.builder()
+                .setSubject(fakeUserDetails.getUsername())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .signWith(differentKey, SignatureAlgorithm.HS256) // invalid key
+                .compact();
+
+        // Act
+        // assert
+
+        assertThrows(SignatureException.class, () -> {
+            // .parseClaimsJws(token) throws SignatureException when the token's signature
+            // doesn't
+            // match the key
+            jwtService.validateToken(badToken, fakeUserDetails);
         });
     }
 }
