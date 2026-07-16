@@ -72,6 +72,16 @@ public class JwtService {
     public void invalidateToken(String token) {
         tokenBlacklist.add(token);
         System.out.println("Token blacklisted: " + token);
+    }
 
+    public String extractRole(String token) {
+        // i use these 5 lines are always when getting a value from the token
+        return Jwts.parserBuilder()// create the token reader
+                .setSigningKey(getSigningKey())// use the key to see if the yoken was tampered with
+                .build()// compile parses (reader)
+                .parseClaimsJws(token)// open the token
+                .getBody()// claims in payload of the token
+                .get("role", String.class); // extract the "role" claim
+        // result will be "ROLE_"
     }
 }

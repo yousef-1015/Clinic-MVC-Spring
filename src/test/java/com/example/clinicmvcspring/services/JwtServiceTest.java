@@ -13,25 +13,26 @@ import com.example.clinicmvcspring.models.Role;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtServiceTest {
+    private JwtService jwtService;
+    private CustomUserDetails fakeUserDetails;
+    private AppUser fakeAppUser;
 
     @BeforeEach // for each test create these new object
     void setUp() {
         jwtService = new JwtService();
+        fakeAppUser = new AppUser();
+        fakeAppUser.setUsername("fake-name");
+        fakeAppUser.setId(55);
+        fakeAppUser.setRole(Role.DOCTOR);
+        fakeUserDetails = new CustomUserDetails(fakeAppUser);
 
         ReflectionTestUtils.setField(jwtService, "jwtSecret",
                 "339b66b1e4668bca8357465af57f141f538f6def6abb1b7c7d5fce7173bbfb67");
     }
 
-    private JwtService jwtService;
-
     @Test
     void JwtService_generateToken_TokenNotEmpty() {
         // Arrange
-        AppUser fakeAppUser = new AppUser();
-        fakeAppUser.setUsername("fake-name");
-        fakeAppUser.setId(55);
-        fakeAppUser.setRole(Role.DOCTOR);
-        CustomUserDetails fakeUserDetails = new CustomUserDetails(fakeAppUser);
 
         // act
         String token = jwtService.generateToken(fakeUserDetails);
@@ -46,16 +47,29 @@ public class JwtServiceTest {
     @Test
     void JwtService_generateToken_TokenContainsUsername() {
         // Arrange
-        AppUser fakeAppUser = new AppUser();
-        fakeAppUser.setUsername("fake-name");
-        fakeAppUser.setId(55);
-        fakeAppUser.setRole(Role.DOCTOR);
-        CustomUserDetails fakeUserDetails = new CustomUserDetails(fakeAppUser);
+        // in setUp()
+
         String token = jwtService.generateToken(fakeUserDetails);
 
         // act
         String extractedUsername = jwtService.extractUsername(token);
         // assert
         assertThat(extractedUsername).isEqualTo(fakeUserDetails.getUsername());
+    }
+
+    @Test
+    void JwtService_generateToken_TokenContainsRole() {
+
+        // Arrange
+        // in setUp()
+
+        String token = jwtService.generateToken(fakeUserDetails);
+
+        // Act
+        String extractedRole = jwtService.extractRole(token);
+
+        // Assert
+        assertThat(extractedRole).isEqualTo("ROLE_" + fakeUserDetails.getAppUser().getRole().name());
+
     }
 }
