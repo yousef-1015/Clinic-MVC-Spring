@@ -1,5 +1,7 @@
 package com.example.clinicmvcspring.services;
 
+import java.util.Date;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,5 +73,18 @@ public class JwtServiceTest {
         // Assert
         assertThat(extractedRole).isEqualTo("ROLE_" + fakeUserDetails.getAppUser().getRole().name());
 
+    }
+
+    @Test
+    void JwtService_generateToken_TokenContainsExpiration() {
+
+        // Arrange
+        // in setUp()
+        String token = jwtService.generateToken(fakeUserDetails);
+        // Act
+        Date extractedExpiration = jwtService.extractExpirationDate(token);
+
+        // Assert expiration must be in the future (after now)
+        assertThat(extractedExpiration).isAfter(new Date()); 
     }
 }

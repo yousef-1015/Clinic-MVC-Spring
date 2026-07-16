@@ -84,4 +84,16 @@ public class JwtService {
                 .get("role", String.class); // extract the "role" claim
         // result will be "ROLE_"
     }
+
+    public Date  extractExpirationDate(String token)
+    {
+
+        return Jwts.parserBuilder()
+        .setSigningKey(getSigningKey())
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .getExpiration();
+    }
+
 }
