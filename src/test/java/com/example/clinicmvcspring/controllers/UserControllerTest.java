@@ -1,9 +1,13 @@
 package com.example.clinicmvcspring.controllers;
 
+import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -19,11 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.clinicmvcspring.dtos.RefreshRequestDTO;
 import com.example.clinicmvcspring.models.AppUser;
-import com.example.clinicmvcspring.models.Role;
-
 import com.example.clinicmvcspring.models.CustomUserDetails;
 import com.example.clinicmvcspring.models.RefreshToken;
+import com.example.clinicmvcspring.models.Role;
 import com.example.clinicmvcspring.services.AppUserDetailsService;
 import com.example.clinicmvcspring.services.DoctorService;
 import com.example.clinicmvcspring.services.JwtService;
@@ -127,6 +131,52 @@ public class UserControllerTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.token").value("fake-jwt-token"))
                 .andExpect(jsonPath("$.refreshToken").value("fake-refresh-token"));
+
+    }
+
+    @Test
+    public void UserController_refresh_refreshTokenRotation() throws Exception {
+        // Arrange
+        AppUser fakeAppUser = new AppUser();
+        fakeAppUser.setUsername("fake-name");
+        fakeAppUser.setId(55);
+        fakeAppUser.setRole(Role.DOCTOR);
+
+        RefreshRequestDTO request = new RefreshRequestDTO();
+        request.setRefreshToken("old-token-string");
+        RefreshToken oldRefToken = new RefreshToken();
+        oldRefToken.setExpiryDate(new Timestamp(System.currentTimeMillis() + (10 * 1000))); // 10 seconds (i want it to
+                                                                                            // not
+                                                                                            // be expired)
+        oldRefToken.setUser(fakeAppUser);
+        when(refreshTokenService.findByToken(request.getRefreshToken())).thenReturn(Optional.of(oldRefToken));
+        CustomUserDetails userDetailsToRefresh = new CustomUserDetails(fakeAppUser);
+        when(userService.loadUserByUsername(fakeAppUser.getUsername())).thenReturn(userDetailsToRefresh);
+
+        when(jwtService.generateToken(userDetailsToRefresh)).thenReturn("new-access-token");
+        RefreshToken newRefToken = new RefreshToken();
+        newRefToken.setPlainTextToken("new-refresh-token-string");
+        when(refreshTokenService.createRefreshToken(fakeAppUser.getUsername())).thenReturn(newRefToken);
+
+        // Act + Assert
+
+        mockMvc.perform(post("/api/v1/users/refresh")
+                .contentType(MediaType.APPLICATION_JSON)// req body of post in perform
+                .content("""
+                        {
+                            "refreshToken": "old-token-string"
+
+                        }
+                        """)// JSON BODY REQ
+        )
+                .andExpect(status().is(200))
+
+                .andExpect(jsonPath("$.newRefreshToken").value("new-refresh-token-string"))
+                .andExpect(jsonPath("$.newAccessToken").value("new-access-token"));
+        // test the deletion of the old one
+        verify(refreshTokenService, times(1)).deleteToken(oldRefToken);
+        // test the creation of the new one
+        verify(refreshTokenService, times(1)).createRefreshToken(fakeAppUser.getUsername());
 
     }
 
