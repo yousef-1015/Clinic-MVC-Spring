@@ -180,4 +180,41 @@ public class UserControllerTest {
 
     }
 
+    @Test
+    public void UserController_logout_DeletesTokensSuccessfully() throws Exception {
+
+        // Arrange
+        AppUser fakeAppUser = new AppUser();
+        fakeAppUser.setUsername("fake-name");
+        fakeAppUser.setId(55);
+        fakeAppUser.setRole(Role.DOCTOR);
+
+        RefreshRequestDTO request = new RefreshRequestDTO();
+        request.setRefreshToken("old-token-string");
+        RefreshToken oldRefToken = new RefreshToken();
+        oldRefToken.setExpiryDate(new Timestamp(System.currentTimeMillis() + (10 * 1000)));
+
+        oldRefToken.setUser(fakeAppUser);
+        when(refreshTokenService.findByToken(request.getRefreshToken())).thenReturn(Optional.of(oldRefToken));
+        // Act + Assert
+
+        mockMvc.perform(post("/api/v1/users/logout")
+                .contentType(MediaType.APPLICATION_JSON)// req body of post in perform
+                .header("Authorization", "Bearer fake-jwt-token")
+                .content("""
+                        {
+                            "refreshToken" : "old-token-string"
+
+                        }
+                        """)// JSON BODY REQ
+        )
+                .andExpect(status().is(200))
+
+                .andExpect(jsonPath("$.message").value("Logged out successfully!"));
+
+        verify(refreshTokenService, times(1)).deleteToken(oldRefToken);
+        verify(jwtService, times(1)).invalidateToken("fake-jwt-token");
+
+    }
+
 }
