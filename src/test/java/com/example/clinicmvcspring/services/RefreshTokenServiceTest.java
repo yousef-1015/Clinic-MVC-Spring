@@ -71,7 +71,7 @@ public class RefreshTokenServiceTest {
     // test user not found exception
 
     @Test
-    public void RefreshTokenService_CreateRefreshToken_ThrowsExceptionWhenUserNotFoun() {
+    public void RefreshTokenService_CreateRefreshToken_ThrowsExceptionWhenUserNotFound() {
         // arrange
         when(userRepo.findByUsername("non-existing-username"))
                 .thenReturn(Optional.empty());
