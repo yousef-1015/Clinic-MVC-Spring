@@ -4,8 +4,7 @@ import com.example.clinicmvcspring.models.CustomUserDetails;
 import com.example.clinicmvcspring.models.RefreshToken;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-
-@JsonPropertyOrder({"token","refreshToken","userDetails"})
+@JsonPropertyOrder({ "token", "refreshToken", "userDetails" })
 public class AuthResponse {
     private final String token;
     private final CustomUserDetails userDetails;
@@ -14,7 +13,7 @@ public class AuthResponse {
     public AuthResponse(String token, CustomUserDetails userDetails, RefreshToken refreshToken) {
         this.token = token;
         this.userDetails = userDetails;
-        this.refreshToken =refreshToken;
+        this.refreshToken = refreshToken;
     }
 
     public String getToken() {
@@ -25,10 +24,8 @@ public class AuthResponse {
         return userDetails;
     }
 
-    public String getRefreshToken()
-    {
+    public String getRefreshToken() {
         return refreshToken.getPlainTextToken();
     }
-
 
 }

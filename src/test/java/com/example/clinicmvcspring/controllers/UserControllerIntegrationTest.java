@@ -1,5 +1,7 @@
 package com.example.clinicmvcspring.controllers;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,15 +11,16 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.clinicmvcspring.dtos.LoginRequest;
 import com.example.clinicmvcspring.models.AppUser;
 import com.example.clinicmvcspring.models.Role;
 import com.example.clinicmvcspring.repositories.RefreshTokenRepo;
 import com.example.clinicmvcspring.repositories.UserRepo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) // random port for testing
 @AutoConfigureMockMvc
@@ -34,6 +37,8 @@ public class UserControllerIntegrationTest {
 
     @Autowired
     private RefreshTokenRepo refreshTokenRepo;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -58,14 +63,10 @@ public class UserControllerIntegrationTest {
     }
 
     // Test login
-
     @Test
     void UserControllerIntegration_Login_ReturnsOkWithToken() throws Exception {
 
         // ARRANGE
-        LoginRequest request = new LoginRequest();
-        request.setUsername("integration-test-user");
-        request.setPassword("test-password");
 
         // act + assert
 
@@ -85,22 +86,66 @@ public class UserControllerIntegrationTest {
 
     @Test
     void UserControllerIntegration_registerUser_ReturnsCreatedSuccessfully() throws Exception {
-        // ARRANGE
 
-        // act + assert
-        mockMvc.perform(post("/api/v1/users/signup")
-                .contentType(MediaType.APPLICATION_JSON)// req body of post in perform
+        // ARRANGE — get a real admin token first
+        MvcResult loginResult = mockMvc.perform(post("/api/v1/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
-                            "username": "test-username",
+                            "username": "integration-test-user",
+                            "password": "test-password"
+                        }
+                        """))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String body = loginResult.getResponse().getContentAsString(); // raw JSON string
+        Map<String, Object> loginBody = objectMapper.readValue(body, Map.class);
+        String realJwtToken = (String) loginBody.get("token");
+
+        // ACT + ASSERT
+        mockMvc.perform(post("/api/v1/users/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + realJwtToken) //
+                .content("""
+                        {
+                            "username": "new-test-user",
                             "password": "test-password",
                             "role": "ADMIN"
                         }
-                                                    """)// JSON BODY REQ
-        )
+                        """))
                 .andExpect(status().is(201))
-                .andExpect(jsonPath("$.status").exists())
                 .andExpect(jsonPath("$.message").value("User registered successfully!"));
     }
 
+    @Test
+    void UserControllerIntegration_Logout_ReturnsOkWithToken() throws Exception {
+        // arrange
+        // Login and capture the real response
+        MvcResult loginResult = mockMvc.perform(post("/api/v1/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "username": "integration-test-user",
+                            "password": "test-password"
+                        }
+                        """))
+                .andExpect(status().isOk())
+                .andReturn(); // get the full response as object
+
+        String body = loginResult.getResponse().getContentAsString(); // raw JSON string
+        Map<String, Object> loginBody = objectMapper.readValue(body, Map.class);
+        String realJwtToken = (String) loginBody.get("token");
+        String realRefreshToken = (String) loginBody.get("refreshToken");
+
+        // Act + Assert
+        mockMvc.perform(
+                post("/api/v1/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + realJwtToken)
+                        .content("{ \"refreshToken\": \"" + realRefreshToken + "\" }"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.message").value("Logged out successfully!"));
+
+    }
 }
