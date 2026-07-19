@@ -62,7 +62,6 @@ public class UserControllerIntegrationTest {
 
     }
 
-    // Test login
     @Test
     void UserControllerIntegration_Login_ReturnsOkWithToken() throws Exception {
 
@@ -87,7 +86,7 @@ public class UserControllerIntegrationTest {
     @Test
     void UserControllerIntegration_registerUser_ReturnsCreatedSuccessfully() throws Exception {
 
-        // ARRANGE — get a real admin token first
+        // ARRANGE get a real admin token first
         MvcResult loginResult = mockMvc.perform(post("/api/v1/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -148,4 +147,37 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("Logged out successfully!"));
 
     }
+
+    @Test
+    void UserControllerIntegration_Refresh_ReturnsOkWithToken() throws Exception {
+
+        // arrange
+        // Login and capture the real response
+        MvcResult loginResult = mockMvc.perform(post("/api/v1/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "username": "integration-test-user",
+                            "password": "test-password"
+                        }
+                        """))
+                .andExpect(status().isOk())
+                .andReturn(); // get the full response as object
+
+        String body = loginResult.getResponse().getContentAsString(); // raw JSON string
+        Map<String, Object> loginBody = objectMapper.readValue(body, Map.class);
+        String realRefreshToken = (String) loginBody.get("refreshToken");
+
+        // act + assert
+        mockMvc.perform(post("/api/v1/users/refresh")
+                .contentType(MediaType.APPLICATION_JSON)// req body of post in perform
+                .content("{ \"refreshToken\": \"" + realRefreshToken + "\" }"))
+
+                .andExpect(status().is(200))
+
+                .andExpect(jsonPath("$.newRefreshToken").exists())
+                .andExpect(jsonPath("$.newAccessToken").exists());
+
+    }
+
 }
