@@ -83,4 +83,24 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.refreshToken").exists());
     }
 
+    @Test
+    void UserControllerIntegration_registerUser_ReturnsCreatedSuccessfully() throws Exception {
+        // ARRANGE
+
+        // act + assert
+        mockMvc.perform(post("/api/v1/users/signup")
+                .contentType(MediaType.APPLICATION_JSON)// req body of post in perform
+                .content("""
+                        {
+                            "username": "test-username",
+                            "password": "test-password",
+                            "role": "ADMIN"
+                        }
+                                                    """)// JSON BODY REQ
+        )
+                .andExpect(status().is(201))
+                .andExpect(jsonPath("$.status").exists())
+                .andExpect(jsonPath("$.message").value("User registered successfully!"));
+    }
+
 }
