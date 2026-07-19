@@ -184,4 +184,19 @@ public class UserControllerIntegrationTest {
 
     }
 
+    @Test
+    void UserControllerIntegration_registerUser_NoTokenReturns401() throws Exception {
+        // ACT + ASSERT
+        mockMvc.perform(post("/api/v1/users/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "username": "new-test-user",
+                            "password": "test-password",
+                            "role": "ADMIN"
+                        }
+                        """))
+                .andExpect(status().is(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"));
+    }
 }
