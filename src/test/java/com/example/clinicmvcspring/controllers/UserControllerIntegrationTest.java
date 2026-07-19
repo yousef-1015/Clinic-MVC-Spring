@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,10 +21,12 @@ import com.example.clinicmvcspring.models.AppUser;
 import com.example.clinicmvcspring.models.Role;
 import com.example.clinicmvcspring.repositories.RefreshTokenRepo;
 import com.example.clinicmvcspring.repositories.UserRepo;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) // random port for testing
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class UserControllerIntegrationTest {
 
     @Autowired
@@ -38,7 +41,8 @@ public class UserControllerIntegrationTest {
     @Autowired
     private RefreshTokenRepo refreshTokenRepo;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
