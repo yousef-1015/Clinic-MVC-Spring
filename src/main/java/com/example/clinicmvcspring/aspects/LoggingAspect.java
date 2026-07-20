@@ -97,4 +97,21 @@ public class LoggingAspect {
         }
     }
 
+    @Around("@annotation(com.example.clinicmvcspring.annotations.ExecutionTimeLog)")
+    public Object methodExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            return joinPoint.proceed();// press play (run the main method)
+        } finally {
+            long endTime = System.currentTimeMillis();
+            long elapsedTime = endTime - startTime;
+            log.info("method annotated with @ExecutionTimeLog {" + joinPoint.getSignature().getName()
+                    + "}" + " from class " + joinPoint.getTarget().getClass().getSimpleName() + "  started at("
+                    + Instant.ofEpochMilli(startTime) + ") and finished at ("
+                    + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
+                    + " ms)");
+        }
+    }
+
 }
