@@ -1,0 +1,54 @@
+package com.example.clinicmvcspring.services;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.example.clinicmvcspring.models.AuditLog;
+import com.example.clinicmvcspring.repositories.AuditLogRepo;
+
+@Service
+public class AuditLogService {
+
+    private final AuditLogRepo repo;
+
+    public AuditLogService(AuditLogRepo repo) {
+        this.repo = repo;
+    }
+
+
+    
+    public AuditLog addAuditLog(AuditLog audit) {
+        return repo.save(audit);
+    }
+
+    public List<AuditLog> getAllAuditLogs() {
+        return repo.findAll();
+    }
+
+    public Optional<AuditLog> getAuditLogByID(int id) {
+        return repo.findById(id);
+    }
+
+    public void deleteAuditLog(AuditLog audit) {
+        repo.delete(audit);
+    }
+
+    public void deleteAuditLogByID(int id) {
+        repo.deleteById(id);
+    }
+
+    public AuditLog updateAuditLogById(int id, AuditLog audit) {
+        audit.setId(id);
+        return repo.save(audit);
+    }
+
+    public Page<AuditLog> getAllAuditLogs(Pageable pageable) {
+        return repo.findAll(pageable);
+    }
+
+
+}
