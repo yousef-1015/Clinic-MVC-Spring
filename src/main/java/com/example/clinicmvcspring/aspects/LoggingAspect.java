@@ -1,6 +1,5 @@
 package com.example.clinicmvcspring.aspects;
 
-import java.lang.reflect.Array;
 import java.time.Instant;
 
 import org.aspectj.lang.JoinPoint;
@@ -30,7 +29,7 @@ public class LoggingAspect {
 
         log.info("Service method {" + joinPoint.getSignature().getName() + "} with the parameters("
                 + paramString + ") from class " + joinPoint.getTarget().getClass().getSimpleName()
-                + "was called");
+                + " was called");
 
     }
 
@@ -63,41 +62,39 @@ public class LoggingAspect {
 
         long startTime = System.currentTimeMillis();
 
-        Object result = joinPoint.proceed();// press play (run the main method)
-
-        long endTime = System.currentTimeMillis();
-
-        long elapsedTime = endTime - startTime;
-
-        log.info("Service method {" + joinPoint.getSignature().getName()
-                + "}" + " from class " + joinPoint.getTarget().getClass().getSimpleName() + " started at("
-                + Instant.ofEpochMilli(startTime) + ") and finished at ("
-                + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
-                + " ms)");
-
-        return result;
-
+        try {
+            return joinPoint.proceed();// press play (run the main method)
+        } finally {
+            long endTime = System.currentTimeMillis();
+            long elapsedTime = endTime - startTime;
+            log.info("service method {" + joinPoint.getSignature().getName()
+                    + "}" + " from class " + joinPoint.getTarget().getClass().getSimpleName() + "  started at("
+                    + Instant.ofEpochMilli(startTime) + ") and finished at ("
+                    + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
+                    + " ms)");
+        }
     }
 
     @Around("execution(* com.example.clinicmvcspring.controllers.*.*(..))")
     public Object endpointExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
 
         long startTime = System.currentTimeMillis();
+        try {
+            return joinPoint.proceed();// press play (run the main method)
 
-        Object result = joinPoint.proceed();// press play (run the main method)
+        } finally {
 
-        long endTime = System.currentTimeMillis();
+            long endTime = System.currentTimeMillis();
 
-        long elapsedTime = endTime - startTime;
+            long elapsedTime = endTime - startTime;
 
-        log.info("controller endpoint {" + joinPoint.getSignature().getName()
-                + "}" + " from class " + joinPoint.getTarget().getClass().getSimpleName() + "  started at("
-                + Instant.ofEpochMilli(startTime) + ") and finished at ("
-                + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
-                + " ms)");
+            log.info("controller endpoint {" + joinPoint.getSignature().getName()
+                    + "}" + " from class " + joinPoint.getTarget().getClass().getSimpleName() + "  started at("
+                    + Instant.ofEpochMilli(startTime) + ") and finished at ("
+                    + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
+                    + " ms)");
 
-        return result;
-
+        }
     }
 
 }
