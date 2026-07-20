@@ -9,7 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.ToString;
+
 //wrapper class
+@ToString // for logging (using lombok)
 public class CustomUserDetails implements UserDetails {
     // the object to be wrapped
     private final AppUser appUser;
