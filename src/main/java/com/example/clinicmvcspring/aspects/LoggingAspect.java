@@ -45,7 +45,7 @@ public class LoggingAspect {
     // @Around is a middle man not observer like @Before,After
 
     @Around("execution(* com.example.clinicmvcspring.services.*.*(..))")
-    public Object endpointExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object serviceMethodExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
 
         long startTime = System.currentTimeMillis();
 
@@ -56,6 +56,26 @@ public class LoggingAspect {
         long elapsedTime = endTime - startTime;
 
         log.info("Service method {" + joinPoint.getSignature().getName()
+                + "} started at(" + Instant.ofEpochMilli(startTime) + ") and finished at ("
+                + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
+                + " ms)");
+
+        return result;
+
+    }
+
+    @Around("execution(* com.example.clinicmvcspring.controllers.*.*(..))")
+    public Object endpointExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        long startTime = System.currentTimeMillis();
+
+        Object result = joinPoint.proceed();// press play (run the main method)
+
+        long endTime = System.currentTimeMillis();
+
+        long elapsedTime = endTime - startTime;
+
+        log.info("controller endpoint {" + joinPoint.getSignature().getName()
                 + "} started at(" + Instant.ofEpochMilli(startTime) + ") and finished at ("
                 + Instant.ofEpochMilli(endTime) + ") time taken: (" + elapsedTime
                 + " ms)");
