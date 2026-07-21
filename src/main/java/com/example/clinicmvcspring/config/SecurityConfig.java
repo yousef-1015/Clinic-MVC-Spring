@@ -2,6 +2,8 @@ package com.example.clinicmvcspring.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,9 +13,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.clinicmvcspring.services.AppUserDetailsService;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +24,8 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
 
     public SecurityConfig(CustomAuthEntryPoint customAuthEntryPoint, AppUserDetailsService appUserDetailsService,
-            PasswordEncoder passwordEncoder, JwtAuthFilter jwtAuthFilter, CustomAccessDeniedHandler customAccessDeniedHandler) {
+            PasswordEncoder passwordEncoder, JwtAuthFilter jwtAuthFilter,
+            CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.customAuthEntryPoint = customAuthEntryPoint;
         this.appUserDetailsService = appUserDetailsService;
         this.passwordEncoder = passwordEncoder;
@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users/refresh").permitAll()// so all users can refresh their tokens
                         .requestMatchers("/api/v1/doctors/**").hasRole("ADMIN")// (**)means that any endpoint with this
                                                                                // path
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/patients/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/medications/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/appointments/**").hasAnyRole("ADMIN", "DOCTOR")
