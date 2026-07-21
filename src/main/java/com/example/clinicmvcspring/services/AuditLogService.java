@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.clinicmvcspring.models.AuditLog;
 import com.example.clinicmvcspring.repositories.AuditLogRepo;
@@ -19,8 +21,7 @@ public class AuditLogService {
         this.repo = repo;
     }
 
-
-    
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // for aufiting failed in Transaction
     public AuditLog addAuditLog(AuditLog audit) {
         return repo.save(audit);
     }
@@ -49,6 +50,5 @@ public class AuditLogService {
     public Page<AuditLog> getAllAuditLogs(Pageable pageable) {
         return repo.findAll(pageable);
     }
-
 
 }
