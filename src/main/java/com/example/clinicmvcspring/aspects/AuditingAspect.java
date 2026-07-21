@@ -8,6 +8,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.AuditLog;
 import com.example.clinicmvcspring.services.AuditLogService;
 
@@ -36,24 +38,36 @@ public class AuditingAspect {
         return authentication.getName();
     }
 
-    @Around("execution(* com.example.clinicmvcspring.services.DoctorService.*(..))")
-    public Object auditDoctorActions(ProceedingJoinPoint joinPoint) throws Throwable {
-        long startTime = System.currentTimeMillis();
+    @Around("@annotation(auditAnnotation)") // annotation in the method parameters not in path like Log
+    public Object auditActions(ProceedingJoinPoint joinPoint, Audit auditAnnotation) throws Throwable {
+        String methodName = joinPoint.getSignature().getName();
+        AuditLog auditLog;
+        AuditAction action;
 
         try {
-            return joinPoint.proceed();
-
-        } finally {
-            long timeTaken = System.currentTimeMillis() - startTime;
-
-            AuditLog auditLog = new AuditLog();
-            auditLog.setActionType(joinPoint.getSignature().getName());// method name is the action that was made
+            Object result = joinPoint.proceed();
+            auditLog = new AuditLog();
+            action = auditAnnotation.action();
+            auditLog.setActionType(action);
             auditLog.setMadeBy(getCurrentUsername()); // username
             auditLog.setPerformedAt(new Timestamp(System.currentTimeMillis()));
-            auditLog.setDetails("Action executed in " + timeTaken + " ms");
+            auditLog.setDetails(methodName + " Done Successfully");
 
             auditLogService.addAuditLog(auditLog);
+            return result;
+
+        } catch (Exception e) {
+            auditLog = new AuditLog();
+            action = auditAnnotation.action();
+            auditLog.setActionType(action);
+            auditLog.setMadeBy(getCurrentUsername()); // username
+            auditLog.setPerformedAt(new Timestamp(System.currentTimeMillis()));
+            auditLog.setDetails(methodName + "Failed, ERROR: " + e.getMessage());
+
+            auditLogService.addAuditLog(auditLog);
+            throw e;
         }
+
     }
 
 }
