@@ -22,7 +22,8 @@ public class AuditLog {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private int id;
-    private String actionType;
+
+    private AuditAction actionType;
 
     private String madeBy;
 

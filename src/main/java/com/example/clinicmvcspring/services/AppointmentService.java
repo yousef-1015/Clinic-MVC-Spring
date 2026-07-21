@@ -9,14 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.example.clinicmvcspring.models.*;
-import com.example.clinicmvcspring.repositories.*;
-import com.example.clinicmvcspring.specifications.AppointmentSpecification;
+import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.AppointmentDTO;
 import com.example.clinicmvcspring.mappers.AppointmentMapper;
-
-import org.springframework.transaction.annotation.Transactional;
+import com.example.clinicmvcspring.models.Appointment;
+import com.example.clinicmvcspring.models.AppointmentStatus;
+import com.example.clinicmvcspring.models.AuditAction;
+import com.example.clinicmvcspring.repositories.AppointmentRepo;
+import com.example.clinicmvcspring.specifications.AppointmentSpecification;
 
 @Service
 public class AppointmentService {
@@ -30,6 +32,7 @@ public class AppointmentService {
         this.mapper = mapper;
     }
 
+    @Audit(action = AuditAction.CREATE)
     public AppointmentDTO addAppointment(Appointment app) {
         return mapper.appointmentToAppointmentDTO(repo.save(app));
     }
@@ -46,14 +49,17 @@ public class AppointmentService {
         return repo.findById(id);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteAppointment(Appointment app) {
         repo.delete(app);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteAppointmentByID(int id) {
         repo.deleteById(id);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public AppointmentDTO updateAppointmentById(int id, Appointment app) {
         app.setId(id);
         return mapper.appointmentToAppointmentDTO(repo.save(app));
@@ -65,6 +71,7 @@ public class AppointmentService {
         return appointmentPage.map(app -> mapper.appointmentToAppointmentDTO(app));// convert to the DTO
     }
 
+    @Audit(action = AuditAction.UPDATE)
     @Transactional
     public void transferPatient(int appointmentId, int doctorId) {
         Optional<Appointment> appOpt = repo.findById(appointmentId);

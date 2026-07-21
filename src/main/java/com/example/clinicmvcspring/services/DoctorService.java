@@ -9,10 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.DoctorDTO;
 import com.example.clinicmvcspring.mappers.DoctorMapper;
-import com.example.clinicmvcspring.models.*;
-import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.models.AuditAction;
+import com.example.clinicmvcspring.models.Doctor;
+import com.example.clinicmvcspring.repositories.DoctorRepo;
 import com.example.clinicmvcspring.specifications.DoctorSpecifications;
 
 @Service
@@ -26,6 +28,7 @@ public class DoctorService {
         this.mapper = mapper;
     }
 
+    @Audit(action = AuditAction.CREATE)
     public Doctor addDoctor(Doctor newDoctor) {
         return repo.save(newDoctor);// using the .save from the built in methods in JpaRepositories
     }
@@ -34,6 +37,7 @@ public class DoctorService {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteDoctor(Doctor docToDelete) {
         repo.delete(docToDelete);
     }
@@ -42,14 +46,17 @@ public class DoctorService {
         return repo.findById(id);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteDoctorByID(int id) {
         repo.deleteById(id);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public Doctor updateDoctor(Doctor doc) {
         return repo.save(doc);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public Doctor updateDoctorById(int id, Doctor doc) {
         doc.setId(id);
         return repo.save(doc);

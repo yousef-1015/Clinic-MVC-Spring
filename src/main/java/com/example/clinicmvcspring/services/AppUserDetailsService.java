@@ -10,10 +10,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.example.clinicmvcspring.models.CustomUserDetails;
 
+import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.models.AppUser;
-
+import com.example.clinicmvcspring.models.AuditAction;
+import com.example.clinicmvcspring.models.CustomUserDetails;
 import com.example.clinicmvcspring.repositories.UserRepo;
 
 @Service
@@ -36,20 +37,24 @@ public class AppUserDetailsService implements UserDetailsService {
         return repo.findById(id);
     }
 
+    @Audit(action = AuditAction.CREATE)
     public AppUser addUser(AppUser appUser) {
         appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
 
         return repo.save(appUser);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteUser(AppUser user) {
         repo.delete(user);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteUserByID(int id) {
         repo.deleteById(id);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public AppUser updateUserById(int id, AppUser user) {
         user.setId(id);
         return repo.save(user);

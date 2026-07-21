@@ -7,8 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.example.clinicmvcspring.models.*;
-import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.models.AuditAction;
+import com.example.clinicmvcspring.models.Medication;
+import com.example.clinicmvcspring.repositories.MedicationRepo;
 
 @Service
 public class MedicationService {
@@ -19,6 +21,7 @@ public class MedicationService {
         this.repo = repo;
     }
 
+    @Audit(action = AuditAction.CREATE)
     public Medication addMedication(Medication med) {
         return repo.save(med);
     }
@@ -31,14 +34,17 @@ public class MedicationService {
         return repo.findById(id);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteMedication(Medication med) {
         repo.delete(med);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deleteMedicationByID(int id) {
         repo.deleteById(id);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public Medication updateMedicationById(int id, Medication med) {
         med.setId(id);
         return repo.save(med);

@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.models.AuditAction;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -27,6 +30,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes); // convert these bytes into a key object to use in java security
     }
 
+    @Audit(action = AuditAction.LOGIN)
     // Generates a token using the user details
     public String generateToken(UserDetails userDetails) {
         // Get the user role
@@ -69,6 +73,7 @@ public class JwtService {
     }
 
     // Adds a token to the blacklist AFTER logout
+    @Audit(action = AuditAction.LOGOUT)
     public void invalidateToken(String token) {
         tokenBlacklist.add(token);
         System.out.println("Token blacklisted: " + token);
@@ -85,15 +90,14 @@ public class JwtService {
         // result will be "ROLE_"
     }
 
-    public Date  extractExpirationDate(String token)
-    {
+    public Date extractExpirationDate(String token) {
 
         return Jwts.parserBuilder()
-        .setSigningKey(getSigningKey())
-        .build()
-        .parseClaimsJws(token)
-        .getBody()
-        .getExpiration();
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
     }
 
 }

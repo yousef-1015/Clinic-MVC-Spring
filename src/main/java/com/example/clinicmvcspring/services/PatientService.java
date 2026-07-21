@@ -3,12 +3,14 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.example.clinicmvcspring.models.*;
-import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.models.AuditAction;
+import com.example.clinicmvcspring.models.Patient;
+import com.example.clinicmvcspring.repositories.PatientRepo;
 
 @Service
 public class PatientService {
@@ -18,6 +20,7 @@ public class PatientService {
         this.repo = repo;
     }
 
+    @Audit(action = AuditAction.CREATE)
     public Patient addPatient(Patient newPatient) {
         return repo.save(newPatient);// the job lies on the repo to access the DB
     }
@@ -26,6 +29,7 @@ public class PatientService {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deletePatient(Patient pat) {
         repo.delete(pat);
     }
@@ -34,10 +38,12 @@ public class PatientService {
         return repo.findById(id);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deletePatientByID(int id) {
         repo.deleteById(id);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public Patient updatePatientById(int id, Patient pat) {
         pat.setId(id);
         return repo.save(pat);

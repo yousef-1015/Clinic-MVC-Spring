@@ -7,10 +7,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
 import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
-import com.example.clinicmvcspring.models.*;
-import com.example.clinicmvcspring.repositories.*;
+import com.example.clinicmvcspring.models.Appointment;
+import com.example.clinicmvcspring.models.AuditAction;
+import com.example.clinicmvcspring.models.Prescription;
+import com.example.clinicmvcspring.repositories.AppointmentRepo;
+import com.example.clinicmvcspring.repositories.PrescriptionRepo;
 
 @Service
 public class PrescriptionService {
@@ -24,6 +28,7 @@ public class PrescriptionService {
 
     }
 
+    @Audit(action = AuditAction.CREATE)
     public Prescription addPrescription(Prescription pres) {
         return repo.save(pres);
     }
@@ -59,14 +64,17 @@ public class PrescriptionService {
         return Optional.of(details);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deletePrescription(Prescription pres) {
         repo.delete(pres);
     }
 
+    @Audit(action = AuditAction.DELETE)
     public void deletePrescriptionByID(int id) {
         repo.deleteById(id);
     }
 
+    @Audit(action = AuditAction.UPDATE)
     public PrescriptionDetailDTO updatePrescriptionById(int id, Prescription pres) {
         pres.setId(id);
         return convertToDetailDTO(repo.save(pres));
@@ -87,6 +95,7 @@ public class PrescriptionService {
         return prePage.map(pre -> convertToDetailDTO(pre));
     }
 
+    @Audit(action = AuditAction.CREATE)
     public PrescriptionDetailDTO addPrescriptionWithMedications(PrescriptionDetailDTO inputDTO) {
         Appointment appointment = new Appointment();
         appointment.setId(inputDTO.getAppointmentId());
