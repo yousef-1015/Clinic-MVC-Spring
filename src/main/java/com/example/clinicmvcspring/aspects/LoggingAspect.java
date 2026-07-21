@@ -37,10 +37,18 @@ public class LoggingAspect {
     @AfterReturning(pointcut = "execution(* com.example.clinicmvcspring.services.*.*(..))", returning = "result")
     public void logAfterSuccessfulReturn(JoinPoint joinPoint, Object result) {
         String paramString = getParametersAsString(joinPoint);
+        String resultString;
+        if (result == null) {
+            // for logout (invalidateToken)
+            resultString = "Void method (no return)";
+
+        } else {
+            resultString = result.toString();
+        }
 
         log.info("Service method {" + joinPoint.getSignature().getName() + "} with the parameters("
                 + paramString + ") from class " + joinPoint.getTarget().getClass().getSimpleName()
-                + "finished successfully and returned [" + result.toString() + "]");
+                + "finished successfully and returned [" + resultString + "]");
 
     }
 

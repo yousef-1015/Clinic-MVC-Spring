@@ -3,6 +3,8 @@ package com.example.clinicmvcspring.models;
 import java.math.BigDecimal;
 import java.sql.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jakarta.persistence.Column;
@@ -11,7 +13,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 // name in db
@@ -53,7 +59,8 @@ public class Doctor {
     // (hibernate)
     private BigDecimal salary;
 
-    @Column(name = "hire_date") // name in db
+    @CreationTimestamp
+    @Column(name = "hire_date", updatable = false) // name in db
     private Date hireDate;
 
     @NotBlank(message = "Specialty is Required")
