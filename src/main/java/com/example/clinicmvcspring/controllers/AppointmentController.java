@@ -1,16 +1,5 @@
 package com.example.clinicmvcspring.controllers;
 
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.clinicmvcspring.dtos.AppointmentDTO;
-import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-import com.example.clinicmvcspring.dtos.PaginatedListDTO;
-import com.example.clinicmvcspring.models.Appointment;
-import com.example.clinicmvcspring.models.AppointmentStatus;
-import com.example.clinicmvcspring.services.AppointmentService;
-
-import jakarta.validation.Valid;
-
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
@@ -23,14 +12,33 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.clinicmvcspring.dtos.AppointmentDTO;
+import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+import com.example.clinicmvcspring.dtos.PaginatedListDTO;
+import com.example.clinicmvcspring.models.Appointment;
+import com.example.clinicmvcspring.models.AppointmentStatus;
+import com.example.clinicmvcspring.services.AppointmentService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
+@Tag(name = "Appointment Management", description = "Make All CRUD Operations On Appointments")
+
 public class AppointmentController {
     private final AppointmentService appointmentService;
 
@@ -39,8 +47,17 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAppointments(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+    @Operation(summary = "Get All Appointments", description = "Retrieve All Appointments From The Database, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters: page must be >= 0 and size must be between 1 and 50", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> getAppointments(
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
+
         if (page < 0) {
             ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
             return ResponseEntity.status(400).body(error);
@@ -58,7 +75,17 @@ public class AppointmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getAppointmentByID(@PathVariable int id) {
+    @Operation(summary = "Get A Single Appointment", description = "Retrieve a Single Appointment By ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = AppointmentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> getAppointmentByID(
+            @Parameter(description = "Database ID of the appointment to retrieve", example = "1") @PathVariable int id) {
+
         if (id <= 0) {
             return ResponseEntity.status(400).body(new ErrorResponseDTO("ID must be a positive number", 400));
         }
@@ -74,6 +101,13 @@ public class AppointmentController {
     }
 
     @PostMapping
+    @Operation(summary = "Add A New Appointment", description = "Insert A New Appointment Into The Database, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Appointment Created Successfully", content = @Content(schema = @Schema(implementation = AppointmentDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> addNewAppointment(@Valid @RequestBody Appointment newApp) {
 
         return ResponseEntity.status(201).body(appointmentService.addAppointment(newApp));
@@ -81,7 +115,17 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAppointment(@PathVariable int id) {
+    @Operation(summary = "Delete An Appointment", description = "Delete an Appointment From The Database Based on Id, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Appointment Deleted Successfully", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> deleteAppointment(
+            @Parameter(description = "ID of the appointment to delete", example = "1") @PathVariable int id) {
+
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -97,7 +141,18 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAppointment(@PathVariable int id, @Valid @RequestBody Appointment app) {
+    @Operation(summary = "Update Appointment Details", description = "Update full information of an existing appointment by ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Appointment Updated Successfully", content = @Content(schema = @Schema(implementation = AppointmentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid ID or request body validation failed", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> updateAppointment(
+            @Parameter(description = "ID of the appointment to update", example = "1") @PathVariable int id,
+            @Valid @RequestBody Appointment app) {
+
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -117,8 +172,18 @@ public class AppointmentController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> partialAppointmentUpdate(@PathVariable int id,
+    @Operation(summary = "Partially Update An Appointment", description = "Partially update specific fields (like dateAndTime, status, patientId, doctorId) of an existing appointment by ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Appointment Partially Updated Successfully", content = @Content(schema = @Schema(implementation = AppointmentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> partialAppointmentUpdate(
+            @Parameter(description = "ID of the appointment to partially update", example = "1") @PathVariable int id,
             @RequestBody Map<String, Object> toUpdate) {
+
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -150,8 +215,17 @@ public class AppointmentController {
     }
 
     @GetMapping("status")
-    public ResponseEntity<?> getAppointmentByStatus(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size, @RequestParam AppointmentStatus status) {
+    @Operation(summary = "Get Appointments By Status", description = "Retrieve a paginated list of appointments filtered by status (e.g. SCHEDULED, COMPLETED, CANCELLED)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> getAppointmentByStatus(
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size,
+            @Parameter(description = "Appointment status to filter by", example = "SCHEDULED") @RequestParam AppointmentStatus status) {
         if (page < 0) {
             ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
             return ResponseEntity.status(400).body(error);
@@ -174,11 +248,18 @@ public class AppointmentController {
     }
 
     @GetMapping("/search/date")
+    @Operation(summary = "Get Appointments By Date Range", description = "Retrieve a paginated list of appointments within an optional start and end timestamp range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> getAppointmentsByDateRange(
-            @RequestParam(required = false) Timestamp start,
-            @RequestParam(required = false) Timestamp end,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @Parameter(description = "Optional start timestamp filter", example = "2026-07-01T00:00:00Z") @RequestParam(required = false) Timestamp start,
+            @Parameter(description = "Optional end timestamp filter", example = "2026-07-31T23:59:59Z") @RequestParam(required = false) Timestamp end,
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
 
         if (page < 0) {
             ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
