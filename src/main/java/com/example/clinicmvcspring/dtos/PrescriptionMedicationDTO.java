@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class PrescriptionMedicationDTO {
 
-    @Schema(description = "Medication name", example = "Panadol")
+    @Schema(description = "Medication name", example = "Panadol", accessMode = Schema.AccessMode.READ_ONLY)
     private String medicationName;
     @Schema(description = "ID of the medication", example = "1")
     private int medicationId;

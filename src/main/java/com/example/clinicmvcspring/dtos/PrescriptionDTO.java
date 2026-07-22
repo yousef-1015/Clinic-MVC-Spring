@@ -6,11 +6,11 @@ import java.sql.Timestamp;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class PrescriptionDTO {
-    @Schema(description = "Unique ID of the prescription", example = "1")
+    @Schema(description = "Unique ID of the prescription", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Integer id;
     @Schema(description = "Doctor notes", example = "Take 1 pill twice daily after meals")
     private String prescriptionNotes;
-    @Schema(description = "Creation timestamp", example = "2026-07-22T10:00:00Z")
+    @Schema(description = "Creation timestamp", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Timestamp createdAt;
 
     public PrescriptionDTO() {

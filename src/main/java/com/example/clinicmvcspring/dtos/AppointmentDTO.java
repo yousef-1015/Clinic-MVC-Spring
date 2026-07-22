@@ -7,7 +7,7 @@ import com.example.clinicmvcspring.models.AppointmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AppointmentDTO {
-    @Schema(description = "Unique ID of the appointment", example = "1")
+    @Schema(description = "Unique ID of the appointment", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private int id;
 
     @Schema(description = "Scheduled date and time of the appointment", example = "2026-07-25T14:30:00Z")
@@ -22,7 +22,7 @@ public class AppointmentDTO {
     @Schema(description = "Current appointment status", example = "SCHEDULED")
     private AppointmentStatus status;
 
-    @Schema(description = "Timestamp when the appointment record was created", example = "2026-07-22T10:00:00Z")
+@Schema(description = "Timestamp when the appointment record was created", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Timestamp createdAt;
 
     @Schema(description = "Prescription details")

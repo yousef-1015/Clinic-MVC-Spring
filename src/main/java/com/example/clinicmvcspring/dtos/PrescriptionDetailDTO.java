@@ -6,7 +6,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class PrescriptionDetailDTO {
-    @Schema(description = "Unique ID of the prescription", example = "1")
+    @Schema(description = "Unique ID", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Integer id;
 
     @Schema(description = "Doctor's notes and dosage instructions for the prescription", example = "Take 1 pill twice daily after meals for 7 days")
@@ -15,7 +15,7 @@ public class PrescriptionDetailDTO {
     @Schema(description = "ID of the associated appointment", example = "10")
     private Integer appointmentId;
 
-    @Schema(description = "Timestamp when the prescription was made", example = "2026-07-22T10:00:00Z")
+    @Schema(description = "Creation timestamp", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Timestamp createdAt;
 
     @Schema(description = "List of prescribed medications and dosage details")

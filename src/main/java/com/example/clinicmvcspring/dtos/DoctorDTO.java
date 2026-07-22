@@ -3,7 +3,7 @@ package com.example.clinicmvcspring.dtos;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class DoctorDTO {
-    @Schema(description = "Unique ID of the doctor", example = "10")
+    @Schema(description = "Unique ID of the doctor", example = "10", accessMode = Schema.AccessMode.READ_ONLY)
     private int id;
     @Schema(description = "Doctor's first name", example = "sampleFirstName", requiredMode = Schema.RequiredMode.REQUIRED)
     private String firstName;

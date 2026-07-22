@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +32,7 @@ public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the appointment", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private int id;
 
     @NotNull(message = "Date and Time is Required")
@@ -43,7 +45,7 @@ public class Appointment {
     // @Column(name = "doctor_id")
     // private int doctorId;;
 
-    @ManyToOne(fetch = FetchType.EAGER)  // one patient many appointments
+    @ManyToOne(fetch = FetchType.EAGER) // one patient many appointments
     @JoinColumn(name = "patient_id")
     @JsonIgnore
     private Patient patient;
@@ -61,9 +63,10 @@ public class Appointment {
 
     @Column(name = "created_at")
     @CreationTimestamp
+    @Schema(description = "Timestamp when the appointment was created", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Timestamp createdAt;
-//fetch type is EAGER by default
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
+    // fetch type is EAGER by default
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Prescription prescription;
 
     // for adding

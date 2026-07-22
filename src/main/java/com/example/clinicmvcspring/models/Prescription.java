@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,7 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "prescriptions")
@@ -24,6 +25,8 @@ import jakarta.validation.constraints.*;
 public class Prescription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the prescription", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
+
     private int id;
 
     @Size(max = 200, message = "Prescription notes max size is 200 characters")
@@ -37,9 +40,10 @@ public class Prescription {
 
     @CreationTimestamp
     @Column(name = "created_at")
+    @Schema(description = "Creation timestamp", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
+
     private Timestamp createdAt;
 
-    
     // for adding
 
     public Prescription(String prescriptionNotes, Appointment appointment) {

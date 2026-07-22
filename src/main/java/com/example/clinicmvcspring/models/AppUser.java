@@ -2,6 +2,7 @@ package com.example.clinicmvcspring.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +20,8 @@ public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the user", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
+
     private int id;
 
     @Column(nullable = false, unique = true, length = 50)

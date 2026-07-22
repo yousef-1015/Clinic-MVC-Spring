@@ -32,6 +32,7 @@ public class Doctor {
     // we used GenerationType.IDENTITY to tell jpa that the value is auto generated
     // by the db don't do it yourself
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the doctor", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private int id;
 
     @NotBlank(message = "First Name is Required")
@@ -63,7 +64,7 @@ public class Doctor {
 
     @CreationTimestamp
     @Column(name = "hire_date", updatable = false) // name in db
-    @Schema(description = "Date when the doctor was hired", example = "2026-07-22")
+    @Schema(description = "Date when the doctor was hired", example = "2026-07-22", accessMode = Schema.AccessMode.READ_ONLY)
     private Date hireDate;
 
     @NotBlank(message = "Specialty is Required")

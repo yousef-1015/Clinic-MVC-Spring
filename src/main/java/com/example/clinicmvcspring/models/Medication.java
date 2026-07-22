@@ -22,7 +22,7 @@ import jakarta.validation.constraints.Size;
 public class Medication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "Unique ID of the medication", example = "1")
+    @Schema(description = "Unique ID of the medication", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private int id;
 
     @NotBlank(message = "Medication Name is Required")
@@ -33,7 +33,7 @@ public class Medication {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    @Schema(description = "Timestamp when the medication was added", example = "2026-07-22T10:00:00Z")
+    @Schema(description = "Timestamp when the medication was added", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Timestamp createdAt;
 
     // for adding

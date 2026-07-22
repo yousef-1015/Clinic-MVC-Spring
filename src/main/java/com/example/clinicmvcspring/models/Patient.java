@@ -24,7 +24,7 @@ import jakarta.validation.constraints.Size;
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "Unique ID of the patient", example = "10")
+    @Schema(description = "Unique ID of the patient", example = "10", accessMode = Schema.AccessMode.READ_ONLY)
     private int id;
 
     @NotBlank(message = "First Name is Required")
@@ -48,7 +48,7 @@ public class Patient {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    @Schema(description = "Timestamp when the patient was registered", example = "2026-07-22T10:00:00Z")
+    @Schema(description = "Timestamp when the patient was registered", example = "2026-07-22T10:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Timestamp createdAt;
 
     // for creating
