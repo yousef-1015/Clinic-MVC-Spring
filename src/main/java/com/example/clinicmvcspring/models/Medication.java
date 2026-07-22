@@ -6,13 +6,15 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "medications")
@@ -20,15 +22,18 @@ import jakarta.validation.constraints.*;
 public class Medication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the medication", example = "1")
     private int id;
 
     @NotBlank(message = "Medication Name is Required")
     @Size(max = 100, message = "Medication Name max size is 100 characters")
     @Column(name = "medication_name")
+    @Schema(description = "Name of the medication", example = "Panadol", requiredMode = Schema.RequiredMode.REQUIRED)
     private String medicationName;
 
     @Column(name = "created_at")
     @CreationTimestamp
+    @Schema(description = "Timestamp when the medication was added", example = "2026-07-22T10:00:00Z")
     private Timestamp createdAt;
 
     // for adding
