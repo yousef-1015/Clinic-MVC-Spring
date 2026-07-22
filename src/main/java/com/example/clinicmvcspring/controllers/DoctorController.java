@@ -100,7 +100,7 @@ public class DoctorController {
     @PostMapping
     @Operation(summary = "Add A New Doctor", description = "Insert A New Doctor Into The Database, [Requires Role: ADMIN]")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Doctor Creates Successfully", content = @Content(schema = @Schema(implementation = Doctor.class))),
+            @ApiResponse(responseCode = "201", description = "Doctor Created Successfully", content = @Content(schema = @Schema(implementation = Doctor.class))),
             @ApiResponse(responseCode = "409", description = "Email Already Used", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
@@ -113,7 +113,17 @@ public class DoctorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDoctor(@PathVariable int id) {
+    @Operation(summary = "Delete A Doctor", description = "Delete a Doctor From The Database Based on Id, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Doctor Deleted Successfully", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No doctor found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+
+    })
+    public ResponseEntity<?> deleteDoctor(
+            @Parameter(description = "ID of the doctor to delete", example = "1") @PathVariable int id) {
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -129,7 +139,17 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDoctor(@PathVariable int id, @Valid @RequestBody Doctor doc) {
+    @Operation(summary = "Update Doctor Details", description = "Update full information of an existing doctor by ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Doctor Updated Successfully", content = @Content(schema = @Schema(implementation = Doctor.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid ID or request body validation failed", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No doctor found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> updateDoctor(
+            @Parameter(description = "ID of the doctor to update", example = "1") @PathVariable int id,
+            @Valid @RequestBody Doctor doc) {
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -146,7 +166,17 @@ public class DoctorController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> partialDocUpdate(@PathVariable int id, @RequestBody Map<String, Object> toUpdate) {
+    @Operation(summary = "Partially Update A Doctor", description = "Partially update specific fields (like firstName, email, specialty, or salary) of an existing doctor by ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Doctor Partially Updated Successfully", content = @Content(schema = @Schema(implementation = Doctor.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No doctor found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> partialDocUpdate(
+            @Parameter(description = "ID of the doctor to partially update", example = "1") @PathVariable int id,
+            @RequestBody Map<String, Object> toUpdate) {
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -171,10 +201,17 @@ public class DoctorController {
     }
 
     @GetMapping("/specialty")
+    @Operation(summary = "Get Doctors By Specialty", description = "Retrieve a paginated list of doctors filtered by their medical specialty")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters: page must be >= 0 and size must be between 1 and 50", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> getDoctorsBySpecialty(
-            @RequestParam String specialty,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @Parameter(description = "Medical specialty to filter by", example = "Cardiology") @RequestParam String specialty,
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
 
         if (page < 0) {
             ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
@@ -199,11 +236,18 @@ public class DoctorController {
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Search Doctors", description = "Search and filter doctors dynamically by optional specialty and/or salary")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> searchDoctors(
-            @RequestParam(required = false) String specialty,
-            @RequestParam(required = false) BigDecimal salary,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @Parameter(description = "Optional specialty filter", example = "Cardiology") @RequestParam(required = false) String specialty,
+            @Parameter(description = "Optional salary filter", example = "12000.00") @RequestParam(required = false) BigDecimal salary,
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
 
         if (page < 0) {
             ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
