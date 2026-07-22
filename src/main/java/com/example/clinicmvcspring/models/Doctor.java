@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -57,10 +58,12 @@ public class Doctor {
     // ATTRIBUTE NAME)
     // changed to BigDecimal so i can use the @Digits validation with jpa
     // (hibernate)
+    @Schema(description = "Doctor's monthly salary", example = "15000.00")
     private BigDecimal salary;
 
     @CreationTimestamp
     @Column(name = "hire_date", updatable = false) // name in db
+    @Schema(description = "Date when the doctor was hired", example = "2026-07-22")
     private Date hireDate;
 
     @NotBlank(message = "Specialty is Required")
