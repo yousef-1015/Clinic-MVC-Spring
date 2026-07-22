@@ -1,10 +1,13 @@
 package com.example.clinicmvcspring.services;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,4 +54,11 @@ public class AuditLogService {
         return repo.findAll(pageable);
     }
 
+    @Scheduled(cron = "0 0 3 * * *")
+    @Transactional
+    public void cleanUpOldAuditLogs() {
+        Timestamp twoWeeksAgo = Timestamp.valueOf(LocalDateTime.now().minusWeeks(2));
+        int deletedCount = repo.deleteByPerformedAtBefore(twoWeeksAgo);
+        System.out.println("Cleanup: Deleted " + deletedCount + " audit logs older than two weeks.");
+    }
 }
