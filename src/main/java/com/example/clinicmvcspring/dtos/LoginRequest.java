@@ -1,7 +1,11 @@
 package com.example.clinicmvcspring.dtos;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class LoginRequest {
+    @Schema(description = "Username for the account", example = "exampleUsername", requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
+    @Schema(description = "Password for the account", example = "secret123", requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 
     public String getUsername() {

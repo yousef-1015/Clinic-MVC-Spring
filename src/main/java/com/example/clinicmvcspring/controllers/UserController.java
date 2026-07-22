@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.clinicmvcspring.annotations.ExecutionTimeLog;
 import com.example.clinicmvcspring.dtos.AuthResponse;
 import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
 import com.example.clinicmvcspring.dtos.LoginRequest;
@@ -39,8 +38,17 @@ import com.example.clinicmvcspring.services.DoctorService;
 import com.example.clinicmvcspring.services.JwtService;
 import com.example.clinicmvcspring.services.RefreshTokenService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/v1/users")
+@Tag(name = "User & Authentication Management", description = "Endpoints for user signup, authentication, token refresh, and logout")
 public class UserController {
     private final AppUserDetailsService userService;
     private final DoctorService doctorService;
@@ -59,9 +67,17 @@ public class UserController {
     }
 
     @GetMapping("")
-    @ExecutionTimeLog
-    public ResponseEntity<?> getAllUsers(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+    @Operation(summary = "Get All Users", description = "Retrieve a paginated list of registered system users, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> getAllUsers(
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of users per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
+
         if (page < 0) {
             ErrorResponseDTO error = new ErrorResponseDTO("Page Number can't be negative", 400);
             return ResponseEntity.status(400).body(error);
@@ -79,6 +95,11 @@ public class UserController {
     }
 
     @PostMapping("/signup")
+    @Operation(summary = "Register A New User", description = "Register a new user account and optionally link to an existing doctor profile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request (e.g. Doctor ID not found or Doctor already has a user account)")
+    })
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest request) {
 
         // If it's a DOCTOR perform all validations
@@ -132,7 +153,11 @@ public class UserController {
     }
 
     @PostMapping("/login")
-
+    @Operation(summary = "User Login", description = "Authenticate user credentials and return a JWT access token and refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Invalid username or password", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -148,7 +173,13 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader,
+    @Operation(summary = "User Logout", description = "Invalidate JWT access token and delete refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Logged out successfully"),
+            @ApiResponse(responseCode = "404", description = "Refresh token not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> logout(
+            @Parameter(description = "Authorization header containing Bearer JWT token", example = "Bearer eyJhbGciOi...") @RequestHeader("Authorization") String authHeader,
             @RequestBody RefreshRequestDTO request) {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -168,6 +199,12 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh Access Token", description = "Exchange a valid refresh token for a new JWT access token and new refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tokens refreshed successfully", content = @Content(schema = @Schema(implementation = RefreshResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Refresh token is expired", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Refresh token not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> refresh(@RequestBody RefreshRequestDTO request) {
 
         Optional<RefreshToken> refToken = refreshTokenService.findByToken(request.getRefreshToken()); // get the

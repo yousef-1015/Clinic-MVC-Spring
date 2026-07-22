@@ -1,7 +1,11 @@
 package com.example.clinicmvcspring.dtos;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class RefreshResponseDTO {
+    @Schema(description = "New JWT access token", example = "eyJhbGciOiJIUzI1NiJ9...")
     private String newAccessToken;
+    @Schema(description = "New UUID refresh token", example = "6ba7b810-9dad-11d1-80b4-00c04fd430c8")
     private String newRefreshToken;
 
     public RefreshResponseDTO(String newAccessToken, String newRefreshToken) {
