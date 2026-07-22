@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,26 +24,31 @@ import jakarta.validation.constraints.Size;
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "Unique ID of the patient", example = "10")
     private int id;
 
     @NotBlank(message = "First Name is Required")
     @Size(max = 50, message = "First Name max size is 50 characters")
     @Column(name = "first_name")
+    @Schema(description = "Patient's first name", example = "sampleFirstName", requiredMode = Schema.RequiredMode.REQUIRED)
     private String firstName;
 
     @NotBlank(message = "Last Name is Required")
     @Size(max = 50, message = "Last Name max size is 50 characters")
     @Column(name = "last_name")
+    @Schema(description = "Patient's last name", example = "sampleLastName", requiredMode = Schema.RequiredMode.REQUIRED)
     private String lastName;
 
     @NotBlank(message = "Email is Required")
     @Size(max = 100, message = "Email max size is 100 characters")
     @Email(message = "Use Valid Email")
     @Column(name = "email")
+    @Schema(description = "Patient's email address", example = "example@email.com", requiredMode = Schema.RequiredMode.REQUIRED)
     private String email;
 
     @Column(name = "created_at")
     @CreationTimestamp
+    @Schema(description = "Timestamp when the patient was registered", example = "2026-07-22T10:00:00Z")
     private Timestamp createdAt;
 
     // for creating
