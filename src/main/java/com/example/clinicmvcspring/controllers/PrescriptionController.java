@@ -1,11 +1,5 @@
 package com.example.clinicmvcspring.controllers;
 
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.clinicmvcspring.models.Appointment;
-import com.example.clinicmvcspring.models.Prescription;
-import com.example.clinicmvcspring.services.PrescriptionService;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,24 +8,36 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
-import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-import com.example.clinicmvcspring.dtos.PaginatedListDTO;
-import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
-
-import jakarta.validation.Valid;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+import com.example.clinicmvcspring.dtos.PaginatedListDTO;
+import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
+import com.example.clinicmvcspring.models.Appointment;
+import com.example.clinicmvcspring.models.Prescription;
+import com.example.clinicmvcspring.services.PrescriptionService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/prescriptions")
+@Tag(name = "Prescription Management", description = "Make All CRUD Operations On Prescriptions")
 public class PrescriptionController {
     private final PrescriptionService prescriptionService;
 
@@ -40,9 +46,17 @@ public class PrescriptionController {
     }
 
     @GetMapping
+    @Operation(summary = "Get All Prescriptions", description = "Retrieve All Prescriptions From The Database, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PaginatedListDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters: page must be >= 0 and size must be between 1 and 50", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> getPrescriptions(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of prescriptions per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
+
         if (page < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("Page number cannot be negative", 400));
@@ -55,12 +69,22 @@ public class PrescriptionController {
         Pageable pageable = PageRequest.of(page, size);
         Page<PrescriptionDetailDTO> presPage = prescriptionService.getAllPrescriptionsPaginated(pageable);
         long total = presPage.getTotalElements();
-        PaginatedListDTO<PrescriptionDetailDTO> response = new PaginatedListDTO<>(presPage.getContent(), page, size, total);
+        PaginatedListDTO<PrescriptionDetailDTO> response = new PaginatedListDTO<>(presPage.getContent(), page, size,
+                total);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPrescriptionByID(@PathVariable int id) {
+    @Operation(summary = "Get A Single Prescription", description = "Retrieve a Single Prescription By ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = PrescriptionDetailDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> getPrescriptionByID(
+            @Parameter(description = "Database ID of the prescription to retrieve", example = "1") @PathVariable int id) {
 
         if (id <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -79,12 +103,29 @@ public class PrescriptionController {
     }
 
     @PostMapping
+    @Operation(summary = "Add A New Prescription", description = "Insert A New Prescription With Medications Into The Database, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Prescription Created Successfully", content = @Content(schema = @Schema(implementation = PrescriptionDetailDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     public ResponseEntity<?> addNewPrescription(@Valid @RequestBody PrescriptionDetailDTO newPresDto) {
+
         return ResponseEntity.status(201).body(prescriptionService.addPrescriptionWithMedications(newPresDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePrescription(@PathVariable int id) {
+    @Operation(summary = "Delete A Prescription", description = "Delete a Prescription From The Database Based on Id, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Prescription Deleted Successfully", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> deletePrescription(
+            @Parameter(description = "ID of the prescription to delete", example = "1") @PathVariable int id) {
 
         if (id <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -101,7 +142,18 @@ public class PrescriptionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePrescription(@PathVariable int id, @Valid @RequestBody Prescription pres) {
+    @Operation(summary = "Update Prescription Details", description = "Update full information of an existing prescription by ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Prescription Updated Successfully", content = @Content(schema = @Schema(implementation = PrescriptionDetailDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid ID or request body validation failed", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> updatePrescription(
+            @Parameter(description = "ID of the prescription to update", example = "1") @PathVariable int id,
+            @Valid @RequestBody Prescription pres) {
+
         if (id <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO("ID must be greater than 0", 400));
@@ -120,8 +172,18 @@ public class PrescriptionController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> partialPrescriptionUpdate(@PathVariable int id,
+    @Operation(summary = "Partially Update A Prescription", description = "Partially update specific fields (like prescriptionNotes, appointmentId) of an existing prescription by ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Prescription Partially Updated Successfully", content = @Content(schema = @Schema(implementation = PrescriptionDetailDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> partialPrescriptionUpdate(
+            @Parameter(description = "ID of the prescription to partially update", example = "1") @PathVariable int id,
             @RequestBody Map<String, Object> toUpdate) {
+
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -140,8 +202,6 @@ public class PrescriptionController {
             appo.setId(((Number) toUpdate.get("appointmentId")).intValue());
             existingPres.get().setAppointment(appo);
         }
-
-        
 
         return ResponseEntity.ok(prescriptionService.updatePrescriptionById(id, existingPres.get())); // 200
 
