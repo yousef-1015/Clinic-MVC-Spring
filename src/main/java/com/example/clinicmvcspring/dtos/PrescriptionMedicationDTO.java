@@ -1,9 +1,16 @@
 package com.example.clinicmvcspring.dtos;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class PrescriptionMedicationDTO {
+
+    @Schema(description = "Medication name", example = "Panadol")
     private String medicationName;
+    @Schema(description = "ID of the medication", example = "1")
     private int medicationId;
+    @Schema(description = "Dosage instructions", example = "500mg")
     private String dosage;
+    @Schema(description = "Frequency instructions", example = "Twice daily after meals")
     private String frequency;
 
     public PrescriptionMedicationDTO() {

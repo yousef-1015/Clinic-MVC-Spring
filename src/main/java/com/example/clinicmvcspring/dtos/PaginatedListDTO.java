@@ -2,12 +2,19 @@ package com.example.clinicmvcspring.dtos;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class PaginatedListDTO<T> {
 
+    @Schema(description = "Current page index (0-based)", example = "0")
     private int currentPage;
+    @Schema(description = "Number of items per page", example = "5")
     private int pageSize;
+    @Schema(description = "List of items on current page")
     private List<T> data;
+    @Schema(description = "Total number of available pages", example = "3")
     private int totalPages;
+    @Schema(description = "Total count of items across all pages", example = "15")
     private long totalItems;
 
     public PaginatedListDTO(List<T> data, int currentPage, int pageSize, long totalItems) {
@@ -17,8 +24,6 @@ public class PaginatedListDTO<T> {
         this.totalItems = totalItems;
         this.totalPages = (pageSize > 0) ? (int) Math.ceil((double) totalItems / pageSize) : 0;
     }
-
-    
 
     public void setCurrentPage(int currentPage) {
         this.currentPage = currentPage;
