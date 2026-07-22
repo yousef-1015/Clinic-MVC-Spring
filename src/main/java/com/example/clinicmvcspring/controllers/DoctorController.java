@@ -74,7 +74,17 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getDoctorByID(@PathVariable int id) {
+    @Operation(summary = "Get A Single Doctor", description = "Retrieve a Single Doctors By The Doctors ID, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = Doctor.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No doctor found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+
+    })
+    public ResponseEntity<?> getDoctorByID(
+            @Parameter(description = "Database ID of the doctor to retrieve", example = "1") @PathVariable int id) {
         if (id <= 0) {
             return ResponseEntity.status(400)
                     .body(new ErrorResponseDTO("ID must be a positive number", 400));
@@ -88,6 +98,15 @@ public class DoctorController {
     }
 
     @PostMapping
+    @Operation(summary = "Add A New Doctor", description = "Insert A New Doctor Into The Database, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Doctor Creates Successfully", content = @Content(schema = @Schema(implementation = Doctor.class))),
+            @ApiResponse(responseCode = "409", description = "Email Already Used", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+
+    })
     public ResponseEntity<?> addNewDoctor(@Valid @RequestBody Doctor newDoc) {
         return ResponseEntity.status(201).body(doctorService.addDoctor(newDoc)); // 201
 
