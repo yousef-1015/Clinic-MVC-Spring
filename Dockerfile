@@ -17,8 +17,21 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:25-jre-alpine AS runtime
 
 WORKDIR /app
+
+# Create a group
+RUN addgroup -S appgroup
+
+# Create a user named "appuser" in that group
+# -S (system user)
+RUN adduser -S appuser -G appgroup
+
 #getting jar from stage 1 (builder) into container
 COPY --from=builder /app/target/*.jar app.jar
+
+
+RUN chown appuser:appgroup app.jar
+
+USER appuser
 
 EXPOSE 8080
 ENTRYPOINT [ "java","-jar", "app.jar" ]
