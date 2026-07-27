@@ -2,15 +2,21 @@
 FROM maven:3.9-eclipse-temurin-25-alpine AS builder
 
 WORKDIR /app
+#maven wrapper
+COPY .mvn/ .mvn/
+
+COPY mvnw .
+
+RUN chmod +x mvnw
 
 COPY pom.xml .
 
-RUN mvn dependency:go-offline -B
+RUN ./mvnw dependency:go-offline -B
 
 COPY src ./src
 
 #Make jar file
-RUN mvn package -DskipTests
+RUN ./mvnw package -DskipTests
 
 #***************************************
 # Run Stage
