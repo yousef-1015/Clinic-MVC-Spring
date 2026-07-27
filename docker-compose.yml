@@ -16,6 +16,14 @@ services:
 
     networks:
       - clinic_network
+      
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   
 
   app:
@@ -29,8 +37,11 @@ services:
     networks:
       - clinic_network
     depends_on:
-      - mysql #Wait for mysql to run first so i can connect to it
+      mysql: #Wait for mysql to run first so i can connect to it
+        condition: service_healthy
     restart: on-failure
+
+
 
 
 volumes:
