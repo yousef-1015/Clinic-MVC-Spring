@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DoctorEventListener {
 
-    private final AuditLogService auditServie;
+    private final AuditLogService auditService;
 
     private String getCurrentUsername() {
         var authentication = SecurityContextHolder.getContext()
@@ -45,7 +45,7 @@ public class DoctorEventListener {
                 .details("Doctor Created: " + event.getDoctorName())
                 .build();
 
-        auditServie.addAuditLog(auditLog);
+        auditService.addAuditLog(auditLog);
     }
 
     @EventListener
@@ -63,7 +63,7 @@ public class DoctorEventListener {
                 .details("Doctor Updated: " + event.getDoctorName())
                 .build();
 
-        auditServie.addAuditLog(auditLog);
+        auditService.addAuditLog(auditLog);
     }
 
     @EventListener
@@ -81,7 +81,7 @@ public class DoctorEventListener {
                 .details("Doctor Deleted: " + event.getDoctorName())
                 .build();
 
-        auditServie.addAuditLog(auditLog);
+        auditService.addAuditLog(auditLog);
     }
 
     @EventListener

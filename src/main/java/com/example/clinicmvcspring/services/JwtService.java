@@ -7,43 +7,50 @@ import java.util.HexFormat;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.events.UserLoggedInEvent;
 import com.example.clinicmvcspring.models.AuditAction;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class JwtService {
     // Read the key from application.properties
     @Value("${application.security.jwt.secret-key}") // this value is a random hex value
     private String jwtSecret;
     // A set to store logged Out tokens in memory
     private final Set<String> tokenBlacklist = new HashSet<>();
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private Key getSigningKey() {
         byte[] keyBytes = HexFormat.of().parseHex(jwtSecret);// decode the hex values into a an array of bytes
         return Keys.hmacShaKeyFor(keyBytes); // convert these bytes into a key object to use in java security
     }
 
-    @Audit(action = AuditAction.LOGIN)
+    // @Audit(action = AuditAction.LOGIN)
     // Generates a token using the user details
     public String generateToken(UserDetails userDetails) {
         // Get the user role
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
-
         // Build the token
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .claim("role", role) // Add the role
                 .setSubject(userDetails.getUsername()) // Add the username
                 .setIssuedAt(new Date(System.currentTimeMillis())) // Created now
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // Expire in 24 hours
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Sign with key
                 .compact(); // Build into a String
+        publishUserLogInEvent(userDetails);
+        return token;
+
     }
 
     public String extractUsername(String token) {
@@ -100,4 +107,10 @@ public class JwtService {
                 .getExpiration();
     }
 
+    // publish events
+    private void publishUserLogInEvent(UserDetails userDetails) {
+        UserLoggedInEvent userLoggedInEvent = new UserLoggedInEvent(userDetails.getUsername().strip(),
+                "Logged In Successfully");
+        applicationEventPublisher.publishEvent(userLoggedInEvent);
+    }
 }
