@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.DoctorDTO;
+import com.example.clinicmvcspring.events.DoctorCreatedEvent;
 import com.example.clinicmvcspring.mappers.DoctorMapper;
 import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.Doctor;
@@ -22,15 +24,19 @@ public class DoctorService {
 
     private final DoctorRepo repo;
     private final DoctorMapper mapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public DoctorService(DoctorRepo repo, DoctorMapper mapper) {
+    public DoctorService(DoctorRepo repo, DoctorMapper mapper, ApplicationEventPublisher applicationEventPublisher) {
         this.repo = repo;
         this.mapper = mapper;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Audit(action = AuditAction.CREATE)
     public Doctor addDoctor(Doctor newDoctor) {
-        return repo.save(newDoctor);// using the .save from the built in methods in JpaRepositories
+        Doctor savedDoc = repo.save(newDoctor);// using the .save from the built in methods in JpaRepositories
+        // publish the event
+        publishDoctorCreatedEvent(savedDoc);
+        return savedDoc;
     }
 
     public List<Doctor> getAllDoctors() {
@@ -79,5 +85,14 @@ public class DoctorService {
                 .and(DoctorSpecifications.salaryGreaterThan(salary));
 
         return repo.findAll(spec, pageable);
+    }
+
+    // publish event
+
+    private void publishDoctorCreatedEvent(Doctor doc) {
+        DoctorCreatedEvent docCreatedEvent = new DoctorCreatedEvent(doc.getFirstName() + " " + doc.getLastName(),
+                doc.getEmail());
+        applicationEventPublisher.publishEvent(docCreatedEvent);
+
     }
 }
