@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.listeners;
 import java.sql.Timestamp;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ public class DoctorEventListener {
     }
 
     @EventListener
+    @Async
     public void handleDoctorCreatedAudit(DoctorCreatedEvent event) {
 
         AuditLog auditLog = AuditLog.builder()
@@ -49,11 +51,13 @@ public class DoctorEventListener {
     }
 
     @EventListener
+    @Async
     public void handleDoctorCreatedAppLog(DoctorCreatedEvent event) {
         log.info("APP LOG: A new doctor named " + event.getDoctorName() + " joined the clinic");
     }
 
     @EventListener
+    @Async
     public void handleDoctorUpdatedAudit(DoctorUpdatedEvent event) {
 
         AuditLog auditLog = AuditLog.builder()
@@ -67,11 +71,13 @@ public class DoctorEventListener {
     }
 
     @EventListener
+    @Async
     public void handleDoctorAppLog(DoctorUpdatedEvent event) {
         log.info("Dr." + event.getDoctorName() + " " + event.getMessage());
     }
 
     @EventListener
+    @Async
     public void handleDoctorDeletedAudit(DoctorDeletedEvent event) {
 
         AuditLog auditLog = AuditLog.builder()
@@ -85,6 +91,7 @@ public class DoctorEventListener {
     }
 
     @EventListener
+    @Async
     public void handleDoctorDeletedAppLog(DoctorDeletedEvent event) {
         log.info("Dr." + event.getDoctorName() + " " + event.getMessage());
     }

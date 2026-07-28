@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.listeners;
 import java.sql.Timestamp;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ public class UserEventListener {
     }
 
     @EventListener
+    @Async
     public void handleUserLogInAudit(UserLoggedInEvent event) {
 
         AuditLog auditLog = AuditLog.builder()
@@ -49,6 +51,7 @@ public class UserEventListener {
     }
 
     @EventListener
+    @Async
     public void handleUserLogInAppLog(UserLoggedInEvent event) {
         log.info("APP LOG: User " + event.getLoggedInUsername() + event.getMessage());
     }
