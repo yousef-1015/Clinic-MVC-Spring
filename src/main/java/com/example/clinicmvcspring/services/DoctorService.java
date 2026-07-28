@@ -10,12 +10,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.DoctorDTO;
 import com.example.clinicmvcspring.events.DoctorCreatedEvent;
+import com.example.clinicmvcspring.events.DoctorDeletedEvent;
 import com.example.clinicmvcspring.events.DoctorUpdatedEvent;
 import com.example.clinicmvcspring.mappers.DoctorMapper;
-import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.Doctor;
 import com.example.clinicmvcspring.repositories.DoctorRepo;
 import com.example.clinicmvcspring.specifications.DoctorSpecifications;
@@ -44,8 +43,9 @@ public class DoctorService {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
-    @Audit(action = AuditAction.DELETE)
     public void deleteDoctor(Doctor docToDelete) {
+        publishDoctorDeletedEvent(docToDelete);
+
         repo.delete(docToDelete);
     }
 
@@ -53,8 +53,9 @@ public class DoctorService {
         return repo.findById(id);
     }
 
-    @Audit(action = AuditAction.DELETE)
     public void deleteDoctorByID(int id) {
+        publishDoctorDeletedEvent(getDoctorByID(id).get());
+
         repo.deleteById(id);
     }
 
@@ -101,6 +102,13 @@ public class DoctorService {
         DoctorUpdatedEvent doctorUpdatedEvent = new DoctorUpdatedEvent(doc.getFirstName() + " " + doc.getLastName(),
                 "Updated Successfully");
         applicationEventPublisher.publishEvent(doctorUpdatedEvent);
+
+    }
+
+    private void publishDoctorDeletedEvent(Doctor doc) {
+        DoctorDeletedEvent doctorDeletedEvent = new DoctorDeletedEvent(doc.getFirstName() + " " + doc.getLastName(),
+                "Deletdd Successfully");
+        applicationEventPublisher.publishEvent(doctorDeletedEvent);
 
     }
 

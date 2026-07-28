@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.example.clinicmvcspring.events.DoctorCreatedEvent;
+import com.example.clinicmvcspring.events.DoctorDeletedEvent;
 import com.example.clinicmvcspring.events.DoctorUpdatedEvent;
 import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.AuditLog;
@@ -67,6 +68,24 @@ public class DoctorEventListener {
 
     @EventListener
     public void handleDoctorAppLog(DoctorUpdatedEvent event) {
+        log.info("Dr." + event.getDoctorName() + " " + event.getMessage());
+    }
+
+    @EventListener
+    public void handleDoctorDeletedAudit(DoctorDeletedEvent event) {
+
+        AuditLog auditLog = AuditLog.builder()
+                .actionType(AuditAction.DELETE)
+                .madeBy(getCurrentUsername())
+                .performedAt(new Timestamp(System.currentTimeMillis()))
+                .details("Doctor Deleted: " + event.getDoctorName())
+                .build();
+
+        auditServie.addAuditLog(auditLog);
+    }
+
+    @EventListener
+    public void handleDoctorDeletedAppLog(DoctorDeletedEvent event) {
         log.info("Dr." + event.getDoctorName() + " " + event.getMessage());
     }
 
