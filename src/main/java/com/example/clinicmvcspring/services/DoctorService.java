@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.DoctorDTO;
 import com.example.clinicmvcspring.events.DoctorCreatedEvent;
+import com.example.clinicmvcspring.events.DoctorUpdatedEvent;
 import com.example.clinicmvcspring.mappers.DoctorMapper;
 import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.Doctor;
@@ -57,15 +58,17 @@ public class DoctorService {
         repo.deleteById(id);
     }
 
-    @Audit(action = AuditAction.UPDATE)
     public Doctor updateDoctor(Doctor doc) {
-        return repo.save(doc);
+        Doctor updatedDoctor = repo.save(doc);
+        publishDoctorUpdatedEvent(updatedDoctor);
+        return updatedDoctor;
     }
 
-    @Audit(action = AuditAction.UPDATE)
     public Doctor updateDoctorById(int id, Doctor doc) {
         doc.setId(id);
-        return repo.save(doc);
+        Doctor updatedDoctor = repo.save(doc);
+        publishDoctorUpdatedEvent(updatedDoctor);
+        return updatedDoctor;
     }
 
     public Page<DoctorDTO> getAllDoctors(Pageable pageable) {
@@ -88,11 +91,17 @@ public class DoctorService {
     }
 
     // publish event
-
     private void publishDoctorCreatedEvent(Doctor doc) {
         DoctorCreatedEvent docCreatedEvent = new DoctorCreatedEvent(doc.getFirstName() + " " + doc.getLastName(),
                 doc.getEmail());
         applicationEventPublisher.publishEvent(docCreatedEvent);
+    }
+
+    private void publishDoctorUpdatedEvent(Doctor doc) {
+        DoctorUpdatedEvent doctorUpdatedEvent = new DoctorUpdatedEvent(doc.getFirstName() + " " + doc.getLastName(),
+                "Updated Successfully");
+        applicationEventPublisher.publishEvent(doctorUpdatedEvent);
 
     }
+
 }
