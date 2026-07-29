@@ -32,7 +32,7 @@ public class JwtServiceTest {
 
     @BeforeEach // for each test create these new object
     void setUp() {
-        jwtService = new JwtService();
+        jwtService = new JwtService(null);
         fakeAppUser = new AppUser();
         fakeAppUser.setUsername("fake-name");
         fakeAppUser.setId(55);

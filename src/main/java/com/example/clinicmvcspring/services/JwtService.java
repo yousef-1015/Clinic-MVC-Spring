@@ -18,10 +18,10 @@ import com.example.clinicmvcspring.models.AuditAction;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class JwtService {
     // Read the key from application.properties
     @Value("${application.security.jwt.secret-key}") // this value is a random hex value

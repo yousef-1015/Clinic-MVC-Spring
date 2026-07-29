@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +50,7 @@ public class DoctorService {
         repo.delete(docToDelete);
     }
 
+    @Cacheable(value = "Doctors", key = "#id") // pull data on miss
     public Optional<Doctor> getDoctorByID(int id) {
         return repo.findById(id);
     }
