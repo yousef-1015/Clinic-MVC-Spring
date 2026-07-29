@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -44,6 +46,7 @@ public class DoctorService {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
+    @CacheEvict(value = "Doctors", key= "#docToDelete.getId()")
     public void deleteDoctor(Doctor docToDelete) {
         publishDoctorDeletedEvent(docToDelete);
 
@@ -55,18 +58,21 @@ public class DoctorService {
         return repo.findById(id);
     }
 
+    @CacheEvict(value = "Doctors", key = "#id") // remove deleted data from cache
     public void deleteDoctorByID(int id) {
         publishDoctorDeletedEvent(getDoctorByID(id).get());
 
         repo.deleteById(id);
     }
 
+    @CachePut(value = "Doctors", key= "#doc.getId()")// push updates from db to cache
     public Doctor updateDoctor(Doctor doc) {
         Doctor updatedDoctor = repo.save(doc);
         publishDoctorUpdatedEvent(updatedDoctor);
         return updatedDoctor;
     }
 
+    @CachePut(value = "Doctors", key = "#id")
     public Doctor updateDoctorById(int id, Doctor doc) {
         doc.setId(id);
         Doctor updatedDoctor = repo.save(doc);
