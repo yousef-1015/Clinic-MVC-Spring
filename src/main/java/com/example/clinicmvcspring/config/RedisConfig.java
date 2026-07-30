@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 @Configuration
 public class RedisConfig {
@@ -17,7 +19,10 @@ public class RedisConfig {
         // the rules of the redid cache
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(60)) // TTL IS 60 MINUTES
-                .disableCachingNullValues(); // SO CACHE DOESN'T FILL UPP WITH NULL VALUES FETCHED FROM THE DATABASE
+                .disableCachingNullValues() // SO CACHE DOESN'T FILL UPP WITH NULL VALUES FETCHED FROM THE DATABASE
+                .serializeValuesWith(SerializationPair.fromSerializer(RedisSerializer.json())); // to turn objects into
+                                                                                                // json values in redis
+                                                                                                // cache
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
