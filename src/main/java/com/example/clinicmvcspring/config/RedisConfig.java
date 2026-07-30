@@ -18,7 +18,7 @@ public class RedisConfig {
 
         // the rules of the redid cache
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(60)) // TTL IS 60 MINUTES
+                .entryTtl(Duration.ofMinutes(5)) // TTL IS 5 MINUTES
                 .disableCachingNullValues() // SO CACHE DOESN'T FILL UPP WITH NULL VALUES FETCHED FROM THE DATABASE
                 .serializeValuesWith(SerializationPair.fromSerializer(RedisSerializer.json())); // to turn objects into
                                                                                                 // json values in redis
