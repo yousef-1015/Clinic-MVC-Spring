@@ -34,11 +34,17 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=false&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
     networks:
       - clinic_network
     depends_on:
       mysql: #Wait for mysql to run first so i can connect to it
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     restart: on-failure
 
 
@@ -48,6 +54,19 @@ services:
       - "6380:6379"
     networks:
       - clinic_network
+
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"        # AMQP port
+      - "15672:15672"      # Admin UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    networks:
+      - clinic_network
+
 
 
 volumes:
