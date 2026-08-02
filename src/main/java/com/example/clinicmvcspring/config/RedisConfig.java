@@ -17,6 +17,7 @@ public class RedisConfig {
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
         RedisCacheConfiguration patientConfig;
+        RedisCacheConfiguration appointmentConfig;
 
         // the rules of the redid cache
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
@@ -26,9 +27,12 @@ public class RedisConfig {
                                                                                                 // json values in redis
                                                                                                 // cache
         patientConfig = config.entryTtl(Duration.ofMinutes(15));
+        appointmentConfig = config.entryTtl(Duration.ofMinutes(0));
+
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .withCacheConfiguration("Patients", patientConfig)
+                .withCacheConfiguration("Appointments", appointmentConfig)
                 .build();
     }
 

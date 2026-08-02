@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,6 +44,7 @@ public class AppointmentService {
         return repo.findAll().stream().map(app -> mapper.appointmentToAppointmentDTO(app)).toList();
     }
 
+    @Cacheable(value = "Appointments", key = "#id")
     public Optional<AppointmentDTO> getAppointmentByID(int id) {
         return repo.findById(id).map(app -> mapper.appointmentToAppointmentDTO(app));
     }
@@ -50,16 +54,19 @@ public class AppointmentService {
     }
 
     @Audit(action = AuditAction.DELETE)
+    @CacheEvict(value = "Appointments", key = "#app.getId()")
     public void deleteAppointment(Appointment app) {
         repo.delete(app);
     }
 
     @Audit(action = AuditAction.DELETE)
+    @CacheEvict(value = "Appointments", key = "#id")
     public void deleteAppointmentByID(int id) {
         repo.deleteById(id);
     }
 
     @Audit(action = AuditAction.UPDATE)
+    @CachePut(value = "Appointments", key = "#id")
     public AppointmentDTO updateAppointmentById(int id, Appointment app) {
         app.setId(id);
         return mapper.appointmentToAppointmentDTO(repo.save(app));
@@ -73,6 +80,7 @@ public class AppointmentService {
 
     @Audit(action = AuditAction.UPDATE)
     @Transactional
+    @CacheEvict(value = "Appointments", key = "#appointmentId")
     public void transferPatient(int appointmentId, int doctorId) {
         Optional<Appointment> appOpt = repo.findById(appointmentId);
 
