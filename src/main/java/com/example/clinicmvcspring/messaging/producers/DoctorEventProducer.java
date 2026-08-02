@@ -1,7 +1,11 @@
-package com.example.clinicmvcspring.messaging;
+package com.example.clinicmvcspring.messaging.producers;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+
+import com.example.clinicmvcspring.messaging.DoctorCreatedMessage;
+import com.example.clinicmvcspring.messaging.DoctorDeletedMessage;
+import com.example.clinicmvcspring.messaging.DoctorUpdatedMessage;
 
 @Component
 public class DoctorEventProducer {

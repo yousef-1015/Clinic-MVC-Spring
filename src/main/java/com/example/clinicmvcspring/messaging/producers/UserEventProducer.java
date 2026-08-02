@@ -1,7 +1,9 @@
-package com.example.clinicmvcspring.messaging;
+package com.example.clinicmvcspring.messaging.producers;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+
+import com.example.clinicmvcspring.messaging.UserLoggedInMessage;
 
 @Component
 public class UserEventProducer {
