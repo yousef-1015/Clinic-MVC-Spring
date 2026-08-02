@@ -16,6 +16,8 @@ public class RedisConfig {
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
+        RedisCacheConfiguration patientConfig;
+
         // the rules of the redid cache
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(5)) // TTL IS 5 MINUTES
@@ -23,8 +25,10 @@ public class RedisConfig {
                 .serializeValuesWith(SerializationPair.fromSerializer(RedisSerializer.json())); // to turn objects into
                                                                                                 // json values in redis
                                                                                                 // cache
+        patientConfig = config.entryTtl(Duration.ofMinutes(15));
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
+                .withCacheConfiguration("Patients", patientConfig)
                 .build();
     }
 

@@ -3,6 +3,9 @@ package com.example.clinicmvcspring.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,20 +33,24 @@ public class PatientService {
     }
 
     @Audit(action = AuditAction.DELETE)
+    @CacheEvict(value = "Patients", key = "#pat.getId()")
     public void deletePatient(Patient pat) {
         repo.delete(pat);
     }
 
+    @Cacheable(value = "Patients", key = "#id")
     public Optional<Patient> getPatientByID(int id) {
         return repo.findById(id);
     }
 
+    @CacheEvict(value = "Patients", key = "#id")
     @Audit(action = AuditAction.DELETE)
     public void deletePatientByID(int id) {
         repo.deleteById(id);
     }
 
     @Audit(action = AuditAction.UPDATE)
+    @CachePut(value = "Patients", key = "#pat.getId()")
     public Patient updatePatientById(int id, Patient pat) {
         pat.setId(id);
         return repo.save(pat);
