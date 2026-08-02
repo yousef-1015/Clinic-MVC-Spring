@@ -7,12 +7,11 @@ import java.util.HexFormat;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.annotations.Audit;
-import com.example.clinicmvcspring.events.UserLoggedInEvent;
+import com.example.clinicmvcspring.messaging.producers.UserEventProducer;
 import com.example.clinicmvcspring.models.AuditAction;
 
 import io.jsonwebtoken.Jwts;
@@ -28,7 +27,9 @@ public class JwtService {
     private String jwtSecret;
     // A set to store logged Out tokens in memory
     private final Set<String> tokenBlacklist = new HashSet<>();
-    private final ApplicationEventPublisher applicationEventPublisher;
+    // private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final UserEventProducer userEventProducer;
 
     private Key getSigningKey() {
         byte[] keyBytes = HexFormat.of().parseHex(jwtSecret);// decode the hex values into a an array of bytes
@@ -109,8 +110,6 @@ public class JwtService {
 
     // publish events
     private void publishUserLogInEvent(UserDetails userDetails) {
-        UserLoggedInEvent userLoggedInEvent = new UserLoggedInEvent(userDetails.getUsername().strip(),
-                "Logged In Successfully");
-        applicationEventPublisher.publishEvent(userLoggedInEvent);
+        userEventProducer.sendUserLoggedIn(userDetails.getUsername().strip(), "Logged In Successfully");
     }
 }

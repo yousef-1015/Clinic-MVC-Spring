@@ -7,17 +7,15 @@ import java.util.Optional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.dtos.DoctorDTO;
-import com.example.clinicmvcspring.events.DoctorCreatedEvent;
-import com.example.clinicmvcspring.events.DoctorDeletedEvent;
-import com.example.clinicmvcspring.events.DoctorUpdatedEvent;
+
 import com.example.clinicmvcspring.mappers.DoctorMapper;
+import com.example.clinicmvcspring.messaging.producers.DoctorEventProducer;
 import com.example.clinicmvcspring.models.Doctor;
 import com.example.clinicmvcspring.repositories.DoctorRepo;
 import com.example.clinicmvcspring.specifications.DoctorSpecifications;
@@ -27,12 +25,14 @@ public class DoctorService {
 
     private final DoctorRepo repo;
     private final DoctorMapper mapper;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    // private final ApplicationEventPublisher applicationEventPublisher;
+    private final DoctorEventProducer doctorEventProducer;
 
-    public DoctorService(DoctorRepo repo, DoctorMapper mapper, ApplicationEventPublisher applicationEventPublisher) {
+    public DoctorService(DoctorRepo repo, DoctorMapper mapper, DoctorEventProducer doctorEventProducer) {
         this.repo = repo;
         this.mapper = mapper;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.doctorEventProducer = doctorEventProducer;
+        // this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Doctor addDoctor(Doctor newDoctor) {
@@ -46,7 +46,7 @@ public class DoctorService {
         return repo.findAll();// the job lies on the repo to access the DB
     }
 
-    @CacheEvict(value = "Doctors", key= "#docToDelete.getId()")
+    @CacheEvict(value = "Doctors", key = "#docToDelete.getId()")
     public void deleteDoctor(Doctor docToDelete) {
         publishDoctorDeletedEvent(docToDelete);
 
@@ -65,7 +65,7 @@ public class DoctorService {
         repo.deleteById(id);
     }
 
-    @CachePut(value = "Doctors", key= "#doc.getId()")// push updates from db to cache
+    @CachePut(value = "Doctors", key = "#doc.getId()") // push updates from db to cache
     public Doctor updateDoctor(Doctor doc) {
         Doctor updatedDoctor = repo.save(doc);
         publishDoctorUpdatedEvent(updatedDoctor);
@@ -101,22 +101,15 @@ public class DoctorService {
 
     // publish event
     private void publishDoctorCreatedEvent(Doctor doc) {
-        DoctorCreatedEvent docCreatedEvent = new DoctorCreatedEvent(doc.getFirstName() + " " + doc.getLastName(),
-                doc.getEmail());
-        applicationEventPublisher.publishEvent(docCreatedEvent);
+        doctorEventProducer.sendDoctorCreated(doc.getFirstName() + " " + doc.getLastName(), doc.getEmail());
     }
 
     private void publishDoctorUpdatedEvent(Doctor doc) {
-        DoctorUpdatedEvent doctorUpdatedEvent = new DoctorUpdatedEvent(doc.getFirstName() + " " + doc.getLastName(),
-                "Updated Successfully");
-        applicationEventPublisher.publishEvent(doctorUpdatedEvent);
-
+        doctorEventProducer.sendDoctorUpdated(doc.getFirstName() + " " + doc.getLastName(), "Updated Successfully");
     }
 
     private void publishDoctorDeletedEvent(Doctor doc) {
-        DoctorDeletedEvent doctorDeletedEvent = new DoctorDeletedEvent(doc.getFirstName() + " " + doc.getLastName(),
-                "Deleted Successfully");
-        applicationEventPublisher.publishEvent(doctorDeletedEvent);
+        doctorEventProducer.sendDoctorDeleted(doc.getFirstName() + " " + doc.getLastName(), "Deleted Successfully");
 
     }
 
