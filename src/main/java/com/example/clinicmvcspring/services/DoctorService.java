@@ -115,7 +115,7 @@ public class DoctorService {
 
     private void publishDoctorDeletedEvent(Doctor doc) {
         DoctorDeletedEvent doctorDeletedEvent = new DoctorDeletedEvent(doc.getFirstName() + " " + doc.getLastName(),
-                "Deletdd Successfully");
+                "Deleted Successfully");
         applicationEventPublisher.publishEvent(doctorDeletedEvent);
 
     }
