@@ -5,13 +5,19 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
+@Slf4j
 public class RabbitMQConfig {
+
 
     // THE QUEUES
     @Bean
@@ -112,5 +118,27 @@ public class RabbitMQConfig {
                 .to(deadLetterExchange)
                 .with(RabbitMQConstants.ROUTING_KEY_DEAD_LETTER);// the routing key for dead letters
     }
+
+    @Bean
+public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+    RabbitTemplate template = new RabbitTemplate(connectionFactory);
+    template.setMessageConverter(messageConverter);
+
+        // did server receive the message
+    template.setConfirmCallback((correlationData, ack, cause) -> {
+        if (ack) {
+            log.info("Message received by RabbitMQ");
+        } else {
+            log.error("Message was not received, Cause: " + cause);
+        }
+    });
+
+        // could exchange route the message to a queue
+    template.setReturnsCallback(returned -> {
+        log.error("Message returned!, Message: " + returned.getMessage());
+    });
+
+    return template;
+}
 
 }
