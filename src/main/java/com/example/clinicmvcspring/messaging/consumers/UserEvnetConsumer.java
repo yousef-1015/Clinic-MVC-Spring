@@ -1,7 +1,5 @@
 package com.example.clinicmvcspring.messaging.consumers;
 
-import java.sql.Timestamp;
-
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +27,8 @@ public class UserEvnetConsumer {
 
         AuditLog auditLog = AuditLog.builder()
                 .actionType(AuditAction.LOGIN)
-                .madeBy("SYSTEM_RABBITMQ") // Because this is background process now
-                .performedAt(new Timestamp(System.currentTimeMillis()))
+                .madeBy(message.loggedInUsername())
+                .performedAt(message.happenedAt())
                 .details("user logged in via RabbitMQ: " + message.loggedInUsername())
                 .build();
 

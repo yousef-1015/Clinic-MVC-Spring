@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.services;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,10 +11,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.dtos.DoctorDTO;
-
 import com.example.clinicmvcspring.mappers.DoctorMapper;
 import com.example.clinicmvcspring.messaging.producers.DoctorEventProducer;
 import com.example.clinicmvcspring.models.Doctor;
@@ -101,15 +102,24 @@ public class DoctorService {
 
     // publish event
     private void publishDoctorCreatedEvent(Doctor doc) {
-        doctorEventProducer.sendDoctorCreated(doc.getFirstName() + " " + doc.getLastName(), doc.getEmail());
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        doctorEventProducer.sendDoctorCreated(doc.getFirstName() + " " + doc.getLastName(), doc.getEmail(),
+                currentUsername, now);
     }
 
     private void publishDoctorUpdatedEvent(Doctor doc) {
-        doctorEventProducer.sendDoctorUpdated(doc.getFirstName() + " " + doc.getLastName(), "Updated Successfully");
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        doctorEventProducer.sendDoctorUpdated(doc.getFirstName() + " " + doc.getLastName(), "Updated Successfully",
+                currentUsername, now);
     }
 
     private void publishDoctorDeletedEvent(Doctor doc) {
-        doctorEventProducer.sendDoctorDeleted(doc.getFirstName() + " " + doc.getLastName(), "Deleted Successfully");
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        doctorEventProducer.sendDoctorDeleted(doc.getFirstName() + " " + doc.getLastName(), "Deleted Successfully",
+                currentUsername, now);
 
     }
 

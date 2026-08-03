@@ -27,7 +27,7 @@ public class RabbitMQConfig {
     public Queue doctorUpdatedQueue() {
         return QueueBuilder.durable(RabbitMQConstants.QUEUE_DOCTOR_UPDATED)
                 .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER)
-                .withArgument("x-dead-letter-routing-key",RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
+                .withArgument("x-dead-letter-routing-key", RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
                 .build();
 
     }
@@ -56,34 +56,34 @@ public class RabbitMQConfig {
 
     // THE BINDINGS
     @Bean
-    public Binding doctorCreatedBinding(Queue doctorCreatedQueue, TopicExchange docExchange) {
+    public Binding doctorCreatedBinding(Queue doctorCreatedQueue, TopicExchange doctorExchange) {
         return BindingBuilder
                 .bind(doctorCreatedQueue)
-                .to(docExchange)
+                .to(doctorExchange)
                 .with(RabbitMQConstants.ROUTING_KEY_DOCTOR_CREATED);// the routing key
     }
 
     @Bean
-    public Binding doctorUpdatedBinding(Queue doctorUpdatedQueue, TopicExchange docExchange) {
+    public Binding doctorUpdatedBinding(Queue doctorUpdatedQueue, TopicExchange doctorExchange) {
         return BindingBuilder
                 .bind(doctorUpdatedQueue)
-                .to(docExchange)
+                .to(doctorExchange)
                 .with(RabbitMQConstants.ROUTING_KEY_DOCTOR_UPDATED);// the routing key
     }
 
     @Bean
-    public Binding doctorDeletedBinding(Queue doctorDeletedQueue, TopicExchange docExchange) {
+    public Binding doctorDeletedBinding(Queue doctorDeletedQueue, TopicExchange doctorExchange) {
         return BindingBuilder
                 .bind(doctorDeletedQueue)
-                .to(docExchange)
+                .to(doctorExchange)
                 .with(RabbitMQConstants.ROUTING_KEY_DOCTOR_DELETED);// the routing key
     }
 
     @Bean
-    public Binding userLoggedInBinding(Queue userLoggedInQueue, TopicExchange docExchange) {
+    public Binding userLoggedInBinding(Queue userLoggedInQueue, TopicExchange doctorExchange) {
         return BindingBuilder
                 .bind(userLoggedInQueue)
-                .to(docExchange)
+                .to(doctorExchange)
                 .with(RabbitMQConstants.ROUTING_KEY_USER_LOGGEDIN);// the routing key
     }
 

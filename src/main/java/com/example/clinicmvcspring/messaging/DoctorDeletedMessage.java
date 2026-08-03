@@ -1,5 +1,7 @@
 package com.example.clinicmvcspring.messaging;
 
-public record DoctorDeletedMessage (String doctorName, String message){
+import java.sql.Timestamp;
+
+public record DoctorDeletedMessage (String doctorName, String message, String username, Timestamp happenedAt){
     
 }

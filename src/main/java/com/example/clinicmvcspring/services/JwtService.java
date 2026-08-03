@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.services;
 
 import java.security.Key;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.HexFormat;
@@ -110,6 +111,7 @@ public class JwtService {
 
     // publish events
     private void publishUserLogInEvent(UserDetails userDetails) {
-        userEventProducer.sendUserLoggedIn(userDetails.getUsername().strip(), "Logged In Successfully");
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        userEventProducer.sendUserLoggedIn(userDetails.getUsername().strip(), "Logged In Successfully", now);
     }
 }

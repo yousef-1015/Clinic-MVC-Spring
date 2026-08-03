@@ -2,15 +2,16 @@ package com.example.clinicmvcspring.messaging.consumers;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
-import com.example.clinicmvcspring.services.AuditLogService;
+
 import com.example.clinicmvcspring.config.RabbitMQConstants;
 import com.example.clinicmvcspring.messaging.DoctorCreatedMessage;
 import com.example.clinicmvcspring.messaging.DoctorDeletedMessage;
 import com.example.clinicmvcspring.messaging.DoctorUpdatedMessage;
-import com.example.clinicmvcspring.models.AuditLog;
 import com.example.clinicmvcspring.models.AuditAction;
-import java.sql.Timestamp;
+import com.example.clinicmvcspring.models.AuditLog;
+import com.example.clinicmvcspring.services.AuditLogService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -30,8 +31,8 @@ public class DoctorEventConsumer {
 
         AuditLog auditLog = AuditLog.builder()
                 .actionType(AuditAction.CREATE)
-                .madeBy("SYSTEM_RABBITMQ") // Because this is background process now
-                .performedAt(new Timestamp(System.currentTimeMillis()))
+                .madeBy(message.username())
+                .performedAt(message.happenedAt())
                 .details("Doctor Created via RabbitMQ: " + message.doctorName())
                 .build();
 
@@ -43,8 +44,8 @@ public class DoctorEventConsumer {
     public void handleDoctorUpdated(DoctorUpdatedMessage message) {
         AuditLog auditLog = AuditLog.builder()
                 .actionType(AuditAction.UPDATE)
-                .madeBy("SYSTEM_RABBITMQ") // Because this is background process now
-                .performedAt(new Timestamp(System.currentTimeMillis()))
+                .madeBy(message.username())
+                .performedAt(message.happenedAt())
                 .details("Doctor Updated: " + message.doctorName())
                 .build();
 
@@ -58,8 +59,8 @@ public class DoctorEventConsumer {
     public void handleDoctorDeleted(DoctorDeletedMessage message) {
         AuditLog auditLog = AuditLog.builder()
                 .actionType(AuditAction.DELETE)
-                .madeBy("SYSTEM_RABBITMQ") // Because this is background process now
-                .performedAt(new Timestamp(System.currentTimeMillis()))
+                .madeBy(message.username())
+                .performedAt(message.happenedAt())
                 .details("Doctor Deleted: " + message.doctorName())
                 .build();
 
