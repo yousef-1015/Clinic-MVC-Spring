@@ -1,7 +1,5 @@
 package com.example.clinicmvcspring.messaging.producers;
 
-import java.sql.Timestamp;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +15,10 @@ public class UserEventProducer {
     }
 
 
-    public void sendUserLoggedIn(String username, String message,Timestamp happendAt) {
+    public void sendUserLoggedIn(UserLoggedInMessage message) {
 
-        UserLoggedInMessage userLoggedInMessage = new UserLoggedInMessage(username, message,happendAt);
 
-        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_CLINIC_EVENTS, RabbitMQConstants.ROUTING_KEY_USER_LOGGEDIN, userLoggedInMessage);
+        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_CLINIC_EVENTS, RabbitMQConstants.ROUTING_KEY_USER_LOGGEDIN, message);
 
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.messaging.UserLoggedInMessage;
 import com.example.clinicmvcspring.messaging.producers.UserEventProducer;
 import com.example.clinicmvcspring.models.AuditAction;
 
@@ -112,6 +113,10 @@ public class JwtService {
     // publish events
     private void publishUserLogInEvent(UserDetails userDetails) {
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        userEventProducer.sendUserLoggedIn(userDetails.getUsername().strip(), "Logged In Successfully", now);
+        UserLoggedInMessage event = new UserLoggedInMessage(
+                userDetails.getUsername().strip(),
+                "Logged In Successfully",
+                now);
+        userEventProducer.sendUserLoggedIn(event);
     }
 }

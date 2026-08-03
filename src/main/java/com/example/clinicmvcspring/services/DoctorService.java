@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.clinicmvcspring.dtos.DoctorDTO;
 import com.example.clinicmvcspring.mappers.DoctorMapper;
+import com.example.clinicmvcspring.messaging.DoctorCreatedMessage;
+import com.example.clinicmvcspring.messaging.DoctorDeletedMessage;
+import com.example.clinicmvcspring.messaging.DoctorUpdatedMessage;
 import com.example.clinicmvcspring.messaging.producers.DoctorEventProducer;
 import com.example.clinicmvcspring.models.Doctor;
 import com.example.clinicmvcspring.repositories.DoctorRepo;
@@ -104,22 +107,33 @@ public class DoctorService {
     private void publishDoctorCreatedEvent(Doctor doc) {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        doctorEventProducer.sendDoctorCreated(doc.getFirstName() + " " + doc.getLastName(), doc.getEmail(),
+
+        DoctorCreatedMessage event = new DoctorCreatedMessage(doc.getFirstName() + " " + doc.getLastName(),
+                doc.getEmail(),
                 currentUsername, now);
+        doctorEventProducer.sendDoctorCreated(event);
     }
 
     private void publishDoctorUpdatedEvent(Doctor doc) {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        doctorEventProducer.sendDoctorUpdated(doc.getFirstName() + " " + doc.getLastName(), "Updated Successfully",
+
+        DoctorUpdatedMessage event = new DoctorUpdatedMessage(doc.getFirstName() + " " + doc.getLastName(),
+                "Updated Successfully",
                 currentUsername, now);
+        doctorEventProducer.sendDoctorUpdated(event);
+
     }
 
     private void publishDoctorDeletedEvent(Doctor doc) {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        doctorEventProducer.sendDoctorDeleted(doc.getFirstName() + " " + doc.getLastName(), "Deleted Successfully",
+
+        DoctorDeletedMessage event = new DoctorDeletedMessage(doc.getFirstName() + " " + doc.getLastName(),
+                "Deleted Successfully",
                 currentUsername, now);
+
+        doctorEventProducer.sendDoctorDeleted(event);
 
     }
 
