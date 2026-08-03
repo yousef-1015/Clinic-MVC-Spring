@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import com.example.clinicmvcspring.config.RabbitMQConstants;
 import com.example.clinicmvcspring.messaging.UserLoggedInMessage;
 import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.AuditLog;
@@ -22,7 +23,7 @@ public class UserEvnetConsumer {
     }
 
     // Listen to the user logged in queue
-    @RabbitListener(queues = "user.loggedin.queue")
+    @RabbitListener(queues = RabbitMQConstants.QUEUE_USER_LOGGEDIN)
     public void handleDoctorCreated(UserLoggedInMessage message) {
         log.info("APP LOG: User (" + message.loggedInUsername() + ") " + message.message());
 

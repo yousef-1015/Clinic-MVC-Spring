@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.messaging.producers;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
+import com.example.clinicmvcspring.config.RabbitMQConstants;
 import com.example.clinicmvcspring.messaging.DoctorCreatedMessage;
 import com.example.clinicmvcspring.messaging.DoctorDeletedMessage;
 import com.example.clinicmvcspring.messaging.DoctorUpdatedMessage;
@@ -20,7 +21,8 @@ public class DoctorEventProducer {
 
         DoctorCreatedMessage doctorCreatedMessage = new DoctorCreatedMessage(name, email);
 
-        rabbitTemplate.convertAndSend("clinic.events", "doctor.created", doctorCreatedMessage);
+        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_CLINIC_EVENTS,
+                RabbitMQConstants.ROUTING_KEY_DOCTOR_CREATED, doctorCreatedMessage);
 
     }
 
@@ -28,7 +30,8 @@ public class DoctorEventProducer {
 
         DoctorUpdatedMessage doctorUpdatedMessage = new DoctorUpdatedMessage(name, message);
 
-        rabbitTemplate.convertAndSend("clinic.events", "doctor.updated", doctorUpdatedMessage);
+        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_CLINIC_EVENTS,
+                RabbitMQConstants.ROUTING_KEY_DOCTOR_UPDATED, doctorUpdatedMessage);
 
     }
 
@@ -36,7 +39,8 @@ public class DoctorEventProducer {
 
         DoctorDeletedMessage doctorDeletedMessage = new DoctorDeletedMessage(name, message);
 
-        rabbitTemplate.convertAndSend("clinic.events", "doctor.deleted", doctorDeletedMessage);
+        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE_CLINIC_EVENTS,
+                RabbitMQConstants.ROUTING_KEY_DOCTOR_DELETED, doctorDeletedMessage);
 
     }
 

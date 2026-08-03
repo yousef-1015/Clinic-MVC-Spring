@@ -4,6 +4,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import com.example.clinicmvcspring.services.AuditLogService;
+import com.example.clinicmvcspring.config.RabbitMQConstants;
 import com.example.clinicmvcspring.messaging.DoctorCreatedMessage;
 import com.example.clinicmvcspring.messaging.DoctorDeletedMessage;
 import com.example.clinicmvcspring.messaging.DoctorUpdatedMessage;
@@ -22,7 +23,7 @@ public class DoctorEventConsumer {
     }
 
     // Listen to the created queue
-    @RabbitListener(queues = "doctor.created.queue")
+    @RabbitListener(queues = RabbitMQConstants.QUEUE_DOCTOR_CREATED)
     public void handleDoctorCreated(DoctorCreatedMessage message) {
         log.info("APP LOG: A new doctor named {} joined the clinic (email: {})",
                 message.doctorName(), message.doctorEmail());
@@ -38,7 +39,7 @@ public class DoctorEventConsumer {
     }
 
     // Listen to the updated queue
-    @RabbitListener(queues = "doctor.updated.queue")
+    @RabbitListener(queues = RabbitMQConstants.QUEUE_DOCTOR_UPDATED)
     public void handleDoctorUpdated(DoctorUpdatedMessage message) {
         AuditLog auditLog = AuditLog.builder()
                 .actionType(AuditAction.UPDATE)
@@ -53,7 +54,7 @@ public class DoctorEventConsumer {
     }
 
     // Listen to the deleted queue!
-    @RabbitListener(queues = "doctor.deleted.queue")
+    @RabbitListener(queues = RabbitMQConstants.QUEUE_DOCTOR_DELETED)
     public void handleDoctorDeleted(DoctorDeletedMessage message) {
         AuditLog auditLog = AuditLog.builder()
                 .actionType(AuditAction.DELETE)

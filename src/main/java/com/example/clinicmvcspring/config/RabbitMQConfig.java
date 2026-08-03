@@ -16,42 +16,42 @@ public class RabbitMQConfig {
     // THE QUEUES
     @Bean
     public Queue doctorCreatedQueue() {
-        return QueueBuilder.durable("doctor.created.queue") // Make a durable (data not lost on restart)
-                .withArgument("x-dead-letter-exchange", "clinic.dlx") // DLQ exchange
-                .withArgument("x-dead-letter-routing-key", "dead.letter") // DLQ routing key
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_DOCTOR_CREATED) // Make a durable (data not lost on restart)
+                .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER) // DLQ exchange
+                .withArgument("x-dead-letter-routing-key", RabbitMQConstants.ROUTING_KEY_DEAD_LETTER) // DLQ routing key
                 .build();
 
     }
 
     @Bean
     public Queue doctorUpdatedQueue() {
-        return QueueBuilder.durable("doctor.updated.queue")
-                .withArgument("x-dead-letter-exchange", "clinic.dlx")
-                .withArgument("x-dead-letter-routing-key", "dead.letter")
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_DOCTOR_UPDATED)
+                .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER)
+                .withArgument("x-dead-letter-routing-key",RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
                 .build();
 
     }
 
     @Bean
     public Queue doctorDeletedQueue() {
-        return QueueBuilder.durable("doctor.deleted.queue")
-                .withArgument("x-dead-letter-exchange", "clinic.dlx")
-                .withArgument("x-dead-letter-routing-key", "dead.letter")
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_DOCTOR_DELETED)
+                .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER)
+                .withArgument("x-dead-letter-routing-key", RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
                 .build();
     }
 
     @Bean
     public Queue userLoggedInQueue() {
-        return QueueBuilder.durable("user.loggedin.queue")
-                .withArgument("x-dead-letter-exchange", "clinic.dlx")
-                .withArgument("x-dead-letter-routing-key", "dead.letter")
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_USER_LOGGEDIN)
+                .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER)
+                .withArgument("x-dead-letter-routing-key", RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
                 .build();
     }
 
     // THE EXCHANGE
     @Bean // broadcast
     public TopicExchange doctorExchange() {
-        return new TopicExchange("clinic.events");
+        return new TopicExchange(RabbitMQConstants.EXCHANGE_CLINIC_EVENTS);
     }
 
     // THE BINDINGS
@@ -60,7 +60,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(doctorCreatedQueue)
                 .to(docExchange)
-                .with("doctor.created");// the routing key
+                .with(RabbitMQConstants.ROUTING_KEY_DOCTOR_CREATED);// the routing key
     }
 
     @Bean
@@ -68,7 +68,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(doctorUpdatedQueue)
                 .to(docExchange)
-                .with("doctor.updated");// the routing key
+                .with(RabbitMQConstants.ROUTING_KEY_DOCTOR_UPDATED);// the routing key
     }
 
     @Bean
@@ -76,7 +76,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(doctorDeletedQueue)
                 .to(docExchange)
-                .with("doctor.deleted");// the routing key
+                .with(RabbitMQConstants.ROUTING_KEY_DOCTOR_DELETED);// the routing key
     }
 
     @Bean
@@ -84,7 +84,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(userLoggedInQueue)
                 .to(docExchange)
-                .with("user.loggedin");// the routing key
+                .with(RabbitMQConstants.ROUTING_KEY_USER_LOGGEDIN);// the routing key
     }
 
     @Bean
@@ -95,13 +95,13 @@ public class RabbitMQConfig {
     // THE GRAVEYARD EXCHANGE
     @Bean
     public TopicExchange deadLetterExchange() {
-        return new TopicExchange("clinic.dlx"); // dlx = dead letter exchange
+        return new TopicExchange(RabbitMQConstants.EXCHANGE_DEAD_LETTER); // dlx = dead letter exchange
     }
 
     // THE GRAVEYARD QUEUE
     @Bean
     public Queue deadLetterQueue() {
-        return new Queue("clinic.dlq", true); // dlq = dead letter queue
+        return new Queue(RabbitMQConstants.QUEUE_DEAD_LETTER, true); // dlq = dead letter queue
     }
 
     // BIND THE GRAVEYARD QUEUE TO THE GRAVEYARD EXCHANGE
@@ -110,7 +110,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(deadLetterQueue)
                 .to(deadLetterExchange)
-                .with("dead.letter");// the routing key for dead letters
+                .with(RabbitMQConstants.ROUTING_KEY_DEAD_LETTER);// the routing key for dead letters
     }
 
 }
