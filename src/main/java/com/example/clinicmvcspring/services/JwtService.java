@@ -51,7 +51,6 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // Expire in 24 hours
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Sign with key
                 .compact(); // Build into a String
-        publishUserLogInEvent(userDetails);
         return token;
 
     }
@@ -111,7 +110,7 @@ public class JwtService {
     }
 
     // publish events
-    private void publishUserLogInEvent(UserDetails userDetails) {
+    public void publishUserLogInEvent(UserDetails userDetails) {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         UserLoggedInMessage event = new UserLoggedInMessage(
                 userDetails.getUsername().strip(),

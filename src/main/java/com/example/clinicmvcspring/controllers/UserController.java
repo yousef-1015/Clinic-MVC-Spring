@@ -168,6 +168,7 @@ public class UserController {
         final UserDetails userDetailsToLogin = userService.loadUserByUsername(request.getUsername());
         final String token = jwtService.generateToken(userDetailsToLogin);
         final RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetailsToLogin.getUsername());
+        jwtService.publishUserLogInEvent(userDetailsToLogin);
 
         return ResponseEntity.ok(new AuthResponse(token, (CustomUserDetails) userDetailsToLogin, refreshToken));
     }
