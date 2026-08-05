@@ -20,6 +20,7 @@ import com.example.clinicmvcspring.messaging.DoctorCreatedMessage;
 import com.example.clinicmvcspring.messaging.DoctorDeletedMessage;
 import com.example.clinicmvcspring.messaging.DoctorUpdatedMessage;
 import com.example.clinicmvcspring.messaging.producers.DoctorEventProducer;
+import com.example.clinicmvcspring.messaging.producers.KafkaDoctorEventProducer;
 import com.example.clinicmvcspring.models.Doctor;
 import com.example.clinicmvcspring.repositories.DoctorRepo;
 import com.example.clinicmvcspring.specifications.DoctorSpecifications;
@@ -31,11 +32,14 @@ public class DoctorService {
     private final DoctorMapper mapper;
     // private final ApplicationEventPublisher applicationEventPublisher;
     private final DoctorEventProducer doctorEventProducer;
+    private final KafkaDoctorEventProducer kafkaDoctorEventProducer;
 
-    public DoctorService(DoctorRepo repo, DoctorMapper mapper, DoctorEventProducer doctorEventProducer) {
+    public DoctorService(DoctorRepo repo, DoctorMapper mapper, DoctorEventProducer doctorEventProducer,
+            KafkaDoctorEventProducer kafkaDoctorEventProducer) {
         this.repo = repo;
         this.mapper = mapper;
         this.doctorEventProducer = doctorEventProducer;
+        this.kafkaDoctorEventProducer = kafkaDoctorEventProducer;
         // this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -112,6 +116,9 @@ public class DoctorService {
                 doc.getEmail(),
                 currentUsername, now, doc.getId());
         doctorEventProducer.sendDoctorCreated(event);
+        // KAFKA EVENT PUBLISH
+        kafkaDoctorEventProducer.sendDoctorCreated(event);
+
     }
 
     private void publishDoctorUpdatedEvent(Doctor doc) {
@@ -122,6 +129,8 @@ public class DoctorService {
                 "Updated Successfully",
                 currentUsername, now, doc.getId());
         doctorEventProducer.sendDoctorUpdated(event);
+        // KAFKA EVENT PUBLISH
+        kafkaDoctorEventProducer.sendDoctorUpdated(event);
 
     }
 
@@ -131,7 +140,9 @@ public class DoctorService {
 
         DoctorDeletedMessage event = new DoctorDeletedMessage(doc.getFirstName() + " " + doc.getLastName(),
                 "Deleted Successfully",
-                currentUsername, now,doc.getId());
+                currentUsername, now, doc.getId());
+        // KAFKA EVENT PUBLISH
+        kafkaDoctorEventProducer.sendDoctorDeleted(event);
 
         doctorEventProducer.sendDoctorDeleted(event);
 
