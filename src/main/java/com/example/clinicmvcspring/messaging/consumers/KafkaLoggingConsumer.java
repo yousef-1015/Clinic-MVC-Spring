@@ -13,7 +13,7 @@ public class KafkaLoggingConsumer {
     @KafkaListener(topics = "doctor-events", groupId = "logging-group")
     public void handleDoctorEvent(ConsumerRecord<String, Object> record) {
 
-        log.info("KAFKA LOG: Doctor Added!! | Topic: {} | Partition: {} | Offset: {} | Key(DoctorID): {} | Message: {}",
+        log.info("KAFKA LOG: | Topic: {} | Partition: {} | Offset: {} | Key(DoctorID): {} | Message: {}",
                 record.topic(),
                 record.partition(),
                 record.offset(),
