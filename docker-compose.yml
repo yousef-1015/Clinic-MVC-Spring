@@ -37,6 +37,8 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
 
     networks:
       - clinic_network
@@ -45,6 +47,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_started
+      kafka:
+        condition: service_started
+
     restart: on-failure
 
 

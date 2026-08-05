@@ -110,7 +110,7 @@ public class DoctorService {
 
         DoctorCreatedMessage event = new DoctorCreatedMessage(doc.getFirstName() + " " + doc.getLastName(),
                 doc.getEmail(),
-                currentUsername, now);
+                currentUsername, now, doc.getId());
         doctorEventProducer.sendDoctorCreated(event);
     }
 
@@ -120,7 +120,7 @@ public class DoctorService {
 
         DoctorUpdatedMessage event = new DoctorUpdatedMessage(doc.getFirstName() + " " + doc.getLastName(),
                 "Updated Successfully",
-                currentUsername, now);
+                currentUsername, now, doc.getId());
         doctorEventProducer.sendDoctorUpdated(event);
 
     }
@@ -131,7 +131,7 @@ public class DoctorService {
 
         DoctorDeletedMessage event = new DoctorDeletedMessage(doc.getFirstName() + " " + doc.getLastName(),
                 "Deleted Successfully",
-                currentUsername, now);
+                currentUsername, now,doc.getId());
 
         doctorEventProducer.sendDoctorDeleted(event);
 
