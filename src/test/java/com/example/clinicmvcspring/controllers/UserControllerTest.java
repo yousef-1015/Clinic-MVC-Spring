@@ -10,12 +10,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,6 +40,8 @@ import com.example.clinicmvcspring.services.RefreshTokenService;
 
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false) // disables Spring Security
+@ActiveProfiles("test")
+
 public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -49,6 +56,14 @@ public class UserControllerTest {
     private JwtService jwtService;
     @MockitoBean
     private RefreshTokenService refreshTokenService;
+
+    @TestConfiguration
+    static class CacheTestConfig {
+        @Bean
+        public CacheManager cacheManager() {
+            return new NoOpCacheManager();
+        }
+    }
 
     // test get all users endpoint
 
