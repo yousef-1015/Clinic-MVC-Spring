@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,10 +34,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/api/v1/doctors")
 @Tag(name = "Doctor Management", description = "Make All CRUD Operations On Doctors")
+@Validated
 public class DoctorController {
     private final DoctorService doctorService;
 
@@ -54,17 +59,8 @@ public class DoctorController {
 
     })
     public ResponseEntity<?> getDoctors(
-            @RequestParam(defaultValue = "0") @Parameter(description = "Page index starting from zero", example = "0") int page,
-            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @RequestParam(defaultValue = "0") @Parameter(description = "Page index starting from zero", example = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<DoctorDTO> doctorPage = doctorService.getAllDoctors(pageable);
@@ -84,11 +80,7 @@ public class DoctorController {
 
     })
     public ResponseEntity<?> getDoctorByID(
-            @Parameter(description = "Database ID of the doctor to retrieve", example = "1") @PathVariable int id) {
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
+            @Parameter(description = "Database ID of the doctor to retrieve", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
         Optional<Doctor> doc = doctorService.getDoctorByID(id);
         if (doc.isEmpty()) {// Empty from repo exception
             return ResponseEntity.status(404)
@@ -123,11 +115,7 @@ public class DoctorController {
 
     })
     public ResponseEntity<?> deleteDoctor(
-            @Parameter(description = "ID of the doctor to delete", example = "1") @PathVariable int id) {
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
+            @Parameter(description = "ID of the doctor to delete", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
         Optional<Doctor> doc = doctorService.getDoctorByID(id);
         if (doc.isEmpty()) {
             return ResponseEntity.status(404)
@@ -148,12 +136,8 @@ public class DoctorController {
             @ApiResponse(responseCode = "404", description = "No doctor found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> updateDoctor(
-            @Parameter(description = "ID of the doctor to update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the doctor to update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @Valid @RequestBody Doctor doc) {
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Doctor> existingDoc = doctorService.getDoctorByID(id);
         if (existingDoc.isEmpty()) {
             return ResponseEntity.status(404)
@@ -175,12 +159,8 @@ public class DoctorController {
             @ApiResponse(responseCode = "404", description = "No doctor found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> partialDocUpdate(
-            @Parameter(description = "ID of the doctor to partially update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the doctor to partially update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @RequestBody Map<String, Object> toUpdate) {
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Doctor> existingDoc = doctorService.getDoctorByID(id);
         if (existingDoc.isEmpty()) {
             return ResponseEntity.status(404)
@@ -210,17 +190,8 @@ public class DoctorController {
     })
     public ResponseEntity<?> getDoctorsBySpecialty(
             @Parameter(description = "Medical specialty to filter by", example = "Cardiology") @RequestParam String specialty,
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Doctor> docPage = doctorService.findDoctorsBySpecialty(specialty, pageable);
@@ -246,17 +217,8 @@ public class DoctorController {
     public ResponseEntity<?> searchDoctors(
             @Parameter(description = "Optional specialty filter", example = "Cardiology") @RequestParam(required = false) String specialty,
             @Parameter(description = "Optional salary filter", example = "12000.00") @RequestParam(required = false) BigDecimal salary,
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of doctors per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Doctor> docPage = doctorService.findDoctorsBySpecialtyAndSalary(specialty, salary, pageable);

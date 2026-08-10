@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,11 +35,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
 @Tag(name = "Appointment Management", description = "Make All CRUD Operations On Appointments")
-
+@Validated
 public class AppointmentController {
     private final AppointmentService appointmentService;
 
@@ -55,17 +59,8 @@ public class AppointmentController {
             @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getAppointments(
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<AppointmentDTO> appPage = appointmentService.getAllAppointments(pageable);
@@ -84,11 +79,7 @@ public class AppointmentController {
             @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getAppointmentByID(
-            @Parameter(description = "Database ID of the appointment to retrieve", example = "1") @PathVariable int id) {
-
-        if (id <= 0) {
-            return ResponseEntity.status(400).body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
+            @Parameter(description = "Database ID of the appointment to retrieve", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
         Optional<AppointmentDTO> app = appointmentService.getAppointmentByID(id);
         if (app.isEmpty()) {
@@ -124,12 +115,8 @@ public class AppointmentController {
             @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> deleteAppointment(
-            @Parameter(description = "ID of the appointment to delete", example = "1") @PathVariable int id) {
+            @Parameter(description = "ID of the appointment to delete", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Appointment> app = appointmentService.getAppointmentEntityByID(id);
 
         if (app.isEmpty()) {
@@ -150,13 +137,9 @@ public class AppointmentController {
             @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> updateAppointment(
-            @Parameter(description = "ID of the appointment to update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the appointment to update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @Valid @RequestBody Appointment app) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<AppointmentDTO> existingApp = appointmentService.getAppointmentByID(id);
 
         if (existingApp.isEmpty()) {
@@ -181,13 +164,9 @@ public class AppointmentController {
             @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> partialAppointmentUpdate(
-            @Parameter(description = "ID of the appointment to partially update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the appointment to partially update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @RequestBody Map<String, Object> toUpdate) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Appointment> existingApp = appointmentService.getAppointmentEntityByID(id);
 
         if (existingApp.isEmpty()) {
@@ -223,17 +202,10 @@ public class AppointmentController {
             @ApiResponse(responseCode = "403", description = "Forbidden, Insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getAppointmentByStatus(
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size,
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size,
             @Parameter(description = "Appointment status to filter by", example = "SCHEDULED") @RequestParam AppointmentStatus status) {
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+
         Pageable pageable = PageRequest.of(page, size);
         Page<AppointmentDTO> appPage = appointmentService.findAppointmentByStatus(status, pageable);
 
@@ -258,17 +230,8 @@ public class AppointmentController {
     public ResponseEntity<?> getAppointmentsByDateRange(
             @Parameter(description = "Optional start timestamp filter", example = "2026-07-01T00:00:00Z") @RequestParam(required = false) Timestamp start,
             @Parameter(description = "Optional end timestamp filter", example = "2026-07-31T23:59:59Z") @RequestParam(required = false) Timestamp end,
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of appointments per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<AppointmentDTO> appPage = appointmentService.findAppointmentByDate(start, end, pageable);

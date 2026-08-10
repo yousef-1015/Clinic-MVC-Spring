@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,10 +32,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/api/v1/medications")
 @Tag(name = "Medication Management", description = "Make All CRUD Operations On Medications")
+@Validated
 public class MedicationController {
     private final MedicationService medicationService;
 
@@ -51,17 +56,8 @@ public class MedicationController {
             @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getMedications(
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of medications per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of medications per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -81,12 +77,8 @@ public class MedicationController {
             @ApiResponse(responseCode = "404", description = "No medication found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getMedicationByID(
-            @Parameter(description = "Database ID of the medication to retrieve", example = "1") @PathVariable int id) {
+            @Parameter(description = "Database ID of the medication to retrieve", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Medication> med = medicationService.getMedicationByID(id);
         if (med.isEmpty()) {
             return ResponseEntity.status(404)
@@ -119,12 +111,8 @@ public class MedicationController {
             @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> deleteMedication(
-            @Parameter(description = "ID of the medication to delete", example = "1") @PathVariable int id) {
+            @Parameter(description = "ID of the medication to delete", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Medication> med = medicationService.getMedicationByID(id);
         if (med.isEmpty()) {
             return ResponseEntity.status(404)
@@ -144,13 +132,9 @@ public class MedicationController {
             @ApiResponse(responseCode = "404", description = "No medication found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> updateMedication(
-            @Parameter(description = "ID of the medication to update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the medication to update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @Valid @RequestBody Medication med) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Medication> existingMed = medicationService.getMedicationByID(id);
         if (existingMed.isEmpty()) {
             return ResponseEntity.status(404)
@@ -172,13 +156,9 @@ public class MedicationController {
             @ApiResponse(responseCode = "404", description = "No medication found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> partialMedicationUpdate(
-            @Parameter(description = "ID of the medication to partially update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the medication to partially update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @RequestBody Map<String, Object> toUpdate) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Medication> existingMed = medicationService.getMedicationByID(id);
         if (existingMed.isEmpty()) {
             return ResponseEntity.status(404)

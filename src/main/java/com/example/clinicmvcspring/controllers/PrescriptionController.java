@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,10 +35,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/api/v1/prescriptions")
 @Tag(name = "Prescription Management", description = "Make All CRUD Operations On Prescriptions")
+@Validated
 public class PrescriptionController {
     private final PrescriptionService prescriptionService;
 
@@ -54,17 +59,8 @@ public class PrescriptionController {
             @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getPrescriptions(
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of prescriptions per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponseDTO("Page number cannot be negative", 400));
-        }
-        if (size <= 0 || size > 50) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponseDTO("Page size must be between 1 and 50", 400));
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of prescriptions per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<PrescriptionDetailDTO> presPage = prescriptionService.getAllPrescriptionsPaginated(pageable);
@@ -84,12 +80,7 @@ public class PrescriptionController {
             @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getPrescriptionByID(
-            @Parameter(description = "Database ID of the prescription to retrieve", example = "1") @PathVariable int id) {
-
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponseDTO("ID must be greater than 0", 400));
-        }
+            @Parameter(description = "Database ID of the prescription to retrieve", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
         // Fetch the detailed DTO directly
         Optional<PrescriptionDetailDTO> details = prescriptionService.getPrescriptionDetailsByID(id);
@@ -125,12 +116,8 @@ public class PrescriptionController {
             @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> deletePrescription(
-            @Parameter(description = "ID of the prescription to delete", example = "1") @PathVariable int id) {
+            @Parameter(description = "ID of the prescription to delete", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponseDTO("ID must be greater than 0", 400));
-        }
         Optional<Prescription> pres = prescriptionService.getPrescriptionByID(id);
 
         if (pres.isEmpty()) {
@@ -151,13 +138,9 @@ public class PrescriptionController {
             @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> updatePrescription(
-            @Parameter(description = "ID of the prescription to update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the prescription to update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @Valid @RequestBody Prescription pres) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponseDTO("ID must be greater than 0", 400));
-        }
         Optional<Prescription> existingPres = prescriptionService.getPrescriptionByID(id);
 
         if (existingPres.isEmpty()) {
@@ -181,13 +164,9 @@ public class PrescriptionController {
             @ApiResponse(responseCode = "404", description = "No prescription found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> partialPrescriptionUpdate(
-            @Parameter(description = "ID of the prescription to partially update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the prescription to partially update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @RequestBody Map<String, Object> toUpdate) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Prescription> existingPres = prescriptionService.getPrescriptionByID(id);
 
         if (existingPres.isEmpty()) {

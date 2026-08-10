@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,10 +32,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/api/v1/patients")
 @Tag(name = "Patient Management", description = "Make All CRUD Operations On Patients")
+@Validated
 public class PatientController {
 
     private final PatientService patientService;
@@ -52,17 +57,8 @@ public class PatientController {
             @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getAllPatients(
-            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of patients per page (1-50)", example = "5") @RequestParam(defaultValue = "5") int size) {
-
-        if (page < 0) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Page Number Must Be Positive", 400);
-            return ResponseEntity.status(400).body(error);
-        }
-        if (size <= 0 || size > 50) {
-            ErrorResponseDTO error = new ErrorResponseDTO("Size must be between 1 and 50", 400);
-            return ResponseEntity.status(400).body(error);
-        }
+            @Parameter(description = "Page index starting from zero", example = "0") @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page Number Must Be Positive") int page,
+            @Parameter(description = "Number of patients per page (1-50)", example = "5") @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be between 1 and 50") @Max(value = 50, message = "Size must be between 1 and 50") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -82,12 +78,8 @@ public class PatientController {
             @ApiResponse(responseCode = "404", description = "No patient found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> getPatientByID(
-            @Parameter(description = "Database ID of the patient to retrieve", example = "1") @PathVariable int id) {
+            @Parameter(description = "Database ID of the patient to retrieve", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Patient> pat = patientService.getPatientByID(id);
         if (pat.isEmpty()) {
             return ResponseEntity.status(404)
@@ -120,12 +112,8 @@ public class PatientController {
             @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> deletePatient(
-            @Parameter(description = "ID of the patient to delete", example = "1") @PathVariable int id) {
+            @Parameter(description = "ID of the patient to delete", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Patient> pat = patientService.getPatientByID(id);
         if (pat.isEmpty()) {
             return ResponseEntity.status(404)
@@ -145,13 +133,9 @@ public class PatientController {
             @ApiResponse(responseCode = "404", description = "No patient found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> updatePatient(
-            @Parameter(description = "ID of the patient to update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the patient to update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @Valid @RequestBody Patient pat) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Patient> existingPat = patientService.getPatientByID(id);
         if (existingPat.isEmpty()) {
             return ResponseEntity.status(404)
@@ -173,13 +157,9 @@ public class PatientController {
             @ApiResponse(responseCode = "404", description = "No patient found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     public ResponseEntity<?> partialPatientUpdate(
-            @Parameter(description = "ID of the patient to partially update", example = "1") @PathVariable int id,
+            @Parameter(description = "ID of the patient to partially update", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id,
             @RequestBody Map<String, Object> toUpdate) {
 
-        if (id <= 0) {
-            return ResponseEntity.status(400)
-                    .body(new ErrorResponseDTO("ID must be a positive number", 400));
-        }
         Optional<Patient> existingPat = patientService.getPatientByID(id);
         if (existingPat.isEmpty()) {
             return ResponseEntity.status(404)
