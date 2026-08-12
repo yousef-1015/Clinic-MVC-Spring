@@ -1,17 +1,19 @@
 package com.example.clinicmvcspring.exceptions;
 
-import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.NoSuchElementException;
 
 import org.springframework.dao.DataIntegrityViolationException;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.security.authentication.BadCredentialsException;
+
+import com.example.clinicmvcspring.dtos.ErrorResponseDTO;
+
+import lombok.extern.slf4j.Slf4j;
 
 // cathc exceptions for all rest controllers
 @RestControllerAdvice
@@ -45,6 +47,36 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException e) {
         ErrorResponseDTO error = new ErrorResponseDTO("Invalid username or password", 401);
+        return ResponseEntity.status(401).body(error);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("Invalid value: " + e.getMessage(), 400);
+        return ResponseEntity.status(400).body(error);
+    }
+
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<?> handleNumberFormatException(NumberFormatException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("Invalid number format", 400);
+        return ResponseEntity.status(400).body(error);
+    }
+
+    @ExceptionHandler(ClassCastException.class)
+    public ResponseEntity<?> handleClassCastException(ClassCastException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("Invalid data type in request", 400);
+        return ResponseEntity.status(400).body(error);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("Resource not found", 404);
+        return ResponseEntity.status(404).body(error);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<?> handleUsernameNotFound(UsernameNotFoundException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO("User not found", 401);
         return ResponseEntity.status(401).body(error);
     }
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.clinicmvcspring.annotations.Audit;
 import com.example.clinicmvcspring.dtos.PrescriptionDetailDTO;
@@ -96,6 +97,7 @@ public class PrescriptionService {
     }
 
     @Audit(action = AuditAction.CREATE)
+    @Transactional
     public PrescriptionDetailDTO addPrescriptionWithMedications(PrescriptionDetailDTO inputDTO) {
         Appointment appointment = new Appointment();
         appointment.setId(inputDTO.getAppointmentId());
