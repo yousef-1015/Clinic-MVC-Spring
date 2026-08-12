@@ -113,9 +113,7 @@ public class PrescriptionService {
             }
         }
 
-        inputDTO.setId(savedPres.getId());
-        inputDTO.setCreatedAt(savedPres.getCreatedAt());
-        return inputDTO;
+        return getPrescriptionDetailsByID(savedPres.getId()).orElseThrow();
     }
 
     public PrescriptionDetailDTO convertToDetailDTO(Prescription pres) {

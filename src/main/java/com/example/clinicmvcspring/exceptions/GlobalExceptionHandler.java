@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -78,6 +79,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleUsernameNotFound(UsernameNotFoundException e) {
         ErrorResponseDTO error = new ErrorResponseDTO("User not found", 401);
         return ResponseEntity.status(401).body(error);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleUnreadableMessage(HttpMessageNotReadableException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                "Invalid JSON format or value: " + e.getMostSpecificCause().getMessage(), 400);
+        return ResponseEntity.status(400).body(error);
     }
 
     // Server error
