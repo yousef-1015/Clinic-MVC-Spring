@@ -63,7 +63,7 @@ public class AuditingAspect {
             auditLog.setMadeBy(getCurrentUsername()); // username
             auditLog.setPerformedAt(new Timestamp(System.currentTimeMillis()));
 
-            auditLog.setDetails(methodName + "Failed, ERROR: " + e.getClass().getSimpleName());
+            auditLog.setDetails(methodName + " Failed, ERROR: " + e.getClass().getSimpleName());
             // e.getClass().getSimpleName() so it could fit in the dc column
             // more fitting for an audit
             auditLogService.addAuditLog(auditLog);

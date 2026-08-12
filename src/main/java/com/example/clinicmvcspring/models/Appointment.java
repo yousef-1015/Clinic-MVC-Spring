@@ -177,8 +177,8 @@ public class Appointment {
     public String toString() {
         return "ID: " + id
                 + " | Date & Time: " + dateAndTime
-                + " | Patient ID: " + patient.getId()
-                + " | Doctor ID: " + doctor.getId()
+                + " | Patient ID: " + (patient != null ? this.patient.getId() : "N/A") // avoiding null pointer exception
+                + " | Doctor ID: " + (doctor != null ? this.doctor.getId() : "N/A")
                 + " | Status: " + status
                 + " | Created: " + createdAt;
     }

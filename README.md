@@ -2,13 +2,6 @@
 
 A Spring Boot REST API for clinic management — covering doctors, patients, appointments, prescriptions, and medications, secured with JWT and backed by RabbitMQ, Kafka, and Redis.
 
-![Java](https://img.shields.io/badge/Java-25-blue?logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen?logo=springboot)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-orange?logo=mysql)
-![Maven](https://img.shields.io/badge/Build-Maven-red?logo=apachemaven)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker)
-![License](https://img.shields.io/badge/License-Unlicensed-lightgrey)
-
 ---
 
 ## Tech Stack
