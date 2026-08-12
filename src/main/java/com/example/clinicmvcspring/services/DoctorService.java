@@ -3,6 +3,7 @@ package com.example.clinicmvcspring.services;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -68,8 +69,9 @@ public class DoctorService {
 
     @CacheEvict(value = "Doctors", key = "#id") // remove deleted data from cache
     public void deleteDoctorByID(int id) {
-        publishDoctorDeletedEvent(getDoctorByID(id).get());
-
+        Doctor docToDelete = getDoctorByID(id)
+                .orElseThrow(() -> new NoSuchElementException("No Doctor found with the ID: " + id));
+        publishDoctorDeletedEvent(docToDelete);
         repo.deleteById(id);
     }
 
