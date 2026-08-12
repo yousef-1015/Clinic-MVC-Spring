@@ -57,6 +57,8 @@ public class AppUserDetailsService implements UserDetailsService {
     @Audit(action = AuditAction.UPDATE)
     public AppUser updateUserById(int id, AppUser user) {
         user.setId(id);
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // Encode even after update
+
         return repo.save(user);
     }
 

@@ -14,18 +14,15 @@ import com.example.clinicmvcspring.dtos.PrescriptionMedicationDTO;
 import com.example.clinicmvcspring.models.Appointment;
 import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.models.Prescription;
-import com.example.clinicmvcspring.repositories.AppointmentRepo;
 import com.example.clinicmvcspring.repositories.PrescriptionRepo;
 
 @Service
 public class PrescriptionService {
 
     private final PrescriptionRepo repo;
-    private final AppointmentRepo appointmentRepo;
 
-    public PrescriptionService(PrescriptionRepo repo, AppointmentRepo appointmentRepo) {
+    public PrescriptionService(PrescriptionRepo repo) {
         this.repo = repo;
-        this.appointmentRepo = appointmentRepo;
 
     }
 
