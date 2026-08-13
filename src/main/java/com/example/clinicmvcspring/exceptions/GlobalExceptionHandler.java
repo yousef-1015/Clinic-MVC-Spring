@@ -88,6 +88,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(400).body(error);
     }
 
+    
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalStateExceptione(IllegalStateException e) {
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                "Conflict in the State " + e.getMessage(), 400);
+        return ResponseEntity.status(400).body(error);
+    }
+
+
     // Server error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneral(Exception e) {

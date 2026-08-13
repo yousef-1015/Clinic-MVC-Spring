@@ -120,6 +120,10 @@ public class AppointmentService {
     public AppointmentDTO cancelAppointment(int id) {
         Appointment appointmentToCancel = repo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No Appointment found with the Id" + id));
+        if (appointmentToCancel.getStatus()!= AppointmentStatus.Scheduled)
+        {
+            throw new IllegalStateException("Cannot cancel appointment because it is already " + appointmentToCancel.getStatus());
+        }
         appointmentToCancel.setStatus(AppointmentStatus.Cancelled);
         return mapper.appointmentToAppointmentDTO(repo.save(appointmentToCancel));
     }
