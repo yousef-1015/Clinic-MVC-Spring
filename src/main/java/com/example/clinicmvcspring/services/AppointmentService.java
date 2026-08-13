@@ -1,6 +1,7 @@
 package com.example.clinicmvcspring.services;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,10 @@ import com.example.clinicmvcspring.models.AuditAction;
 import com.example.clinicmvcspring.repositories.AppointmentRepo;
 import com.example.clinicmvcspring.specifications.AppointmentSpecification;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class AppointmentService {
 
     private final AppointmentRepo repo;
@@ -153,4 +158,17 @@ public class AppointmentService {
                 savedApp.getId());
         return mapper.appointmentToAppointmentDTO(savedApp);
     }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void cleanupOldAppointments() {
+        LocalDateTime oneWeekAgoDate = LocalDateTime.now().minusWeeks(1);
+        Timestamp cutoffTimestamp = Timestamp.valueOf(oneWeekAgoDate);
+
+        List<AppointmentStatus> statusesToDelete = List.of(
+                AppointmentStatus.Completed,
+                AppointmentStatus.Cancelled);
+
+        repo.deleteOldAppointments(statusesToDelete, cutoffTimestamp);
+    }
+
 }
