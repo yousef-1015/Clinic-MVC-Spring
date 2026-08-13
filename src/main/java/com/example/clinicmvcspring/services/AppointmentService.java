@@ -37,7 +37,12 @@ public class AppointmentService {
 
     @Audit(action = AuditAction.CREATE)
     public AppointmentDTO addAppointment(Appointment app) {
-        return mapper.appointmentToAppointmentDTO(repo.save(app));
+        if (!repo.isDoctorBooked(app.getDoctor(), app.getDateAndTime())) {
+            return mapper.appointmentToAppointmentDTO(repo.save(app));
+        } else {
+            throw new IllegalArgumentException("The doctor is already booked at this time!");
+        }
+
     }
 
     public List<AppointmentDTO> getAllAppointments() {
@@ -109,6 +114,14 @@ public class AppointmentService {
         Page<Appointment> appointmentPage = repo.findAll(spec, pageable);
 
         return appointmentPage.map(app -> mapper.appointmentToAppointmentDTO(app));
+    }
+
+    @Audit(action = AuditAction.UPDATE)
+    public AppointmentDTO cancelAppointment(int id) {
+        Appointment appointmentToCancel = repo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No Appointment found with the Id" + id));
+        appointmentToCancel.setStatus(AppointmentStatus.Cancelled);
+        return mapper.appointmentToAppointmentDTO(repo.save(appointmentToCancel));
     }
 
 }

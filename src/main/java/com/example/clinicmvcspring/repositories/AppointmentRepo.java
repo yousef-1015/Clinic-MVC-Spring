@@ -12,15 +12,19 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.clinicmvcspring.models.Appointment;
 import com.example.clinicmvcspring.models.AppointmentStatus;
+import com.example.clinicmvcspring.models.Doctor;
 
 public interface AppointmentRepo extends JpaRepository<Appointment, Integer>, JpaSpecificationExecutor<Appointment> {
     // using JPQL finding appointments by status
     @Query("SELECT a FROM Appointment a WHERE a.status = :stat")
     Page<Appointment> findByStatus(@Param("stat") AppointmentStatus status, Pageable pageable);
 
-    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor WHERE a.status = :status AND a.dateAndTime BETWEEN :start AND :end") //TO AVOID N+1 PROBLEM
+    //JOIN FETCH to avoid N+1 problem
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor WHERE a.status = :status AND a.dateAndTime BETWEEN :start AND :end")                                                                                                                                               // PROBLEM
     List<Appointment> findUpcomingAppointments(@Param("status") AppointmentStatus status,
             @Param("start") Timestamp start,
             @Param("end") Timestamp end);
 
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Appointment a WHERE a.doctor = :doctor AND a.dateAndTime = :time AND a.status != 'Cancelled'")
+    boolean isDoctorBooked(@Param("doctor") Doctor doctor, @Param("time") Timestamp time);
 }

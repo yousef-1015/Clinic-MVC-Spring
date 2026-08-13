@@ -246,4 +246,26 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/cancel/{id}")
+    @Operation(summary = "Cancel an Appointment", description = "Setting the status of an already booked appointment to Canceled, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Appointment Canceled Successfully", content = @Content(schema = @Schema(implementation = AppointmentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> cancelAppointment(
+            @Parameter(description = "ID of the appointment to cacncel", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
+
+        Optional<Appointment> existingApp = appointmentService.getAppointmentEntityByID(id);
+
+        if (existingApp.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(new ErrorResponseDTO("No Appointment found with id: " + id, 404));
+        }
+        return ResponseEntity.ok(appointmentService.cancelAppointment(id));
+
+    }
+
 }
