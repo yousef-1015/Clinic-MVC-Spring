@@ -268,4 +268,19 @@ public class AppointmentController {
 
     }
 
+    @PatchMapping("/complete/{id}")
+    @Operation(summary = "Complete an Appointment", description = "Marks a scheduled appointment as Completed and triggers background PDF generation, [Requires Role: ADMIN]")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Appointment Completed Successfully", content = @Content(schema = @Schema(implementation = AppointmentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "ID must be a positive number or Appointment is not Scheduled", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, Missing or invalid JWT token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden, Requires ADMIN role", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "No appointment found with that ID", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    public ResponseEntity<?> completeAppointment(
+            @Parameter(description = "ID of the appointment to complete", example = "1") @PathVariable @Positive(message = "ID must be a positive number") int id) {
+
+        return ResponseEntity.ok(appointmentService.completeAppointment(id));
+    }
+
 }

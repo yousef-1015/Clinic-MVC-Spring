@@ -12,14 +12,15 @@ public final class RabbitMQConstants {
     public static final String QUEUE_DOCTOR_DELETED = "doctor.deleted.queue";
     public static final String QUEUE_USER_LOGGEDIN = "user.loggedin.queue";
     public static final String QUEUE_DEAD_LETTER = "clinic.dlq";
-
+    public static final String QUEUE_APPOINTMENT_COMPLETED = "appointment.completed.queue";
     // ROUTING KEYS
     public static final String ROUTING_KEY_DOCTOR_CREATED = "doctor.created";
     public static final String ROUTING_KEY_DOCTOR_UPDATED = "doctor.updated";
     public static final String ROUTING_KEY_DOCTOR_DELETED = "doctor.deleted";
     public static final String ROUTING_KEY_USER_LOGGEDIN = "user.loggedin";
     public static final String ROUTING_KEY_DEAD_LETTER = "dead.letter";
-
+    public static final String ROUTING_KEY_APPOINTMENT_COMPLETED = "appointment.completed";
+    
     private RabbitMQConstants() {
     }
 

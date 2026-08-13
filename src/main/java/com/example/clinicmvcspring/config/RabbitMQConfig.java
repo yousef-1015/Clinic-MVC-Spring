@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RabbitMQConfig {
 
-
     // THE QUEUES
     @Bean
     public Queue doctorCreatedQueue() {
@@ -49,6 +48,14 @@ public class RabbitMQConfig {
     @Bean
     public Queue userLoggedInQueue() {
         return QueueBuilder.durable(RabbitMQConstants.QUEUE_USER_LOGGEDIN)
+                .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER)
+                .withArgument("x-dead-letter-routing-key", RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
+                .build();
+    }
+    // PDF report generation on appointment completion
+    @Bean
+    public Queue appointmentCompletedQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_APPOINTMENT_COMPLETED)
                 .withArgument("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DEAD_LETTER)
                 .withArgument("x-dead-letter-routing-key", RabbitMQConstants.ROUTING_KEY_DEAD_LETTER)
                 .build();
@@ -92,6 +99,13 @@ public class RabbitMQConfig {
                 .to(doctorExchange)
                 .with(RabbitMQConstants.ROUTING_KEY_USER_LOGGEDIN);// the routing key
     }
+    @Bean
+    public Binding appointmentCompletedBinding(Queue appointmentCompletedQueue, TopicExchange doctorExchange) {
+        return BindingBuilder
+                .bind(appointmentCompletedQueue)
+                .to(doctorExchange)
+                .with(RabbitMQConstants.ROUTING_KEY_APPOINTMENT_COMPLETED);// the routing key
+    }
 
     @Bean
     public MessageConverter jsonMessageConverter() {
@@ -120,25 +134,25 @@ public class RabbitMQConfig {
     }
 
     @Bean
-public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
-    RabbitTemplate template = new RabbitTemplate(connectionFactory);
-    template.setMessageConverter(messageConverter);
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(messageConverter);
 
         // did server receive the message
-    template.setConfirmCallback((correlationData, ack, cause) -> {
-        if (ack) {
-            log.info("Message received by RabbitMQ");
-        } else {
-            log.error("Message was not received, Cause: " + cause);
-        }
-    });
+        template.setConfirmCallback((correlationData, ack, cause) -> {
+            if (ack) {
+                log.info("Message received by RabbitMQ");
+            } else {
+                log.error("Message was not received, Cause: " + cause);
+            }
+        });
 
         // could exchange route the message to a queue
-    template.setReturnsCallback(returned -> {
-        log.error("Message returned!, Message: " + returned.getMessage());
-    });
+        template.setReturnsCallback(returned -> {
+            log.error("Message returned!, Message: " + returned.getMessage());
+        });
 
-    return template;
-}
+        return template;
+    }
 
 }

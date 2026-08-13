@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.clinicmvcspring.annotations.Audit;
+import com.example.clinicmvcspring.config.RabbitMQConstants;
 import com.example.clinicmvcspring.dtos.AppointmentDTO;
 import com.example.clinicmvcspring.mappers.AppointmentMapper;
 import com.example.clinicmvcspring.models.Appointment;
@@ -28,11 +30,14 @@ public class AppointmentService {
 
     private final AppointmentRepo repo;
     private final AppointmentMapper mapper;
+    private final RabbitTemplate rabbitTemplate;
 
     // spring boot will automatically do the dependency injection
-    public AppointmentService(AppointmentRepo repo, AppointmentMapper mapper) {
+    public AppointmentService(AppointmentRepo repo, AppointmentMapper mapper,
+            RabbitTemplate rabbitTemplate) {
         this.repo = repo;
         this.mapper = mapper;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Audit(action = AuditAction.CREATE)
@@ -120,12 +125,32 @@ public class AppointmentService {
     public AppointmentDTO cancelAppointment(int id) {
         Appointment appointmentToCancel = repo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No Appointment found with the Id" + id));
-        if (appointmentToCancel.getStatus()!= AppointmentStatus.Scheduled)
-        {
-            throw new IllegalStateException("Cannot cancel appointment because it is already " + appointmentToCancel.getStatus());
+        if (appointmentToCancel.getStatus() != AppointmentStatus.Scheduled) {
+            throw new IllegalStateException(
+                    "Cannot cancel appointment because it is already " + appointmentToCancel.getStatus());
         }
         appointmentToCancel.setStatus(AppointmentStatus.Cancelled);
         return mapper.appointmentToAppointmentDTO(repo.save(appointmentToCancel));
     }
 
+    @Audit(action = AuditAction.UPDATE)
+    public AppointmentDTO completeAppointment(int id) {
+        Appointment appointmentToComplete = repo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No Appointment found with the Id " + id));
+
+        if (appointmentToComplete.getStatus() != AppointmentStatus.Scheduled) {
+            throw new IllegalStateException(
+                    "Cannot complete appointment because it is already " + appointmentToComplete.getStatus());
+        }
+
+        appointmentToComplete.setStatus(AppointmentStatus.Completed);
+        Appointment savedApp = repo.save(appointmentToComplete);
+
+        // THIS IS THE PRODUCER, send message to rabbitmq
+        rabbitTemplate.convertAndSend(
+                RabbitMQConstants.EXCHANGE_CLINIC_EVENTS,
+                RabbitMQConstants.ROUTING_KEY_APPOINTMENT_COMPLETED,
+                savedApp.getId());
+        return mapper.appointmentToAppointmentDTO(savedApp);
+    }
 }
